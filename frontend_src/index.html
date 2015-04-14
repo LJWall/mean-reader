@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Wombles!</title>
+    </head>
+    <body ng-app="wombleApp">
+        <h1>The Wombles...</h1>
+        <h3>... of Wimbledon common</h3>
+        <hr>
+        <div ng-controller="wombleCtrl as ctrl">
+            <form ng-submit="ctrl.postFeedUri(ctrl.newFeed)">
+                <input type="text" ng-model="ctrl.newFeed">
+                <input type="submit" value="Go">
+            </form>
+        </div>
+        <script src="js/bower.js"></script>
+        <script src="js/womble-client.js"></script>
+    </body>
+</html>

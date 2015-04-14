@@ -17,16 +17,16 @@ module.exports = function(grunt) {
     config.watch.bower = {files: ['bower.json'], tasks: ['bower_concat:all']};
     
     // Own JavaScript
-    config.copy.js = {files: [{expand: true, filter: 'isFile', flatten: true, src: 'frontend-src/*.js', dest: 'frontend-build/'}] };
-    config.watch.js = {files: ['frontend-src/*.js'], tasks: ['copy:js']};
+    config.copy.js = {files: [{expand: true, filter: 'isFile', flatten: true, src: 'frontend_src/*.js', dest: 'frontend_build/js'}] };
+    config.watch.js = {files: ['frontend_src/*.js'], tasks: ['copy:js']};
 
     // HTML
-    config.copy.html = {files: [{expand: true, filter: 'isFile', flatten: true, src: 'frontend-src/*.html', dest: 'frontend-build/'}] };
-    config.watch.html = {files: ['frontend-src/*.html'], tasks: ['copy:html']};
+    config.copy.html = {files: [{expand: true, filter: 'isFile', flatten: true, src: 'frontend_src/*.html', dest: 'frontend_build/'}] };
+    config.watch.html = {files: ['frontend_src/*.html'], tasks: ['copy:html']};
 
     // Server
-    config.express = { options: {script: 'backend/main.js'}, dev: {}},
-    config.watch.server = {files: ['backend/*.js'], tasks: ['express:dev:stop', 'express:dev'], options: {spawn: false}}
+    config.express = { options: {script: 'webserv/main.js'}, dev: {}},
+    config.watch.server = {files: ['webserv/*.js'], tasks: ['express:dev:stop', 'express:dev'], options: {spawn: false}}
 
     grunt.initConfig(config);
     grunt.registerTask('build', ['bower_concat', 'copy']);
