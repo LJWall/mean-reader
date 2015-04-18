@@ -10,19 +10,6 @@ router.get('/', function (req, res) {
         res.status(200).end(JSON.stringify(feed_data));
 });
 
-//router.post('/', function (req, res) {
-//    var feed_url = req.body.feed_url;
-//    if (!feed_url) {
-//        res.status(400).end();
-//        return;
-//    }
-//    getFeedData(feed_url)
-//        .then(function () {res.status(200).end(JSON.stringify(feed_data));})
-//        .then(null, function (err) {res.status(500).end({err: err});});
-//    
-//    
-//});
-
 var getFeedData = function (feed_url) {
     // Somewhat pinched from FeedParser examples...
     if (feed_url.slice(0, 5) === 'feed:') {
@@ -36,7 +23,6 @@ var getFeedData = function (feed_url) {
         defer = q.defer();
     req.on('error', function (err) {defer.reject(err)});
     req.on('response', function (res) {
-        //console.log('Resonse from feed...');
         res.pipe(fp);
     });
     
