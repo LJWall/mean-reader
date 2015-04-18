@@ -4,11 +4,20 @@
     var wombleApp = angular.module('wombleApp', []);
     
     wombleApp.factory('wombleService', ['$http', function ($http) {
+        var feed_data;
         return {
             postFeedUri: function (feedURI) {
                 console.log(feedURI);
                 $http.post('/womble', {feed_url: feedURI})
-                    .then(function () {console.log('Got results')}, function (err) {console.log('Error: ', err)});
+                    .then(function (res) {console.log('Got results'); feed_data = res.data;},
+                          function (err) {console.log('Error: ', err)});
+            },
+            getFeedData: function () {
+                if (!feed_data) {
+                    feed_data = $http.get('/womble')
+                                    .then(function (res) {console.log('Got results: ', res.data); return res.data;});
+                }
+                return feed_data;
             }
         };
     }]);
@@ -16,9 +25,15 @@
     wombleApp.controller('wombleCtrl', ['wombleService', function (ws) {
         var self = this;
         
-        self.postFeedUri = function (newFeedURI) {
-            ws.postFeedUri(newFeedURI);
+        self.feedData = {};
+        self.updateDate = function () {
+            ws.getFeedData().then(function (data) {
+                self.feedData = data;
+            });
+            
         };
+        
+        self.updateDate();
     }]);
     
 })();

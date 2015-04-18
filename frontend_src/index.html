@@ -2,16 +2,31 @@
 <html>
     <head>
         <title>Wombles!</title>
+        <link rel="stylesheet" href="css/bower.css"> 
     </head>
     <body ng-app="wombleApp">
         <h1>The Wombles...</h1>
         <h3>... of Wimbledon common</h3>
         <hr>
-        <div ng-controller="wombleCtrl as ctrl">
-            <form ng-submit="ctrl.postFeedUri(ctrl.newFeed)">
+        <div class="container-fluid" ng-controller="wombleCtrl as ctrl">
+            <!-- <form ng-submit="ctrl.postFeedUri(ctrl.newFeed)">
                 <input type="text" ng-model="ctrl.newFeed">
                 <input type="submit" value="Go">
-            </form>
+            </form> -->
+            <!-- <a ng-href="{{ctrl.feedData().meta.link}}" target="_blank"><h3 ng-bind="ctrl.feedData().meta.title"></h3></a>
+            <h4 ng-bind="ctrl.feedData().meta.description"></h4> -->
+            <div class="row">
+                <div class="col-md-3">
+                    <ul class="nav nav-pills nav-stacked" ng-repeat="(url, meta) in ctrl.feedData.meta">
+                        <li role="presentation"><a href ng-bind="meta.title"></a></li>
+                    </ul>
+                </div>
+                <div class="col-md-9">
+                    <ul ng-repeat="item in ctrl.feedData.items">
+                        <li><a ng-href="{{item.link}}" ng-bind="item.title" target="_blank"></a></li>
+                    </ul>
+                </div>
+            </div>
         </div>
         <script src="js/bower.js"></script>
         <script src="js/womble-client.js"></script>
