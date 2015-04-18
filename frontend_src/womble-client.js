@@ -38,6 +38,10 @@
             }
             
         });
+        
+        self.markRead = function (post) {
+            post.read = true;
+        };
     }]);
     
 })();
