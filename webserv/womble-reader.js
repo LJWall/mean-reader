@@ -2,7 +2,7 @@ var express = require('express'),
     FeedParser = require('feedparser'),
     request = require('request'),
     q = require('q'),
-    feed_data = {meta: {}, items: []},
+    feed_data = {meta: [], items: []},
     router = express.Router();
 
 
@@ -42,10 +42,12 @@ var getFeedData = function (feed_url) {
     
     fp.on('error', function (err) {defer.reject(err)});
     fp.on('meta', function (meta) {
-        feed_data.meta[meta.xmlurl] = {title: meta.title,
-                                       description: meta.description,
-                                       link: meta.link};
+        feed_data.meta.push({title: meta.title,
+                                    description: meta.description,
+                                    link: meta.link,
+                                    xmlurl: meta.xmlurl});
     });
+    
     fp.on('data', function(post) {
         feed_data.items.push({title: post.title,
                               link: post.link,
@@ -61,7 +63,13 @@ var getFeedData = function (feed_url) {
     
 };
 
-getFeedData('http://127.0.0.1:1337/surf.atom');
-getFeedData('https://rideapart.com/articles.rss');
+getFeedData('http://127.0.0.1:1337/surf.atom').then(function () {
+    return getFeedData('https://rideapart.com/articles.rss');
+}).then(function () {
+    feed_data.items.sort(function (a, b) {
+        return b.pubdate.valueOf() - a.pubdate.valueOf();
+    });    
+});
+
 
 module.exports = router; 

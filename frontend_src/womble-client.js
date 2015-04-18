@@ -25,15 +25,19 @@
     wombleApp.controller('wombleCtrl', ['wombleService', function (ws) {
         var self = this;
         
-        self.feedData = {};
+        self.feedData = {meta: []};
         self.updateDate = function () {
-            ws.getFeedData().then(function (data) {
+            return ws.getFeedData().then(function (data) {
                 self.feedData = data;
             });
-            
         };
         
-        self.updateDate();
+        self.updateDate().then(function () {
+            if (self.feedData.meta[0]) {
+                self.selected = self.feedData.meta[0].xmlurl;
+            }
+            
+        });
     }]);
     
 })();

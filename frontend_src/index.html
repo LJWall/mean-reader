@@ -5,10 +5,13 @@
         <link rel="stylesheet" href="css/bower.css"> 
     </head>
     <body ng-app="wombleApp">
-        <h1>The Wombles...</h1>
-        <h3>... of Wimbledon common</h3>
-        <hr>
+        
         <div class="container-fluid" ng-controller="wombleCtrl as ctrl">
+            <div class="row">
+                <div class="col-md-12">
+                    <h1>womble-reader</h1>
+                </div>
+            </div>
             <!-- <form ng-submit="ctrl.postFeedUri(ctrl.newFeed)">
                 <input type="text" ng-model="ctrl.newFeed">
                 <input type="submit" value="Go">
@@ -17,14 +20,17 @@
             <h4 ng-bind="ctrl.feedData().meta.description"></h4> -->
             <div class="row">
                 <div class="col-md-3">
-                    <ul class="nav nav-pills nav-stacked" ng-repeat="(url, meta) in ctrl.feedData.meta">
-                        <li role="presentation"><a href ng-bind="meta.title"></a></li>
+                    <ul class="nav nav-pills nav-stacked" ng-repeat="meta in ctrl.feedData.meta">
+                        <li role="presentation" ng-class="{active: meta.xmlurl===ctrl.selected}"><a href ng-bind="meta.title" ng-click="ctrl.selected=meta.xmlurl"></a></li>
                     </ul>
                 </div>
                 <div class="col-md-9">
-                    <ul ng-repeat="item in ctrl.feedData.items">
-                        <li><a ng-href="{{item.link}}" ng-bind="item.title" target="_blank"></a></li>
-                    </ul>
+                    <table class="table">
+                        <tr ng-repeat="item in ctrl.feedData.items | filter:{xmlurl: ctrl.selected}" ng-class="{info: !item.read}">
+                            <td><a ng-href="{{item.link}}" target="_blank" ng-click="item.read=true">{{item.title}}</a></td>
+                            <td>{{item.pubdate | date: 'dd/MMM/yyyy' }}</td>
+                        </tr>
+                    </table>
                 </div>
             </div>
         </div>
