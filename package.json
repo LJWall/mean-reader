@@ -13,6 +13,7 @@
     "express": "^4.12.3",
     "feedparser": "^1.0.1",
     "grunt-bower-concat": "^0.4.0",
+    "mongodb": "^2.0.27",
     "morgan": "^1.5.2",
     "q": "^1.2.0",
     "request": "^2.55.0"
