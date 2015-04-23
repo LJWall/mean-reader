@@ -43,20 +43,20 @@ var getFeedFromSource = function (feed_url) {
 
 
 module.exports.getFeedData = function (feed_url, mongodb) {
-    var posts_promise,
-        retVal = q.defer(),
-        meta_promise = q.npost(mongodb.collection('feeds').find({url: feed_url}).limit(1), 'toArray');
+
+    var meta_promise = q.npost(mongodb.collection('feeds')
+                                      .find({url: feed_url})
+                                      .limit(1), 'toArray');
     
-    meta_promise.then(function (meta_data) {
+    return meta_promise.then(function (meta_data) {
         if (meta_data.length) {
             // it's already in the db
             if (Date.now() - meta_data[0].lastUpdate.getTime() < 3600000) {
-                console.log('Getting data from DB');
                 // been updated withing the hour, just use the mongo data
-                posts_promise = q.npost(mongodb.collection('posts').find({xmlurl: meta_data[0].xmlurl}), 'toArray');
-                posts_promise.then(function (posts_array) {
-                    retVal.resolve({meta: meta_data[0], items: posts_array});
-                }).done();
+                return q.npost(mongodb.collection('posts').find({xmlurl: meta_data[0].xmlurl}), 'toArray')
+                        .then(function (posts_array) {
+                            return {meta: meta_data[0], items: posts_array};
+                        });
             }
             else {
                 // last updated over an hour ago.
@@ -64,16 +64,14 @@ module.exports.getFeedData = function (feed_url, mongodb) {
             }
         }
         else {
-            console.log('Getting data from source');
             // resolve by getting from source...
-            getFeedFromSource(feed_url).then(function (feed_data) {
+            return getFeedFromSource(feed_url).then(function (feed_data) {
                 feed_data.meta.lastUpdate = new Date();
                 mongodb.collection('feeds').insertOne(feed_data.meta, function () {});
                 mongodb.collection('posts').insertMany(feed_data.items, function () {});
-                retVal.resolve(feed_data);
+                return feed_data;
             });
         }
-    }).done();
+    });
     
-    return retVal.promise;
 };

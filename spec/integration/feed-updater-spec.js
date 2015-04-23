@@ -20,7 +20,7 @@ describe('feed-updater', function () {
         feed_updater.getFeedData('http://127.0.0.1:1337/surf.atom', mongodb).then(function (data) {
             expect(data.meta.title).toEqual('A Board, Some Wax and a Leash');
             expect(data.items).toContain(jasmine.objectContaining({title: 'Life vs Surfing'}));
-        }).done(setTimeout.bind(null, done, 0), function (err) {console.log('Error:', e), done()});  
+        }).done(setTimeout.bind(null, done, 0));  
     });
     
     
