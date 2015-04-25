@@ -5,6 +5,8 @@ var feed_server = require('./test_atomserv/feed_server'),
     MongoClient = Promise.promisifyAll(mongodb.MongoClient);
 
 Promise.promisifyAll(mongodb.Collection.prototype);
+Promise.promisifyAll(mongodb.Cursor.prototype);
+
 Promise.longStackTraces();
 
 
@@ -45,7 +47,7 @@ describe('feed-updater', function () {
     });
     
     describe('updateFeedData', function () {    
-        it('should put put the feed data in the DB', function (done){
+        it('should put the feed data in the DB', function (done){
             feed_updater.getFeedFromSource('http://127.0.0.1:1337/surf.atom')
             .then(function (feed_data) {
                 return feed_updater.updateFeedData(feed_data, mongodb);
@@ -59,6 +61,25 @@ describe('feed-updater', function () {
             .done(done);
         });
     });
-    
+
+    describe('getFeedData', function () {    
+        it('should get the feed data in the DB', function (done){
+            // this part is tested elsewhere
+            var sampledata = {
+                meta: {url: 'url', xmlurl: 'xmlurl', title: 'blog'},
+                items: [{xmlurl: 'xmlurl', title: 'T1'}, {xmlurl: 'xmlurl', title: 'T2'}]
+            };
+            feed_updater.updateFeedData(sampledata, mongodb)
+            .then(function (insert_res) {
+                return feed_updater.getFeedData('url', mongodb);
+            })
+            .then(function (data) {
+                expect(data.meta.title).toEqual('blog');
+                expect(data.items.length).toEqual(2);
+                expect(data.items).toContain(jasmine.objectContaining({xmlurl: 'xmlurl', title: 'T2'}));
+            })
+            .done(done);
+        });
+    });    
     
 });
