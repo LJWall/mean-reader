@@ -63,6 +63,6 @@ module.exports.getFeedData = function (feed_url, mongodb) {
                         return {meta: meta_data[0], items: posts_array};
                     });
         } else
-            throw 'Feed not found in db';
+            throw new Error('Feed not found in db');
     });
 };
