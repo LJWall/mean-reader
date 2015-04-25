@@ -18,7 +18,11 @@ var clearDB = function (db) {
 };
     
 describe('feed-updater', function () {
-    var mongodb;
+    var mongodb,
+        sampledata1 = {
+            meta: {url: 'url', xmlurl: 'xmlurl', title: 'blog'},
+            items: [{xmlurl: 'xmlurl', guid: '1', title: 'T1'}, {xmlurl: 'xmlurl', guid: '2', title: 'T2'}]
+        };
     
     beforeAll(function (done) {
         feed_server.startServer();
@@ -42,21 +46,45 @@ describe('feed-updater', function () {
             feed_updater.getFeedFromSource('http://127.0.0.1:1337/surf.atom').then(function (data) {
                 expect(data.meta.title).toEqual('A Board, Some Wax and a Leash');
                 expect(data.items).toContain(jasmine.objectContaining({title: 'Life vs Surfing'}));
+                expect(data.items.length).toEqual(25);
             }).done(done);  
         });
     });
     
     describe('updateFeedData', function () {    
         it('should put the feed data in the DB', function (done){
-            feed_updater.getFeedFromSource('http://127.0.0.1:1337/surf.atom')
-            .then(function (feed_data) {
-                return feed_updater.updateFeedData(feed_data, mongodb);
+            feed_updater.updateFeedData(sampledata1, mongodb)
+            .then(function (insert_res) {
+                expect(insert_res[0].ops[0].title).toEqual('blog');
+                expect(insert_res[0].ops[0]._id).toBeDefined();
+                expect(insert_res[0].insertedCount).toEqual(1);
+                expect(insert_res[1].ops).toContain(jasmine.objectContaining({title: 'T2'}));
+                expect(insert_res[1].insertedCount).toEqual(2);
+            })
+            .done(done);
+        });
+        
+        it('should not double insert exiting data', function (done){
+            var sampledata2 = {
+                    meta: {url: 'url', xmlurl: 'xmlurl', title: 'New title'},
+                    items: [{xmlurl: 'xmlurl', guid: '2', title: 'NewT2'}, {xmlurl: 'xmlurl', guid: '3', title: 'T3'}]
+                };
+            feed_updater.updateFeedData(sampledata1, mongodb)
+            .then(function (insert_res) {
+                return feed_updater.updateFeedData(sampledata2, mongodb)
             })
             .then(function (insert_res) {
-                expect(insert_res[0].ops[0].title).toEqual('A Board, Some Wax and a Leash');
-                expect(insert_res[0].insertedCount).toEqual(1);
-                expect(insert_res[1].ops).toContain(jasmine.objectContaining({title: 'Life vs Surfing'}));
-                expect(insert_res[1].insertedCount).toEqual(25);
+                return Promise.all([
+                    mongodb.collection('feeds').find({}).toArrayAsync(),
+                    mongodb.collection('posts').find({}).toArrayAsync()
+                ]);
+            }).then(function (db_data) {
+                expect(db_data[0].length).toEqual(1);
+                expect(db_data[0][0].title).toEqual('New title');
+                expect(db_data[1].length).toEqual(3);
+                expect(db_data[1]).toContain(jasmine.objectContaining({guid: '1', title: 'T1'}));
+                expect(db_data[1]).toContain(jasmine.objectContaining({guid: '2', title: 'NewT2'}));
+                expect(db_data[1]).toContain(jasmine.objectContaining({guid: '3', title: 'T3'}));
             })
             .done(done);
         });
@@ -64,12 +92,7 @@ describe('feed-updater', function () {
 
     describe('getFeedData', function () {    
         it('should get the feed data in the DB', function (done){
-            // this part is tested elsewhere
-            var sampledata = {
-                meta: {url: 'url', xmlurl: 'xmlurl', title: 'blog'},
-                items: [{xmlurl: 'xmlurl', title: 'T1'}, {xmlurl: 'xmlurl', title: 'T2'}]
-            };
-            feed_updater.updateFeedData(sampledata, mongodb)
+            feed_updater.updateFeedData(sampledata1, mongodb)
             .then(function (insert_res) {
                 return feed_updater.getFeedData('url', mongodb);
             })
