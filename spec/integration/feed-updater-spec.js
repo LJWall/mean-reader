@@ -55,11 +55,16 @@ describe('feed-updater', function () {
         it('should put the feed data in the DB', function (done){
             feed_updater.updateFeedData(sampledata1, mongodb)
             .then(function (insert_res) {
-                expect(insert_res[0].ops[0].title).toEqual('blog');
-                expect(insert_res[0].ops[0]._id).toBeDefined();
-                expect(insert_res[0].insertedCount).toEqual(1);
-                expect(insert_res[1].ops).toContain(jasmine.objectContaining({title: 'T2'}));
-                expect(insert_res[1].insertedCount).toEqual(2);
+                return Promise.all([
+                    mongodb.collection('feeds').find({}).toArrayAsync(),
+                    mongodb.collection('posts').find({}).toArrayAsync()
+                ]);
+            }).then(function (db_data) {
+                expect(db_data[0].length).toEqual(1);
+                expect(db_data[0][0].title).toEqual('blog');
+                expect(db_data[1].length).toEqual(2);
+                expect(db_data[1]).toContain(jasmine.objectContaining({guid: '1', title: 'T1'}));
+                expect(db_data[1]).toContain(jasmine.objectContaining({guid: '2', title: 'T2'}));
             })
             .done(done);
         });

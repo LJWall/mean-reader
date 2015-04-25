@@ -59,11 +59,12 @@ module.exports.getFeedFromSource = function (feed_url) {
 };    
 
 module.exports.updateFeedData = function (feed_data, mongodb) {
-    feed_data.meta.lastUpdate = new Date();
-    return Promise.all([
-        mongodb.collection('feeds').insertOneAsync(feed_data.meta),
-        mongodb.collection('posts').insertManyAsync(feed_data.items)
-    ]);
+    var ret = [];
+    ret.push(mongodb.collection('feeds').updateOneAsync({url: feed_data.meta.url}, {$set: feed_data.meta}, {upsert: true}));
+    feed_data.items.forEach(function (post) {
+        ret.push(mongodb.collection('posts').updateOneAsync({xmlurl: post.xmlurl, guid: post.guid}, {$set: post}, {upsert: true}));
+    });
+    return Promise.all(ret);
 };
 
 module.exports.getFeedData = function (feed_url, mongodb) {
