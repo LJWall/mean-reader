@@ -1,11 +1,17 @@
 var feed_server = require('./test_atomserv/feed_server'),
     feed_updater = require('../../webserv/feed-updater.js'),
-    q = require('q');
+    Promise = require('bluebird'),
+    mongodb = require("mongodb"),
+    MongoClient = Promise.promisifyAll(mongodb.MongoClient);
+
+Promise.promisifyAll(mongodb.Collection.prototype);
+Promise.longStackTraces();
+
 
 var clearDB = function (db) {
-    return q.all([
-        q.npost(db.collection('posts'), 'deleteMany', [{}]),
-        q.npost(db.collection('feeds'), 'deleteMany', [{}])
+    return Promise.all([
+        db.collection('posts').deleteManyAsync({}),
+        db.collection('feeds').deleteManyAsync({})
     ]);
 };
     
@@ -13,12 +19,14 @@ describe('feed-updater', function () {
     var mongodb;
     
     beforeAll(function (done) {
-        var MongoClient = require('mongodb').MongoClient;    
         feed_server.startServer();
-        MongoClient.connect('mongodb://127.0.0.1:27017/testwomble', function(err, db) {
+        MongoClient.connectAsync('mongodb://127.0.0.1:27017/testwomble')
+        .then(function(db) {
             mongodb = db;
-            clearDB(mongodb).done(done);
-        });
+            return db;
+        })
+        .then(clearDB)
+        .done(done);
     });
     afterEach(function (done) {
         clearDB(mongodb).done(done);
