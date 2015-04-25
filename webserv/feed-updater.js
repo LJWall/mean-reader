@@ -41,6 +41,18 @@ var getFeedFromSource = function (feed_url) {
     return defer.promise;
 };    
 
+module.exports.getFeedFromSource = getFeedFromSource;
+
+module.exports.updateFeedData = function (feed_url, mongodb) {
+    return getFeedFromSource(feed_url)
+        .then(function (feed_data) {
+            var feed_insert, posts_insert;
+            feed_data.meta.lastUpdate = new Date();
+            feed_insert = q.npost(mongodb.collection('feeds'), 'insertOne', [feed_data.meta]);
+            posts_insert = q.npost(mongodb.collection('posts'), 'insertMany', [feed_data.items]);
+            return q.all([feed_insert, posts_insert]);
+        });
+};
 
 module.exports.getFeedData = function (feed_url, mongodb) {
 
@@ -50,28 +62,11 @@ module.exports.getFeedData = function (feed_url, mongodb) {
     
     return meta_promise.then(function (meta_data) {
         if (meta_data.length) {
-            // it's already in the db
-            if (Date.now() - meta_data[0].lastUpdate.getTime() < 3600000) {
-                // been updated withing the hour, just use the mongo data
-                return q.npost(mongodb.collection('posts').find({xmlurl: meta_data[0].xmlurl}), 'toArray')
-                        .then(function (posts_array) {
-                            return {meta: meta_data[0], items: posts_array};
-                        });
-            }
-            else {
-                // last updated over an hour ago.
-                throw 'Not implemented';
-            }
-        }
-        else {
-            // resolve by getting from source...
-            return getFeedFromSource(feed_url).then(function (feed_data) {
-                feed_data.meta.lastUpdate = new Date();
-                mongodb.collection('feeds').insertOne(feed_data.meta, function () {});
-                mongodb.collection('posts').insertMany(feed_data.items, function () {});
-                return feed_data;
-            });
-        }
+            return q.npost(mongodb.collection('posts').find({xmlurl: meta_data[0].xmlurl}), 'toArray')
+                    .then(function (posts_array) {
+                        return {meta: meta_data[0], items: posts_array};
+                    });
+        } else
+            throw 'Feed not found in db';
     });
-    
 };

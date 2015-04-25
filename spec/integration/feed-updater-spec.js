@@ -1,6 +1,14 @@
-var feed_server = require('./test_atomserv/feed_server');
-var feed_updater = require('../../webserv/feed-updater.js');
+var feed_server = require('./test_atomserv/feed_server'),
+    feed_updater = require('../../webserv/feed-updater.js'),
+    q = require('q');
 
+var clearDB = function (db) {
+    return q.all([
+        q.npost(db.collection('posts'), 'deleteMany', [{}]),
+        q.npost(db.collection('feeds'), 'deleteMany', [{}])
+    ]);
+};
+    
 describe('feed-updater', function () {
     var mongodb;
     
@@ -9,8 +17,11 @@ describe('feed-updater', function () {
         feed_server.startServer();
         MongoClient.connect('mongodb://127.0.0.1:27017/testwomble', function(err, db) {
             mongodb = db;
-            done();
+            clearDB(mongodb).done(done);
         });
+    });
+    afterEach(function (done) {
+        clearDB(mongodb).done(done);
     });
     afterAll(function () {
         mongodb.close();
