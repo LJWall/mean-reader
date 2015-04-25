@@ -27,11 +27,29 @@ describe('feed-updater', function () {
         mongodb.close();
     });
     
-    it('getFeedData should get the atom data from the test atom server', function (done){
-        feed_updater.getFeedData('http://127.0.0.1:1337/surf.atom', mongodb).then(function (data) {
-            expect(data.meta.title).toEqual('A Board, Some Wax and a Leash');
-            expect(data.items).toContain(jasmine.objectContaining({title: 'Life vs Surfing'}));
-        }).done(setTimeout.bind(null, done, 0));  
+    describe('getFeedFromSource', function () {    
+        it('should get the atom data from the test atom server', function (done){
+            feed_updater.getFeedFromSource('http://127.0.0.1:1337/surf.atom').then(function (data) {
+                expect(data.meta.title).toEqual('A Board, Some Wax and a Leash');
+                expect(data.items).toContain(jasmine.objectContaining({title: 'Life vs Surfing'}));
+            }).done(done);  
+        });
+    });
+    
+    describe('updateFeedData', function () {    
+        it('should put put the feed data in the DB', function (done){
+            feed_updater.getFeedFromSource('http://127.0.0.1:1337/surf.atom')
+            .then(function (feed_data) {
+                return feed_updater.updateFeedData(feed_data, mongodb);
+            })
+            .then(function (insert_res) {
+                expect(insert_res[0].ops[0].title).toEqual('A Board, Some Wax and a Leash');
+                expect(insert_res[0].insertedCount).toEqual(1);
+                expect(insert_res[1].ops).toContain(jasmine.objectContaining({title: 'Life vs Surfing'}));
+                expect(insert_res[1].insertedCount).toEqual(25);
+            })
+            .done(done);
+        });
     });
     
     
