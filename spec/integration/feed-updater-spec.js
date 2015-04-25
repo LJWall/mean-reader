@@ -20,8 +20,8 @@ var clearDB = function (db) {
 describe('feed-updater', function () {
     var mongodb,
         sampledata1 = {
-            meta: {url: 'url', xmlurl: 'xmlurl', title: 'blog'},
-            items: [{xmlurl: 'xmlurl', guid: '1', title: 'T1'}, {xmlurl: 'xmlurl', guid: '2', title: 'T2'}]
+            meta: {link: 'url', feedurl: 'feedurl', title: 'blog'},
+            items: [{feedurl: 'feedurl', guid: '1', title: 'T1'}, {feedurl: 'feedurl', guid: '2', title: 'T2'}]
         };
     
     beforeAll(function (done) {
@@ -71,8 +71,8 @@ describe('feed-updater', function () {
         
         it('should not double insert exiting data', function (done){
             var sampledata2 = {
-                    meta: {url: 'url', xmlurl: 'xmlurl', title: 'New title'},
-                    items: [{xmlurl: 'xmlurl', guid: '2', title: 'NewT2'}, {xmlurl: 'xmlurl', guid: '3', title: 'T3'}]
+                    meta: {link: 'url', feedurl: 'feedurl', title: 'New title'},
+                    items: [{feedurl: 'feedurl', guid: '2', title: 'NewT2'}, {feedurl: 'feedurl', guid: '3', title: 'T3'}]
                 };
             feed_updater.updateFeedData(sampledata1, mongodb)
             .then(function (insert_res) {
@@ -99,12 +99,12 @@ describe('feed-updater', function () {
         it('should get the feed data in the DB', function (done){
             feed_updater.updateFeedData(sampledata1, mongodb)
             .then(function (insert_res) {
-                return feed_updater.getFeedData('url', mongodb);
+                return feed_updater.getFeedData('feedurl', mongodb);
             })
             .then(function (data) {
                 expect(data.meta.title).toEqual('blog');
                 expect(data.items.length).toEqual(2);
-                expect(data.items).toContain(jasmine.objectContaining({xmlurl: 'xmlurl', title: 'T2'}));
+                expect(data.items).toContain(jasmine.objectContaining({feedurl: 'feedurl', title: 'T2'}));
             })
             .done(done);
         });

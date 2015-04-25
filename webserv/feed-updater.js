@@ -41,8 +41,7 @@ module.exports.getFeedFromSource = function (feed_url) {
         feed_data.meta = {title: meta.title,
                             description: meta.description,
                             link: meta.link,
-                            xmlurl: meta.xmlurl,
-                            url: feed_url};
+                            feedurl: feed_url};
     });
     
     fp.on('data', function(post) {
@@ -50,7 +49,7 @@ module.exports.getFeedFromSource = function (feed_url) {
                               link: post.link,
                               pubdate: post.pubdate,
                               guid: post.guid,
-                              xmlurl: post.meta.xmlurl});
+                              feedurl: feed_url});
     });
     fp.on('end', function () {
         def.resolve(feed_data);
@@ -60,9 +59,9 @@ module.exports.getFeedFromSource = function (feed_url) {
 
 module.exports.updateFeedData = function (feed_data, mongodb) {
     var ret = [];
-    ret.push(mongodb.collection('feeds').updateOneAsync({url: feed_data.meta.url}, {$set: feed_data.meta}, {upsert: true}));
+    ret.push(mongodb.collection('feeds').updateOneAsync({feedurl: feed_data.meta.feedurl}, {$set: feed_data.meta}, {upsert: true}));
     feed_data.items.forEach(function (post) {
-        ret.push(mongodb.collection('posts').updateOneAsync({xmlurl: post.xmlurl, guid: post.guid}, {$set: post}, {upsert: true}));
+        ret.push(mongodb.collection('posts').updateOneAsync({feedurl: post.feedurl, guid: post.guid}, {$set: post}, {upsert: true}));
     });
     return Promise.all(ret);
 };
@@ -70,12 +69,12 @@ module.exports.updateFeedData = function (feed_data, mongodb) {
 module.exports.getFeedData = function (feed_url, mongodb) {
 
     var meta_promise = mongodb.collection('feeds')
-                                      .find({url: feed_url})
+                                      .find({feedurl: feed_url})
                                       .limit(1).toArrayAsync();
     
     return meta_promise.then(function (meta_data) {
         if (meta_data.length) {
-            return mongodb.collection('posts').find({xmlurl: meta_data[0].xmlurl}).toArrayAsync()
+            return mongodb.collection('posts').find({feedurl: meta_data[0].feedurl}).toArrayAsync()
                     .then(function (posts_array) {
                         return {meta: meta_data[0], items: posts_array};
                     });
