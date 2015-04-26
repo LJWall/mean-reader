@@ -1,5 +1,4 @@
-var feed_server = require('./test_atomserv/feed_server'),
-    feed_updater = require('../webserv/feed-updater.js'),
+var mongoFeedStore = require('../../webserv/feed_handle/utils/mongoFeedStore.js'),
     Promise = require('bluebird'),
     mongodb = require("mongodb"),
     MongoClient = Promise.promisifyAll(mongodb.MongoClient);
@@ -17,7 +16,7 @@ var clearDB = function (db) {
     ]);
 };
     
-describe('feed-updater', function () {
+describe('mongoFeedStore', function () {
     var mongodb,
         sampledata1 = {
             meta: {link: 'url', feedurl: 'feedurl', title: 'blog'},
@@ -25,7 +24,6 @@ describe('feed-updater', function () {
         };
     
     beforeAll(function (done) {
-        feed_server.startServer();
         MongoClient.connectAsync('mongodb://127.0.0.1:27017/testwomble')
         .then(function(db) {
             mongodb = db;
@@ -41,21 +39,9 @@ describe('feed-updater', function () {
         mongodb.close();
     });
     
-    describe('getFeedFromSource', function () {    
-        it('should get the atom data from the test atom server', function (done){
-            feed_updater.getFeedFromSource('http://127.0.0.1:1337/surf.atom')
-            .then(function (data) {
-                expect(data.meta.title).toEqual('A Board, Some Wax and a Leash');
-                expect(data.items).toContain(jasmine.objectContaining({title: 'Life vs Surfing'}));
-                expect(data.items.length).toEqual(25);
-            })
-            .done(done);  
-        });
-    });
-    
-    describe('updateFeedData', function () {    
+    describe('updateMongoFeedData', function () {    
         it('should put the feed data in the DB', function (done){
-            feed_updater.updateFeedData(sampledata1, mongodb)
+            mongoFeedStore.updateMongoFeedData(sampledata1, mongodb)
             .then(function (insert_res) {
                 return Promise.all([
                     mongodb.collection('feeds').find({}).toArrayAsync(),
@@ -76,9 +62,9 @@ describe('feed-updater', function () {
                     meta: {link: 'url', feedurl: 'feedurl', title: 'New title'},
                     items: [{feedurl: 'feedurl', guid: '2', title: 'NewT2'}, {feedurl: 'feedurl', guid: '3', title: 'T3'}]
                 };
-            feed_updater.updateFeedData(sampledata1, mongodb)
+            mongoFeedStore.updateMongoFeedData(sampledata1, mongodb)
             .then(function (insert_res) {
-                return feed_updater.updateFeedData(sampledata2, mongodb)
+                return mongoFeedStore.updateMongoFeedData(sampledata2, mongodb)
             })
             .then(function (insert_res) {
                 return Promise.all([
@@ -97,11 +83,11 @@ describe('feed-updater', function () {
         });
     });
 
-    describe('getFeedData', function () {    
+    describe('getMongoFeedData', function () {    
         it('should get the feed data in the DB', function (done){
-            feed_updater.updateFeedData(sampledata1, mongodb)
+            mongoFeedStore.updateMongoFeedData(sampledata1, mongodb) // should not really rely on updateMongoFeedData here!
             .then(function (insert_res) {
-                return feed_updater.getFeedData('feedurl', mongodb);
+                return mongoFeedStore.getMongoFeedData('feedurl', mongodb);
             })
             .then(function (data) {
                 expect(data.meta.title).toEqual('blog');
@@ -112,19 +98,19 @@ describe('feed-updater', function () {
         });
     });
     
-    describe('updateFeedFromSource', function () {
-        it('should get data if none is already there', function (done) {
-            spyOn(feed_updater, 'getFeedFromSource').and.returnValue(Promise.resolve(sampledata1));
-            spyOn(feed_updater, 'updateFeedData');
-            feed_updater.updateFeedFromSource('feedurl', mongodb)
-            .then(function (res) {
-                expect(feed_updater.getFeedFromSource).toHaveBeenCalledWith('feedurl');
-                expect(feed_updater.getFeedFromSource.calls.count()).toEqual(1);
-                expect(feed_updater.updateFeedData).toHaveBeenCalledWith(sampledata1, mongodb);
-                expect(feed_updater.updateFeedData.calls.count()).toEqual(1)
-            })
-            .done(done);
-        });
-    });
+    //describe('updateFeedFromSource', function () {
+    //    it('should get data if none is already there', function (done) {
+    //        spyOn(feed_updater, 'getFeedFromSource').and.returnValue(Promise.resolve(sampledata1));
+    //        spyOn(feed_updater, 'updateFeedData');
+    //        feed_updater.updateFeedFromSource('feedurl', mongodb)
+    //        .then(function (res) {
+    //            expect(feed_updater.getFeedFromSource).toHaveBeenCalledWith('feedurl');
+    //            expect(feed_updater.getFeedFromSource.calls.count()).toEqual(1);
+    //            expect(feed_updater.updateFeedData).toHaveBeenCalledWith(sampledata1, mongodb);
+    //            expect(feed_updater.updateFeedData.calls.count()).toEqual(1)
+    //        })
+    //        .done(done);
+    //    });
+    //});
     
 });
