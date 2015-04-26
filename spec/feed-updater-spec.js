@@ -1,5 +1,5 @@
 var feed_server = require('./test_atomserv/feed_server'),
-    feed_updater = require('../../webserv/feed-updater.js'),
+    feed_updater = require('../webserv/feed-updater.js'),
     Promise = require('bluebird'),
     mongodb = require("mongodb"),
     MongoClient = Promise.promisifyAll(mongodb.MongoClient);
@@ -43,11 +43,13 @@ describe('feed-updater', function () {
     
     describe('getFeedFromSource', function () {    
         it('should get the atom data from the test atom server', function (done){
-            feed_updater.getFeedFromSource('http://127.0.0.1:1337/surf.atom').then(function (data) {
+            feed_updater.getFeedFromSource('http://127.0.0.1:1337/surf.atom')
+            .then(function (data) {
                 expect(data.meta.title).toEqual('A Board, Some Wax and a Leash');
                 expect(data.items).toContain(jasmine.objectContaining({title: 'Life vs Surfing'}));
                 expect(data.items.length).toEqual(25);
-            }).done(done);  
+            })
+            .done(done);  
         });
     });
     
@@ -108,6 +110,21 @@ describe('feed-updater', function () {
             })
             .done(done);
         });
-    });    
+    });
+    
+    describe('updateFeedFromSource', function () {
+        it('should get data if none is already there', function (done) {
+            spyOn(feed_updater, 'getFeedFromSource').and.returnValue(Promise.resolve(sampledata1));
+            spyOn(feed_updater, 'updateFeedData');
+            feed_updater.updateFeedFromSource('feedurl', mongodb)
+            .then(function (res) {
+                expect(feed_updater.getFeedFromSource).toHaveBeenCalledWith('feedurl');
+                expect(feed_updater.getFeedFromSource.calls.count()).toEqual(1);
+                expect(feed_updater.updateFeedData).toHaveBeenCalledWith(sampledata1, mongodb);
+                expect(feed_updater.updateFeedData.calls.count()).toEqual(1)
+            })
+            .done(done);
+        });
+    });
     
 });
