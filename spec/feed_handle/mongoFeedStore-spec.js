@@ -81,22 +81,31 @@ describe('mongoFeedStore', function () {
     });
 
     describe('getMongoFeedData', function () {    
-        it('should get the feed data in the DB', function (done){
-            mongoFeedStore.updateMongoFeedData(sampledata1) // should not really rely on updateMongoFeedData here!
-            .then(function (insert_res) {
-                return mongoFeedStore.getMongoFeedData('feedurl');
-            })
+        it('should pass its work to getMongoFeedMeta and getMongoFeedItems', function (done){
+            spyOn(mongoFeedStore, 'getMongoFeedMeta').and.returnValue(Promise.resolve('Foo!'));
+            spyOn(mongoFeedStore, 'getMongoFeedItems').and.returnValue(Promise.resolve('Bar!'));
+            
+            mongoFeedStore.getMongoFeedData('feedurl')
             .then(function (data) {
-                expect(data.meta.title).toEqual('blog');
-                expect(data.items.length).toEqual(2);
-                expect(data.items).toContain(jasmine.objectContaining({feedurl: 'feedurl', title: 'T2'}));
+                expect(mongoFeedStore.getMongoFeedMeta.calls.count()).toEqual(1);
+                expect(mongoFeedStore.getMongoFeedItems.calls.count()).toEqual(1);
+                expect(data.meta).toEqual('Foo!');
+                expect(data.items).toEqual('Bar!');
+            })
+            .done(done);
+        });
+        
+        it('should do something sensible when there\'s no data', function (done) {
+            mongoFeedStore.getMongoFeedData('feedurl')
+            .then(function (data) {
+                expect(data).toEqual({meta: null, items: []});
             })
             .done(done);
         });
     });
     
     describe('getMongoFeedItems', function () {    
-        it('should get the feed data in the DB', function (done){
+        it('should get the feed items from the DB', function (done){
             mongoFeedStore.updateMongoFeedData(sampledata1) // should not really rely on updateMongoFeedData here!
             .then(function (insert_res) {
                 return mongoFeedStore.getMongoFeedItems('feedurl');
@@ -110,7 +119,7 @@ describe('mongoFeedStore', function () {
     });
     
     describe('getMongoFeedMeta', function () {    
-        it('should get the feed data in the DB', function (done){
+        it('should get the feed meta from the DB', function (done){
             mongoFeedStore.updateMongoFeedData(sampledata1) // should not really rely on updateMongoFeedData here!
             .then(function (insert_res) {
                 return mongoFeedStore.getMongoFeedMeta('feedurl');
