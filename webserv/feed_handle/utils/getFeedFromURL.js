@@ -16,7 +16,7 @@ function defer() {
     };
 }
 
-module.exports = function (feed_url) {
+module.exports.get = function (feed_url) {
     var feed_data = {meta: {}, items: []},
         req,
         fp = new FeedParser();

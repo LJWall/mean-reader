@@ -1,10 +1,6 @@
 var mongoFeedStore = require('../../webserv/feed_handle/utils/mongoFeedStore.js'),
     Promise = require('bluebird'),
-    mongodb = require("mongodb"),
-    MongoClient = Promise.promisifyAll(mongodb.MongoClient);
-
-Promise.promisifyAll(mongodb.Collection.prototype);
-Promise.promisifyAll(mongodb.Cursor.prototype);
+    mongoConn = require('../../webserv/mongoConnect.js');
 
 Promise.longStackTraces();
 
@@ -24,7 +20,8 @@ describe('mongoFeedStore', function () {
         };
     
     beforeAll(function (done) {
-        MongoClient.connectAsync('mongodb://127.0.0.1:27017/testwomble')
+        mongoConn.uri = 'mongodb://127.0.0.1:27017/testwomble';
+        mongoConn.connection()
         .then(function(db) {
             mongodb = db;
             return db;
@@ -41,7 +38,7 @@ describe('mongoFeedStore', function () {
     
     describe('updateMongoFeedData', function () {    
         it('should put the feed data in the DB', function (done){
-            mongoFeedStore.updateMongoFeedData(sampledata1, mongodb)
+            mongoFeedStore.updateMongoFeedData(sampledata1)
             .then(function (insert_res) {
                 return Promise.all([
                     mongodb.collection('feeds').find({}).toArrayAsync(),
@@ -62,9 +59,9 @@ describe('mongoFeedStore', function () {
                     meta: {link: 'url', feedurl: 'feedurl', title: 'New title'},
                     items: [{feedurl: 'feedurl', guid: '2', title: 'NewT2'}, {feedurl: 'feedurl', guid: '3', title: 'T3'}]
                 };
-            mongoFeedStore.updateMongoFeedData(sampledata1, mongodb)
+            mongoFeedStore.updateMongoFeedData(sampledata1)
             .then(function (insert_res) {
-                return mongoFeedStore.updateMongoFeedData(sampledata2, mongodb)
+                return mongoFeedStore.updateMongoFeedData(sampledata2)
             })
             .then(function (insert_res) {
                 return Promise.all([
@@ -85,9 +82,9 @@ describe('mongoFeedStore', function () {
 
     describe('getMongoFeedData', function () {    
         it('should get the feed data in the DB', function (done){
-            mongoFeedStore.updateMongoFeedData(sampledata1, mongodb) // should not really rely on updateMongoFeedData here!
+            mongoFeedStore.updateMongoFeedData(sampledata1) // should not really rely on updateMongoFeedData here!
             .then(function (insert_res) {
-                return mongoFeedStore.getMongoFeedData('feedurl', mongodb);
+                return mongoFeedStore.getMongoFeedData('feedurl');
             })
             .then(function (data) {
                 expect(data.meta.title).toEqual('blog');
@@ -98,19 +95,32 @@ describe('mongoFeedStore', function () {
         });
     });
     
-    //describe('updateFeedFromSource', function () {
-    //    it('should get data if none is already there', function (done) {
-    //        spyOn(feed_updater, 'getFeedFromSource').and.returnValue(Promise.resolve(sampledata1));
-    //        spyOn(feed_updater, 'updateFeedData');
-    //        feed_updater.updateFeedFromSource('feedurl', mongodb)
-    //        .then(function (res) {
-    //            expect(feed_updater.getFeedFromSource).toHaveBeenCalledWith('feedurl');
-    //            expect(feed_updater.getFeedFromSource.calls.count()).toEqual(1);
-    //            expect(feed_updater.updateFeedData).toHaveBeenCalledWith(sampledata1, mongodb);
-    //            expect(feed_updater.updateFeedData.calls.count()).toEqual(1)
-    //        })
-    //        .done(done);
-    //    });
-    //});
+    describe('getMongoFeedItems', function () {    
+        it('should get the feed data in the DB', function (done){
+            mongoFeedStore.updateMongoFeedData(sampledata1) // should not really rely on updateMongoFeedData here!
+            .then(function (insert_res) {
+                return mongoFeedStore.getMongoFeedItems('feedurl');
+            })
+            .then(function (data) {
+                expect(data.length).toEqual(2);
+                expect(data).toContain(jasmine.objectContaining({feedurl: 'feedurl', title: 'T2'}));
+            })
+            .done(done);
+        });
+    });
     
+    describe('getMongoFeedMeta', function () {    
+        it('should get the feed data in the DB', function (done){
+            mongoFeedStore.updateMongoFeedData(sampledata1) // should not really rely on updateMongoFeedData here!
+            .then(function (insert_res) {
+                return mongoFeedStore.getMongoFeedMeta('feedurl');
+            })
+            .then(function (data) {
+                expect(data.title).toEqual('blog');
+            })
+            .done(done);
+        });
+    });
+    
+        
 });
