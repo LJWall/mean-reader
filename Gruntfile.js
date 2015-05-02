@@ -24,6 +24,10 @@ module.exports = function(grunt) {
     config.copy.html = {files: [{expand: true, filter: 'isFile', flatten: true, src: 'frontend_src/*.html', dest: 'frontend_build/'}] };
     config.watch.html = {files: ['frontend_src/*.html'], tasks: ['copy:html']};
 
+    // Own CSS
+    config.copy.css = {files: [{expand: true, filter: 'isFile', flatten: true, src: 'frontend_src/*.css', dest: 'frontend_build/css'}] };
+    config.watch.css = {files: ['frontend_src/*.css'], tasks: ['copy:css']};
+    
     // Server
     config.express = { options: {script: 'webserv/main.js'}, dev: {}},
     config.watch.server = {files: ['webserv/*.js', 'webserv/**/*.js'], tasks: ['express:dev:stop', 'express:dev'], options: {spawn: false}}

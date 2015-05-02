@@ -1,32 +1,26 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Wombles!</title>
-        <link rel="stylesheet" href="css/bower.css"> 
+        <title>read</title>
+        <link rel="stylesheet" href="css/bower.css">
+        <link rel="stylesheet" href="css/mr.css"> 
     </head>
     <body ng-app="wombleApp">
         
         <div class="container-fluid" ng-controller="wombleCtrl as ctrl">
             <div class="row">
                 <div class="col-md-12">
-                    <h1>womble-reader</h1>
+                    <h1>reader</h1>
                     <hr>
                 </div>
             </div>
             <div class="row">
-                <div class="col-md-3">
-                    <div class="row">
-                        <div class="col-md-12"><h4>Blogs</h4></div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <ul class="nav nav-pills nav-stacked" ng-repeat="meta in ctrl.feedData.meta">
-                                <li role="presentation" ng-class="{active: meta.feedurl===ctrl.selected}"><a href ng-bind="meta.title" ng-click="ctrl.selected=meta.feedurl"></a></li>
-                            </ul>
-                        </div>
-                    </div>
+                <div class="col-md-3 sidebar">
+                    <ul class="nav nav-sidebar" ng-repeat="meta in ctrl.feedData.meta">
+                        <li ng-class="{active: meta.feedurl===ctrl.selected}"><a href ng-bind="meta.title" ng-click="ctrl.selected=meta.feedurl"></a></li>
+                    </ul>
                 </div>
-                <div class="col-md-9">
+                <div class="col-md-9 main">
                     <div class="row">
                         <div class="col-md-12">
                             <h4>Posts</h4>
@@ -36,7 +30,7 @@
                         <div class="col-md-12">
                             <table class="table">
                                 <tr ng-repeat="item in ctrl.feedData.items | filter:{feedurl: ctrl.selected}" ng-class="{info: !item.read}">
-                                    <td><span ng-click="ctrl.selectItem(item)">{{item.title}}</span></td>
+                                    <td><a href ng-click="ctrl.selectItem(item)">{{item.title}}</a></td>
                                     <td>{{item.pubdate | date: 'dd/MMM/yyyy' }}</td>
                                 </tr>
                             </table>
