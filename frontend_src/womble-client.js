@@ -34,13 +34,14 @@
         
         self.updateDate().then(function () {
             if (self.feedData.meta[0]) {
-                self.selected = self.feedData.meta[0].xmlurl;
+                self.selected = self.feedData.meta[0].feedurl;
             }
             
         });
         
-        self.markRead = function (post) {
+        self.selectItem = function (post) {
             post.read = true;
+            window.open(post.link, '_blank');
         };
     }]);
     
