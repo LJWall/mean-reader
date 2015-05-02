@@ -15,21 +15,31 @@ module.exports.updateMongoFeedData = function (feed_data) {
 };
 
 module.exports.getMongoFeedData = function (feed_url) {
-    return Promise.props({meta: module.exports.getMongoFeedMeta(feed_url), items: module.exports.getMongoFeedItems(feed_url)});
+    return Promise.props({
+        meta: module.exports.getMongoFeedMeta(feed_url),
+        items: module.exports.getMongoFeedItems(feed_url)
+    });
 };
 
 module.exports.getMongoFeedMeta = function (feed_url) {
     return mongoConn.connection()
     .then(function (mongodb) {
-        return mongodb.collection('feeds')
-                .findOneAsync({feedurl: feed_url});
-       
+        if (feed_url) {
+            return mongodb.collection('feeds')
+                          .findOneAsync({feedurl: feed_url});
+       } else {
+            return mongodb.collection('feeds')
+                          .find({})
+                          .toArrayAsync();
+       }
+        
     });
 };
 
 module.exports.getMongoFeedItems = function (feed_url) {
     return mongoConn.connection()
     .then(function (mongodb) {
-        return mongodb.collection('posts').find({feedurl: feed_url}).toArrayAsync();
+        var search_term = (feed_url ? {feedurl: feed_url} : {});
+        return mongodb.collection('posts').find(search_term).toArrayAsync();
     });
 };
