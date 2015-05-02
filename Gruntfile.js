@@ -2,7 +2,7 @@ module.exports = function(grunt) {
     
     var config = {};
 
-    // Load grunt packages and create black section of the config object.  
+    // Load grunt packages and create blank section of the config object.  
     grunt.loadNpmTasks('grunt-contrib-copy'); 
     config.copy = {};
     grunt.loadNpmTasks('grunt-express-server'); 
@@ -26,7 +26,7 @@ module.exports = function(grunt) {
 
     // Server
     config.express = { options: {script: 'webserv/main.js'}, dev: {}},
-    config.watch.server = {files: ['webserv/*.js'], tasks: ['express:dev:stop', 'express:dev'], options: {spawn: false}}
+    config.watch.server = {files: ['webserv/*.js', 'webserv/**/*.js'], tasks: ['express:dev:stop', 'express:dev'], options: {spawn: false}}
 
     grunt.initConfig(config);
     grunt.registerTask('build', ['bower_concat', 'copy']);
