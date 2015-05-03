@@ -20,4 +20,11 @@ module.exports.connection = function () {
     }
 };
 
+module.exports.disconnect = function () {
+    if (db) {
+        db.close();
+    }
+};
+
+
 

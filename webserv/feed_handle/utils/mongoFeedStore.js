@@ -1,14 +1,19 @@
 var Promise = require('bluebird'),
-    mongoConn = require('../../mongoConnect.js'); 
+    mongoConn = require('../../mongoConnect.js'),
+    ObjectID = require('mongodb').ObjectID; 
 
 module.exports.updateMongoFeedData = function (feed_data) {
-    var ret = [];
+    var ret = [], m;
     return mongoConn.connection()
     .then(function (mongodb) {
+        m = mongodb;
         feed_data.meta.last_update = new Date();
-        ret.push(mongodb.collection('feeds').updateOneAsync({feedurl: feed_data.meta.feedurl}, {$set: feed_data.meta}, {upsert: true}));
+        return m.collection('feeds').findOneAndUpdateAsync({feedurl: feed_data.meta.feedurl}, {$set: feed_data.meta}, {upsert: true})
+    })
+    .then(function (upsert_res) {
         feed_data.items.forEach(function (post) {
-            ret.push(mongodb.collection('posts').updateOneAsync({feedurl: post.feedurl, guid: post.guid}, {$set: post}, {upsert: true}));
+            post.meta_id = (upsert_res.lastErrorObject.updatedExisting ? upsert_res.value._id : upsert_res.lastErrorObject.upserted);
+            ret.push(m.collection('posts').updateOneAsync({feedurl: post.feedurl, guid: post.guid}, {$set: post}, {upsert: true}));
         });
         return Promise.all(ret);
     });
@@ -41,5 +46,12 @@ module.exports.getMongoFeedItems = function (feed_url) {
     .then(function (mongodb) {
         var search_term = (feed_url ? {feedurl: feed_url} : {});
         return mongodb.collection('posts').find(search_term).toArrayAsync();
+    });
+};
+
+module.exports.getMongoFeedItemsByID = function (id) {
+    return mongoConn.connection()
+    .then(function (mongodb) {
+        return mongodb.collection('posts').find({meta_id: ObjectID.createFromHexString(id)}).toArrayAsync();
     });
 };

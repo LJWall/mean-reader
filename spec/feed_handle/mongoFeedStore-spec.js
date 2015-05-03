@@ -1,6 +1,7 @@
 var mongoFeedStore = require('../../webserv/feed_handle/utils/mongoFeedStore.js'),
     Promise = require('bluebird'),
-    mongoConn = require('../../webserv/mongoConnect.js');
+    mongoConn = require('../../webserv/mongoConnect.js')
+    ObjectID = require('mongodb').ObjectID;
 
 Promise.longStackTraces();
 
@@ -15,7 +16,7 @@ var clearDB = function (db) {
 describe('mongoFeedStore', function () {
     var mongodb,
         sampledata1 = {
-            meta: {link: 'url', feedurl: 'feedurl', title: 'blog'},
+            meta: {_id: new ObjectID('000000000000000000000001'), link: 'url', feedurl: 'feedurl', title: 'blog'},
             items: [{feedurl: 'feedurl', guid: '1', title: 'T1'}, {feedurl: 'feedurl', guid: '2', title: 'T2'}]
         };
     
@@ -95,8 +96,7 @@ describe('mongoFeedStore', function () {
             .done(done);
         });
         
-        // xit'd because this shoul be test on the underlying functions!
-        xit('should do something sensible when there\'s no data', function (done) {
+        it('should do something sensible when there\'s no data', function (done) {
             mongoFeedStore.getMongoFeedData('feedurl')
             .then(function (data) {
                 expect(data).toEqual({meta: null, items: []});
@@ -107,7 +107,7 @@ describe('mongoFeedStore', function () {
     
     describe('[db get routines]', function () {
         var sampledata2 = {
-            meta: {link: 'url2', feedurl: 'feedurl2', title: 'blog2'},
+            meta: {_id: new ObjectID('000000000000000000000002'), link: 'url2', feedurl: 'feedurl2', title: 'blog2'},
             items: [{feedurl: 'feedurl2', guid: '1', title: 'S1'}, {feedurl: 'feedurl2', guid: '2', title: 'S2'}]
         };
         beforeAll(function (done) {
@@ -139,6 +139,18 @@ describe('mongoFeedStore', function () {
                     expect(data).toEqual(jasmine.arrayContaining([jasmine.objectContaining(sampledata1.items[1])]));
                     expect(data).toEqual(jasmine.arrayContaining([jasmine.objectContaining(sampledata2.items[0])]));
                     expect(data).toEqual(jasmine.arrayContaining([jasmine.objectContaining(sampledata2.items[1])]));
+                })
+                .done(done);
+            });
+        });
+        
+        describe('getMongoFeedItemsByID', function () {
+            it('should get the feed items from the DB when called with a meta _id', function (done) {
+                mongoFeedStore.getMongoFeedItemsByID('000000000000000000000001')
+                .then(function (data) {
+                    expect(data.length).toEqual(2);
+                    expect(data).toEqual(jasmine.arrayContaining([jasmine.objectContaining(sampledata1.items[0])]));
+                    expect(data).toEqual(jasmine.arrayContaining([jasmine.objectContaining(sampledata1.items[1])]));
                 })
                 .done(done);
             });

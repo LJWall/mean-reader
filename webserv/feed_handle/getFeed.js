@@ -6,11 +6,9 @@ var getFeedFromUrl = require('./utils/getFeedFromURL.js'),
 module.exports.get = function (url) {
     return mongoFeedStore.getMongoFeedMeta(url)
     .then(function (meta) {
-        if (!meta || Date.now() - meta.last_update.getTime() >= 60*60*1000) {
+        if (!meta) {
             return getFeedFromUrl.get(url)
-            .then(function (feed_data) {
-                return mongoFeedStore.updateMongoFeedData(feed_data)
-            })
+            .then(mongoFeedStore.updateMongoFeedData)
             .then(function () {
                 return mongoFeedStore.getMongoFeedData(url);
             });

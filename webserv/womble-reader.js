@@ -1,25 +1,46 @@
 var express = require('express'),
     router = express.Router(),
     Promise = require('bluebird'),
-    getFeed = require("./feed_handle/getFeed.js");
+    //getFeed = require("./feed_handle/getFeed.js");
+    mongoFeedStore = require('./feed_handle/utils/mongoFeedStore.js');
 
 
+// Get everything
 router.get('/', function (req, res) {
-    Promise.all([
-        getFeed.get('https://rideapart.com/feeds/rss2'),
-        getFeed.get('http://surfingnorthdevon.blogspot.com/feeds/posts/default'),
-        getFeed.get('http://www.houseofbonzer.com/feeds/posts/default'),
-        getFeed.get('http://empiresurfboards.co.uk/?feed=atom')
-    ])
+    mongoFeedStore.getMongoFeedData()
     .then(function (feed_data) {
-        var return_data = {
-            meta: [feed_data[0].meta, feed_data[1].meta, feed_data[2].meta, feed_data[3].meta],
-            items: feed_data[0].items.concat(feed_data[1].items).concat(feed_data[2].items).concat(feed_data[3].items)
-        };
-        res.status(200).end(JSON.stringify(return_data));
+        res.status(200).end(JSON.stringify(feed_data));
     })
     .done();
     
+});
+
+// get array of meta items
+router.get('/meta', function (req, res) {
+    mongoFeedStore.getMongoFeedMeta()
+    .then(function (feed_data) {
+        res.status(200).end(JSON.stringify(feed_data));
+    })
+    .done();
+});
+
+//get all the items
+router.get('/items', function (req, res) {
+    mongoFeedStore.getMongoFeedItems()
+    .then(function (feed_data) {
+        res.status(200).end(JSON.stringify(feed_data));
+    })
+    .done();
+});
+
+
+// get items by meta_id
+router.get('/items/:meta_id', function (req, res) {
+    mongoFeedStore.getMongoFeedItemsByID(req.params.meta_id)
+    .then(function (feed_data) {
+        res.status(200).end(JSON.stringify(feed_data));
+    })
+    .done();
 });
 
 
