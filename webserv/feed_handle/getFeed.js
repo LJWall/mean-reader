@@ -1,9 +1,14 @@
 var getFeedFromUrl = require('./utils/getFeedFromURL.js'),
     mongoFeedStore = require('./utils/mongoFeedStore.js'),
     Promise = require('bluebird');
-
     
-module.exports.get = function (url) {
+// re-export a bunch of the underying mongo methods
+module.exports.get = mongoFeedStore.getMongoFeedData;
+module.exports.getMeta = mongoFeedStore.getMongoFeedMeta;
+module.exports.getItems = mongoFeedStore.getMongoFeedItems;
+module.exports.getItemsByID = mongoFeedStore.getMongoFeedItemsByID;
+
+module.exports.add = function (url) {
     return mongoFeedStore.getMongoFeedMeta(url)
     .then(function (meta) {
         if (!meta) {
@@ -13,7 +18,11 @@ module.exports.get = function (url) {
                 return mongoFeedStore.getMongoFeedData(url);
             });
         } else {
-            return Promise.props({meta: meta, items: mongoFeedStore.getMongoFeedItems(url)});
+            // it's already in the store, just return the stored data
+            return Promise.props({
+                meta: meta,
+                items: mongoFeedStore.getMongoFeedItems(url)
+            });
         }
     });
 };
