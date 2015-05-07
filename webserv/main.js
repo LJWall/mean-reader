@@ -5,7 +5,7 @@ var bodyParser = require('body-parser');
 
 app = express();
 app.use(bodyParser.json());
-app.use('/womble', womble);
+app.use('/reader', womble);
 app.use(morgan('dev'));
 app.use(express.static('frontend_build'));
 app.listen(5667);
