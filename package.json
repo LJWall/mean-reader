@@ -4,7 +4,7 @@
   "description": "",
   "main": "",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jasmine"
   },
   "author": "Liam Wall <liam.wall@gmail.com>",
   "license": "ISC",
@@ -24,6 +24,6 @@
     "grunt-contrib-watch": "^0.6.1",
     "grunt-express-server": "^0.5.1",
     "grunt-bower-concat": "^0.4.0",
-    "jasmin": "2.2.1"
+    "jasmine": "2.2.1"
   }
 }
