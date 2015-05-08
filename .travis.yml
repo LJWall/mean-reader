@@ -9,3 +9,6 @@ services:
 before_script:
   - sleep 5
 
+notifications:
+  email: false
+
