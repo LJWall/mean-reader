@@ -34,6 +34,31 @@ describe('mongoFeedStore', function () {
         mongodb.close();
     });
     
+    describe('setRead', function () {
+        afterEach(function (done) {
+            clearDB(mongodb).done(done);
+        });
+        it('should mark an item as read', function (done) {
+            mongoFeedStore.updateMongoFeedData(sampledata1)// relying on this to work
+            .then(function () {
+                return mongoFeedStore.setRead('000000000000000000000001', '2');
+            })
+            .then(function () {
+                return Promise.all([
+                    mongodb.collection('posts').findOneAsync({guid: '1'}),
+                    mongodb.collection('posts').findOneAsync({guid: '2'})
+                ]);
+            })
+            .then(function (db_data) {
+                expect(db_data.length).toEqual(2);
+                expect(db_data[0]).toEqual(jasmine.objectContaining({guid: '1', title: 'T1'}));
+                expect(db_data[0]).not.toEqual(jasmine.objectContaining({read: true}));
+                expect(db_data[1]).toEqual(jasmine.objectContaining({guid: '2', title: 'T2', read: true}));
+            })
+            .done(done);
+        });
+    });
+    
     describe('updateMongoFeedData', function () {
         afterEach(function (done) {
             clearDB(mongodb).done(done);

@@ -19,6 +19,17 @@ module.exports.updateMongoFeedData = function (feed_data) {
     });
 };
 
+module.exports.setRead = function (meta_id, post_guid) {
+    return mongoConn.connection()
+    .then(function (m) {
+        return m.collection('posts').updateOneAsync(
+            {meta_id: ObjectID.createFromHexString(meta_id), guid: post_guid},
+            {$set: {read: true}},
+            {upsert: false}
+        );
+    });
+};
+
 module.exports.getMongoFeedData = function (feed_url) {
     return Promise.props({
         meta: module.exports.getMongoFeedMeta(feed_url),

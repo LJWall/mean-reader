@@ -7,6 +7,7 @@ module.exports.get = mongoFeedStore.getMongoFeedData;
 module.exports.getMeta = mongoFeedStore.getMongoFeedMeta;
 module.exports.getItems = mongoFeedStore.getMongoFeedItems;
 module.exports.getItemsByID = mongoFeedStore.getMongoFeedItemsByID;
+module.exports.setRead = mongoFeedStore.setRead;
 
 module.exports.add = function (url) {
     return mongoFeedStore.getMongoFeedMeta(url)
