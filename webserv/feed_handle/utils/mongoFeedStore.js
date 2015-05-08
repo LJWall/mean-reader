@@ -8,12 +8,16 @@ module.exports.updateMongoFeedData = function (feed_data) {
     .then(function (mongodb) {
         m = mongodb;
         feed_data.meta.last_update = new Date();
-        return m.collection('feeds').findOneAndUpdateAsync({feedurl: feed_data.meta.feedurl}, {$set: feed_data.meta}, {upsert: true})
+        var match = {feedurl: feed_data.meta.feedurl}
+        if (feed_data.meta._id) { match._id = feed_data.meta._id; } 
+        return m.collection('feeds').findOneAndUpdateAsync(match, {$set: feed_data.meta}, {upsert: true})
     })
     .then(function (upsert_res) {
         feed_data.items.forEach(function (post) {
             post.meta_id = (upsert_res.lastErrorObject.updatedExisting ? upsert_res.value._id : upsert_res.lastErrorObject.upserted);
-            ret.push(m.collection('posts').updateOneAsync({feedurl: post.feedurl, guid: post.guid}, {$set: post}, {upsert: true}));
+            var match = {feedurl: post.feedurl, guid: post.guid}
+            if (post._id) { match._id = post._id; }
+            ret.push(m.collection('posts').updateOneAsync(match, {$set: post}, {upsert: true}));
         });
         return Promise.all(ret);
     });
