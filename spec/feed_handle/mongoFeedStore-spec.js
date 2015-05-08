@@ -33,31 +33,7 @@ describe('mongoFeedStore', function () {
     afterAll(function () {
         mongodb.close();
     });
-    
-    describe('setRead', function () {
-        afterEach(function (done) {
-            clearDB(mongodb).done(done);
-        });
-        it('should mark an item as read', function (done) {
-            mongoFeedStore.updateMongoFeedData(sampledata1)// relying on this to work
-            .then(function () {
-                return mongoFeedStore.setRead('000000000000000000000001', '2');
-            })
-            .then(function () {
-                return Promise.all([
-                    mongodb.collection('posts').findOneAsync({guid: '1'}),
-                    mongodb.collection('posts').findOneAsync({guid: '2'})
-                ]);
-            })
-            .then(function (db_data) {
-                expect(db_data.length).toEqual(2);
-                expect(db_data[0]).toEqual(jasmine.objectContaining({guid: '1', title: 'T1'}));
-                expect(db_data[0]).not.toEqual(jasmine.objectContaining({read: true}));
-                expect(db_data[1]).toEqual(jasmine.objectContaining({guid: '2', title: 'T2', read: true}));
-            })
-            .done(done);
-        });
-    });
+
     
     describe('updateMongoFeedData', function () {
         afterEach(function (done) {
@@ -135,10 +111,15 @@ describe('mongoFeedStore', function () {
             meta: {_id: new ObjectID('000000000000000000000002'), link: 'url2', feedurl: 'feedurl2', title: 'blog2'},
             items: [{feedurl: 'feedurl2', guid: '1', title: 'S1'}, {feedurl: 'feedurl2', guid: '2', title: 'S2'}]
         };
+        sampledata2.items[0].meta_id = sampledata2.meta._id;
+        sampledata2.items[1].meta_id = sampledata2.meta._id;
+        
         beforeAll(function (done) {
             Promise.all([
-                mongoFeedStore.updateMongoFeedData(sampledata1),
-                mongoFeedStore.updateMongoFeedData(sampledata2)
+                mongodb.collection('feeds').insertOneAsync(sampledata1.meta),
+                mongodb.collection('posts').insertManyAsync(sampledata1.items),
+                mongodb.collection('feeds').insertOneAsync(sampledata2.meta),
+                mongodb.collection('posts').insertManyAsync(sampledata2.items)
             ])
             .done(done);
         });
@@ -199,6 +180,26 @@ describe('mongoFeedStore', function () {
                 .done(done);
             });
         });
+        
+        describe('setRead', function () {
+            it('should mark an item as read', function (done) {
+                return mongoFeedStore.setRead('000000000000000000000001', '2')
+                .then(function () {
+                    return Promise.all([
+                        mongodb.collection('posts').findOneAsync({feedurl: 'feedurl', guid: '1'}),
+                        mongodb.collection('posts').findOneAsync({feedurl: 'feedurl', guid: '2'})
+                    ]);
+                })
+                .then(function (db_data) {
+                    expect(db_data.length).toEqual(2);
+                    expect(db_data[0]).toEqual(jasmine.objectContaining({guid: '1', title: 'T1'}));
+                    expect(db_data[0]).not.toEqual(jasmine.objectContaining({read: true}));
+                    expect(db_data[1]).toEqual(jasmine.objectContaining({guid: '2', title: 'T2', read: true}));
+                })
+                .done(done);
+            });
+        });
+        
     });
         
 });
