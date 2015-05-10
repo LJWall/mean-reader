@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LJWall/mean-reader"
+  }
   "scripts": {
     "test": "jasmine"
   },
@@ -23,7 +27,6 @@
     "grunt-contrib-copy": "^0.8.0",
     "grunt-contrib-watch": "^0.6.1",
     "grunt-express-server": "^0.5.1",
-    "grunt-bower-concat": "^0.4.0",
     "jasmine": "2.2.1"
   }
 }
