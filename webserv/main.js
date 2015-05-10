@@ -1,9 +1,8 @@
-var express = require('express');
-var reader = require('./mean-reader');
-var morgan = require('morgan');
-var bodyParser = require('body-parser');
-
-app = express();
+var express = require('express'),
+    reader = require('./mean-reader'),
+    morgan = require('morgan'),
+    bodyParser = require('body-parser'),
+    app = express();
 
 app.use(morgan('dev'));
 app.use(bodyParser.json());
@@ -12,4 +11,5 @@ app.use(express.static('frontend_build'));
 
 app.listen(5667);
 console.log('Listening on port 5667');
+
 
