@@ -1,6 +1,6 @@
 var mongoFeedStore = require('../../webserv/feed_handle/utils/mongoFeedStore.js'),
     Promise = require('bluebird'),
-    mongoConn = require('../../webserv/mongoConnect.js')
+    mongoConn = require('../../webserv/mongoConnect.js'),
     ObjectID = require('mongodb').ObjectID;
 
 Promise.longStackTraces();
