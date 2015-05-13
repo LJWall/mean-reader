@@ -33,6 +33,7 @@ module.exports = function(grunt) {
     config.watch.server = {files: ['webserv/*.js', 'webserv/**/*.js'], tasks: ['express:dev:stop', 'express:dev'], options: {spawn: false}}
 
     grunt.initConfig(config);
+
     grunt.registerTask('build', ['bower_concat', 'copy']);
     grunt.registerTask('default',['build']);
     grunt.registerTask('run', ['build', 'express:dev', 'watch']);

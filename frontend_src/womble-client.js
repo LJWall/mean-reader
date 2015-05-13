@@ -21,7 +21,7 @@
                 return items;
             },
             addNew: function (url) {
-                $http.post('/reader/add', {url: url}).then(function (res) {
+                $http.post('/reader/feeds', {feedurl: url}).then(function (res) {
                     meta_data.push(res.data.meta);
                     items = items.concat(res.data.items);
                 });

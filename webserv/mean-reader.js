@@ -2,19 +2,44 @@ var express = require('express'),
     router = express.Router(),
     Promise = require('bluebird'),
     getFeed = require("./feed_handle/getFeed.js");
-    //mongoFeedStore = require('./feed_handle/utils/mongoFeedStore.js');
 
+    
+module.exports = router; 
 
 // Get everything
 router.get('/', function (req, res) {
     getFeed.get()
     .then(function (feed_data) {
-        res.status(200).end(JSON.stringify(feed_data));
+        res.status(200).json(feed_data);
     })
     .done();
-    
 });
 
+// add a new feed
+router.post('/feeds', function (req, res) {
+    var newFeedURL = req.body.feedurl;
+    if (!newFeedURL) {
+        res.status(400).json({error: 'feedurl parameter required', msg: 'Something went wrong'});
+        return;
+    }
+    getFeed.add(newFeedURL)
+    .then(function (feed_data) {
+        res.status(200).json(feed_data);
+    })
+    .done();
+
+});
+
+router.use(function(err, req, res, next) {
+    res.status(500).json({error: 'Unknown server error'});
+});
+
+
+router.use(function (req, res) {
+    res.status(404).json({error: 'Not found'});
+})
+
+/* 
 // get array of meta items
 router.get('/meta', function (req, res) {
     getFeed.getMeta()
@@ -43,19 +68,5 @@ router.get('/items/:meta_id', function (req, res) {
     .done();
 });
 
-// add a new feed to look at...
-router.post('/add', function (req, res) {
-    var newFeedURL = req.body.url;
-    if (!newFeedURL) {
-        res.status(400).end(JSON.stringify({msg: 'Feed url required'}));
-        return;
-    }
-    getFeed.add(newFeedURL)
-    .then(function (feed_data) {
-        res.status(200).end(JSON.stringify(feed_data));
-    })
-    .done();
-});
+*/
 
-
-module.exports = router; 

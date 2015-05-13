@@ -17,7 +17,7 @@ describe('mongoFeedStore', function () {
     var mongodb,
         sampledata1 = {
             meta: {_id: new ObjectID('000000000000000000000001'), link: 'url', feedurl: 'feedurl', title: 'blog'},
-            items: [{feedurl: 'feedurl', guid: '1', title: 'T1'}, {feedurl: 'feedurl', guid: '2', title: 'T2'}]
+            items: [{feedurl: 'feedurl', guid: '1', title: 'T1', }, {feedurl: 'feedurl', guid: '2', title: 'T2'}]
         };
     
     beforeAll(function (done) {
@@ -59,9 +59,14 @@ describe('mongoFeedStore', function () {
         it('should not double insert exiting data', function (done){
             var sampledata2 = {
                 meta: {link: 'url', feedurl: 'feedurl', title: 'New title'},
-                items: [{feedurl: 'feedurl', guid: '2', title: 'NewT2'}, {feedurl: 'feedurl', guid: '3', title: 'T3'}]
+                items: [{guid: '2', title: 'NewT2'}, {guid: '3', title: 'T3'}]
             };
-            mongoFeedStore.updateMongoFeedData(sampledata1)
+            sampledata1.items[0].meta_id = sampledata1.meta._id;
+            sampledata1.items[1].meta_id = sampledata1.meta._id;
+            Promise.all([
+                mongodb.collection('feeds').insertOneAsync(sampledata1.meta),
+                mongodb.collection('posts').insertManyAsync(sampledata1.items)
+            ])
             .then(function (insert_res) {
                 return mongoFeedStore.updateMongoFeedData(sampledata2)
             })
@@ -151,12 +156,12 @@ describe('mongoFeedStore', function () {
         });
         
         describe('getMongoFeedItemsByID', function () {
-            it('should get the feed items from the DB when called with a meta _id', function (done) {
-                mongoFeedStore.getMongoFeedItemsByID('000000000000000000000001')
+            it('should get the feed items from the DB when called with a meta_id', function (done) {
+                mongoFeedStore.getMongoFeedItemsByID('000000000000000000000002')
                 .then(function (data) {
                     expect(data.length).toEqual(2);
-                    expect(data).toEqual(jasmine.arrayContaining([jasmine.objectContaining(sampledata1.items[0])]));
-                    expect(data).toEqual(jasmine.arrayContaining([jasmine.objectContaining(sampledata1.items[1])]));
+                    expect(data).toEqual(jasmine.arrayContaining([jasmine.objectContaining(sampledata2.items[0])]));
+                    expect(data).toEqual(jasmine.arrayContaining([jasmine.objectContaining(sampledata2.items[1])]));
                 })
                 .done(done);
             });
@@ -183,18 +188,18 @@ describe('mongoFeedStore', function () {
         
         describe('setRead', function () {
             it('should mark an item as read', function (done) {
-                return mongoFeedStore.setRead('000000000000000000000001', '2')
+                return mongoFeedStore.setRead('000000000000000000000002', '2')
                 .then(function () {
                     return Promise.all([
-                        mongodb.collection('posts').findOneAsync({feedurl: 'feedurl', guid: '1'}),
-                        mongodb.collection('posts').findOneAsync({feedurl: 'feedurl', guid: '2'})
+                        mongodb.collection('posts').findOneAsync({feedurl: 'feedurl2', guid: '1'}),
+                        mongodb.collection('posts').findOneAsync({feedurl: 'feedurl2', guid: '2'})
                     ]);
                 })
                 .then(function (db_data) {
                     expect(db_data.length).toEqual(2);
-                    expect(db_data[0]).toEqual(jasmine.objectContaining({guid: '1', title: 'T1'}));
+                    expect(db_data[0]).toEqual(jasmine.objectContaining({guid: '1', title: 'S1'}));
                     expect(db_data[0]).not.toEqual(jasmine.objectContaining({read: true}));
-                    expect(db_data[1]).toEqual(jasmine.objectContaining({guid: '2', title: 'T2', read: true}));
+                    expect(db_data[1]).toEqual(jasmine.objectContaining({guid: '2', title: 'S2', read: true}));
                 })
                 .done(done);
             });

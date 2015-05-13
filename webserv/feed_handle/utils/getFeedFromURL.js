@@ -48,8 +48,7 @@ module.exports.get = function (feed_url) {
         feed_data.items.push({title: post.title,
                               link: post.link,
                               pubdate: post.pubdate,
-                              guid: post.guid,
-                              feedurl: feed_url});
+                              guid: post.guid});
     });
     fp.on('end', function () {
         def.resolve(feed_data);

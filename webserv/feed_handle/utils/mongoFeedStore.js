@@ -2,7 +2,7 @@ var Promise = require('bluebird'),
     mongoConn = require('../../mongoConnect.js'),
     ObjectID = require('mongodb').ObjectID; 
 
-    
+  /*  
 var safeClone = function (obj) {
     var ret = {};
     Object.keys(obj).forEach(function (key) {
@@ -11,24 +11,35 @@ var safeClone = function (obj) {
         }
     });
     return ret;
-}
+} */
 
 module.exports.updateMongoFeedData = function (feed_data) {
     var ret = [], m;
     return mongoConn.connection()
     .then(function (mongodb) {
         m = mongodb;
-        feed_data.meta.last_update = new Date();
         var match = {feedurl: feed_data.meta.feedurl};
         if (feed_data.meta._id) { match._id =  feed_data.meta._id}
-        return m.collection('feeds').findOneAndUpdateAsync(match, {$set: safeClone(feed_data.meta)}, {upsert: true})
+        return m.collection('feeds').findOneAndUpdateAsync(match, {$set: {
+            feedurl: feed_data.meta.feedurl,
+            title:  feed_data.meta.title,
+            description: feed_data.meta.description,
+            link: feed_data.meta.link,
+            last_update: new Date()
+        }}, {upsert: true})
     })
     .then(function (upsert_res) {
         feed_data.items.forEach(function (post) {
-            post.meta_id = (upsert_res.lastErrorObject.updatedExisting ? upsert_res.value._id : upsert_res.lastErrorObject.upserted);
-            var match = {feedurl: post.feedurl, guid: post.guid};
+            var meta_id = (upsert_res.lastErrorObject.updatedExisting ? upsert_res.value._id : upsert_res.lastErrorObject.upserted)
+            var match = {meta_id: meta_id, guid: post.guid};
             if (post._id) { match._id = post._id; }
-            ret.push(m.collection('posts').updateOneAsync(match, {$set: safeClone(post)}, {upsert: true}));
+            ret.push(m.collection('posts').updateOneAsync(match, {$set: {
+                meta_id: meta_id,
+                guid: post.guid,
+                title: post.title,
+                link: post.link,
+                pubdate: post.pubdate
+            }}, {upsert: true}));
         });
         return Promise.all(ret);
     });

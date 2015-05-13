@@ -8,14 +8,14 @@ var Promise = require('bluebird'),
 module.exports.sampledata = []
 module.exports.sampledata.push({
     meta: {_id: new ObjectID('000000000000000000000001'), link: 'url', feedurl: 'feedurl', title: 'blog'},
-    items: [{feedurl: 'feedurl', guid: '1', title: 'A', link: 'linkA'}, {feedurl: 'feedurl', guid: '2', title: 'B', link: 'linkB'}]
+    items: [{guid: '1', title: 'A', link: 'linkA'}, {guid: '2', title: 'B', link: 'linkB'}]
 });
 module.exports.sampledata[0].items[0].meta_id = module.exports.sampledata[0].meta._id;
 module.exports.sampledata[0].items[1].meta_id = module.exports.sampledata[0].meta._id;
 
 module.exports.sampledata.push({
     meta: {_id: new ObjectID('000000000000000000000002'), link: 'url2', feedurl: 'feedurl2', title: 'blog2'},
-    items: [{feedurl: 'feedurl2', guid: '1', title: 'A', link: 'linkA2'}, {feedurl: 'feedurl', guid: '2', title: 'B', link: 'linkB2'}]
+    items: [{guid: '1', title: 'A', link: 'linkA2'}, {guid: '2', title: 'B', link: 'linkB2'}]
 });
 module.exports.sampledata[1].items[0].meta_id = module.exports.sampledata[1].meta._id;
 module.exports.sampledata[1].items[1].meta_id = module.exports.sampledata[1].meta._id;
