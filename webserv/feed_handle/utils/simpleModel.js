@@ -23,16 +23,17 @@ var augment = function (collection, result) {
     return result;
 }
 module.exports = function (collection) {
+    var f = augment.bind(null, collection);
     return {
-        findOne: function (q, opt) {
-            return collection.findOneAsync(q, opt)
-            .then(augment.bind(null, collection));
+        findOne: function (q) {
+            return collection.findOneAsync(q)
+            .then(f);
         },
         findMany: function (q, sort, num) {
             var cursor = collection.find(q);
             if (sort) { cursor = cursor.sort(sort); }
             if (num) { cursor = cursor.limit(num); }
-            return cursor.toArrayAsync().map(augment.bind(null, collection));
+            return cursor.toArrayAsync().map(f);
         }
     };
 };

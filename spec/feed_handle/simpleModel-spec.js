@@ -1,4 +1,4 @@
-var model = require('../../webserv/feed_handle/utils/simpleModel'),
+var modelMaker = require('../../webserv/feed_handle/utils/simpleModel'),
     Promise = require('bluebird');
 
 describe('simpleModel', function () {
@@ -28,33 +28,33 @@ describe('simpleModel', function () {
     });
     
     it('should export a function', function () {
-        expect(typeof model).toEqual('function');
+        expect(typeof modelMaker).toEqual('function');
     });
     it('should should acccept one paramter', function () {
-        expect(model.length).toEqual(1);
+        expect(modelMaker.length).toEqual(1);
     });
     it('should should return an object', function () {
-        expect(typeof model(foo)).toEqual('object');
+        expect(typeof modelMaker(foo)).toEqual('object');
     });
-    it('should should return an object with a findOne method, which takes two parameters', function () {
-        expect(typeof model(foo).findOne).toEqual('function');
-        expect(model(foo).findOne.length).toEqual(2);
+    it('should should return an object with a findOne method, which takes one parameter', function () {
+        expect(typeof modelMaker(foo).findOne).toEqual('function');
+        expect(modelMaker(foo).findOne.length).toEqual(1);
     });
     
     it('should should return an object with a findMany method, which takes three parameters', function () {
-        expect(typeof model(foo).findMany).toEqual('function');
-        expect(model(foo).findMany.length).toEqual(3);
+        expect(typeof modelMaker(foo).findMany).toEqual('function');
+        expect(modelMaker(foo).findMany.length).toEqual(3);
     });
     
     describe('.findOne()', function () {
         it('should call collection.findOneAsync once with passed parameters', function () {
-            var collection = model(foo);
-            collection.findOne({spam: 'eggs'}, {skip: 42});
+            var collection = modelMaker(foo);
+            collection.findOne({spam: 'eggs'});
             expect(foo.findOneAsync.calls.count()).toEqual(1);
-            expect(foo.findOneAsync).toHaveBeenCalledWith({spam: 'eggs'}, {skip: 42});
+            expect(foo.findOneAsync).toHaveBeenCalledWith({spam: 'eggs'});
         });
         it('should return (promise for) object containing result from findOneAsync', function (done) {
-            var collection = model(foo),
+            var collection = modelMaker(foo),
                 result = collection.findOne({}, {});
             result.then(function (r) {
                 expect(r).toEqual(jasmine.objectContaining({foo: 'bar'}));
@@ -62,7 +62,7 @@ describe('simpleModel', function () {
             .done(done);
         });
         it('should return (promise for) object containing a save method (which takes no parameters)', function (done) {
-            var collection = model(foo),
+            var collection = modelMaker(foo),
                 result = collection.findOne({}, {});
             result.then(function (r) {
                 expect(typeof r.save).toEqual('function');
@@ -71,7 +71,7 @@ describe('simpleModel', function () {
             .done(done);
         });
         it('return object\'s _id property should not be writtable', function (done) {
-            var collection = model(foo),
+            var collection = modelMaker(foo),
                 result = collection.findOne({}, {});
             result.then(function (r) {
                 r._id = 'Some other thing';
@@ -84,7 +84,7 @@ describe('simpleModel', function () {
     
     describe('.findMany()', function() {
         it('should call collection.find(q).toArrayAsync() if only passed a search query', function () {
-            var collection = model(foo);
+            var collection = modelMaker(foo);
             collection.findMany({spam: 'eggs'});
             expect(foo.find.calls.count()).toEqual(1);
             expect(foo.find).toHaveBeenCalledWith({spam: 'eggs'});
@@ -94,7 +94,7 @@ describe('simpleModel', function () {
         });
         
         it('should call collection.find(q).sort(s).toArrayAsync() if only passed a search query and sort term', function () {
-            var collection = model(foo);
+            var collection = modelMaker(foo);
             collection.findMany({spam: 'eggs'}, [['foo', -1]]);
             expect(foo.find.calls.count()).toEqual(1);
             expect(foo.find).toHaveBeenCalledWith({spam: 'eggs'});
@@ -105,7 +105,7 @@ describe('simpleModel', function () {
         });
         
         it('should call collection.find(q).limit(n).toArrayAsync() if only passed a search query and limit', function () {
-            var collection = model(foo);
+            var collection = modelMaker(foo);
             collection.findMany({spam: 'eggs'}, null, 5);
             expect(foo.find.calls.count()).toEqual(1);
             expect(foo.find).toHaveBeenCalledWith({spam: 'eggs'});
@@ -116,7 +116,7 @@ describe('simpleModel', function () {
         });
         
         it('should return (promise for) object containing result from findOneAsync', function (done) {
-            var collection = model(foo),
+            var collection = modelMaker(foo),
                 result = collection.findMany({spam: 'eggs'});
             result.then(function (r) {
                 expect(r[0]).toEqual(jasmine.objectContaining({_id: 1, foo: 'a'}));
@@ -124,7 +124,7 @@ describe('simpleModel', function () {
             .done(done);
         });
         it('should add a save method to array items (which takes no parameters)', function (done) {
-            var collection = model(foo),
+            var collection = modelMaker(foo),
                 result = collection.findMany({spam: 'eggs'});
             result.then(function (r) {
                 expect(typeof r[0].save).toEqual('function');
@@ -133,7 +133,7 @@ describe('simpleModel', function () {
             .done(done);
         });
         it('should make _id property not be writtable for items in return array', function (done) {
-            var collection = model(foo),
+            var collection = modelMaker(foo),
                 result = collection.findMany({});
             result.then(function (r) {
                 r[0]._id = 'Some other thing';
@@ -146,7 +146,7 @@ describe('simpleModel', function () {
     
     describe('.save()', function () {
         it('should call collection.updateOneAsync to update object on result of findOne()', function (done) {
-            var collection = model(foo),
+            var collection = modelMaker(foo),
                 result = collection.findOne({}, {});
             
             result.then(function (r) {
@@ -162,7 +162,7 @@ describe('simpleModel', function () {
         });
         
         it('should call collection.updateOneAsync to update object on result of findMany()[0]', function (done) {
-            var collection = model(foo),
+            var collection = modelMaker(foo),
                 result = collection.findMany({});
             
             result.then(function (r) {
