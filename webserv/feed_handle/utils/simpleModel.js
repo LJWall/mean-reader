@@ -1,5 +1,3 @@
-var Promise = require('bluebird');
-
 
 var augment = function (collection, result) {
     Object.defineProperties(result, {
@@ -26,9 +24,15 @@ var augment = function (collection, result) {
 }
 module.exports = function (collection) {
     return {
-        find: function (q, opt) {
+        findOne: function (q, opt) {
             return collection.findOneAsync(q, opt)
             .then(augment.bind(null, collection));
+        },
+        findMany: function (q, sort, num) {
+            var cursor = collection.find(q);
+            if (sort) { cursor = cursor.sort(sort); }
+            if (num) { cursor = cursor.limit(num); }
+            return cursor.toArrayAsync().map(augment.bind(null, collection));
         }
     };
 };
