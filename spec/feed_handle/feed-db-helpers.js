@@ -29,7 +29,6 @@ module.exports.clearTestDb = function () {
 };
 
 module.exports.setupTestDb = function () {
-    mongoConn.uri = 'mongodb://127.0.0.1:27017/testwomble';
     return mongoConn.connection()
     .then(function(db) {
         mongodb = db;

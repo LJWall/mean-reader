@@ -1,5 +1,5 @@
 var request = require('request'),
-    db_helpers = require('./helpers/feed-db-helpers'),
+    db_helpers = require('./feed_handle/feed-db-helpers'),
     reader,
     express = require('express'),
     app = express()
@@ -14,7 +14,7 @@ function jsonReviver(k, v) {
     return v;
 }
 
-describe('mean-reader', function () {
+xdescribe('mean-reader', function () {
     
     // Set up the test db and store some test data.
     // Then start up the express server (after the call to

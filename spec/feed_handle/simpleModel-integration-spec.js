@@ -7,7 +7,6 @@ describe('simpleModel [integration]', function () {
         model;
     
     beforeAll(function (done) {
-        mongoConn.uri = 'mongodb://127.0.0.1:27017/testwomble';
         mongoConn.connection()
         .then(function(_db) {
             collection = _db.collection('simpleModelTest');
@@ -17,8 +16,6 @@ describe('simpleModel [integration]', function () {
         })
         .done(done);
     });
-    
-    afterAll(function () { db.close(); });
     
     beforeEach(function (done) {
         collection.insertManyAsync([
