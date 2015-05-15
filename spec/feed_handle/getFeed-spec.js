@@ -26,15 +26,15 @@ describe('getFeed', function () {
             }
         });
         
-        getFeed = require('../../webserv/feed_handle/getFeed.js');
+        getFeed = require('../../webserv/feed_handle/getFeed.js')();
     });
     
-    it('should use simpleModel to make export.feeds', function () {
+    it('should use simpleModel to make feeds object', function () {
         expect(simpleModel.make).toHaveBeenCalledWith({name: 'feeds'});
         expect(getFeed.feeds.collection).toEqual({name: 'feeds'});
     });
     
-    it('should use simpleModel to make export.posts', function () {
+    it('should use simpleModel to make posts object', function () {
         expect(simpleModel.make).toHaveBeenCalledWith({name: 'posts'});
         expect(getFeed.posts.collection).toEqual({name: 'posts'});
     });
