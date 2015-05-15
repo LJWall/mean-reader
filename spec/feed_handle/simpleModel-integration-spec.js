@@ -72,4 +72,20 @@ describe('simpleModel [integration]', function () {
         .done(done);
     });
     
+    it('should return null from .findOne() if not found', function (done) {
+        model.findOne({foo: 42})
+        .then(function (result) {
+            expect(result).toBeNull();
+        })
+        .done(done)
+    });
+    
+    it('should return [] from .findMany() if nothing found', function (done) {
+        model.findMany({foo: 42})
+        .then(function (result) {
+            expect(result).toEqual([]);
+        })
+        .done(done)
+    });
+    
 });
