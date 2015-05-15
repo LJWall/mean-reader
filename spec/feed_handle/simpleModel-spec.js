@@ -47,11 +47,14 @@ describe('simpleModel', function () {
     });
     
     describe('.findOne()', function () {
-        it('should call collection.findOneAsync once with passed parameters', function () {
+        it('should call collection.findOneAsync once with passed parameters', function (done) {
             var collection = modelMaker(foo);
-            collection.findOne({spam: 'eggs'});
-            expect(foo.findOneAsync.calls.count()).toEqual(1);
-            expect(foo.findOneAsync).toHaveBeenCalledWith({spam: 'eggs'});
+            collection.findOne({spam: 'eggs'})
+            .then(function () {
+                expect(foo.findOneAsync.calls.count()).toEqual(1);
+                expect(foo.findOneAsync).toHaveBeenCalledWith({spam: 'eggs'});
+            })
+            .done(done);
         });
         it('should return (promise for) object containing result from findOneAsync', function (done) {
             var collection = modelMaker(foo),
@@ -83,36 +86,45 @@ describe('simpleModel', function () {
     });
     
     describe('.findMany()', function() {
-        it('should call collection.find(q).toArrayAsync() if only passed a search query', function () {
+        it('should call collection.find(q).toArrayAsync() if only passed a search query', function (done) {
             var collection = modelMaker(foo);
-            collection.findMany({spam: 'eggs'});
-            expect(foo.find.calls.count()).toEqual(1);
-            expect(foo.find).toHaveBeenCalledWith({spam: 'eggs'});
-            expect(cursor.toArrayAsync.calls.count()).toEqual(1);
-            expect(cursor.sort.calls.count()).toEqual(0);
-            expect(cursor.limit.calls.count()).toEqual(0);
+            collection.findMany({spam: 'eggs'})
+            .then(function () {
+                expect(foo.find.calls.count()).toEqual(1);
+                expect(foo.find).toHaveBeenCalledWith({spam: 'eggs'});
+                expect(cursor.toArrayAsync.calls.count()).toEqual(1);
+                expect(cursor.sort.calls.count()).toEqual(0);
+                expect(cursor.limit.calls.count()).toEqual(0);
+            })
+            .done(done);
         });
         
-        it('should call collection.find(q).sort(s).toArrayAsync() if only passed a search query and sort term', function () {
+        it('should call collection.find(q).sort(s).toArrayAsync() if only passed a search query and sort term', function (done) {
             var collection = modelMaker(foo);
-            collection.findMany({spam: 'eggs'}, [['foo', -1]]);
-            expect(foo.find.calls.count()).toEqual(1);
-            expect(foo.find).toHaveBeenCalledWith({spam: 'eggs'});
-            expect(cursor.sort.calls.count()).toEqual(1);
-            expect(cursor.sort).toHaveBeenCalledWith([['foo', -1]]);
-            expect(cursor.toArrayAsync.calls.count()).toEqual(1);
-            expect(cursor.limit.calls.count()).toEqual(0);
+            collection.findMany({spam: 'eggs'}, [['foo', -1]])
+            .then(function () {
+                expect(foo.find.calls.count()).toEqual(1);
+                expect(foo.find).toHaveBeenCalledWith({spam: 'eggs'});
+                expect(cursor.sort.calls.count()).toEqual(1);
+                expect(cursor.sort).toHaveBeenCalledWith([['foo', -1]]);
+                expect(cursor.toArrayAsync.calls.count()).toEqual(1);
+                expect(cursor.limit.calls.count()).toEqual(0);
+            })
+            .done(done);
         });
         
-        it('should call collection.find(q).limit(n).toArrayAsync() if only passed a search query and limit', function () {
+        it('should call collection.find(q).limit(n).toArrayAsync() if only passed a search query and limit', function (done) {
             var collection = modelMaker(foo);
-            collection.findMany({spam: 'eggs'}, null, 5);
-            expect(foo.find.calls.count()).toEqual(1);
-            expect(foo.find).toHaveBeenCalledWith({spam: 'eggs'});
-            expect(cursor.limit.calls.count()).toEqual(1);
-            expect(cursor.limit).toHaveBeenCalledWith(5);
-            expect(cursor.toArrayAsync.calls.count()).toEqual(1);
-            expect(cursor.sort.calls.count()).toEqual(0);
+            collection.findMany({spam: 'eggs'}, null, 5)
+            .then(function () {
+                expect(foo.find.calls.count()).toEqual(1);
+                expect(foo.find).toHaveBeenCalledWith({spam: 'eggs'});
+                expect(cursor.limit.calls.count()).toEqual(1);
+                expect(cursor.limit).toHaveBeenCalledWith(5);
+                expect(cursor.toArrayAsync.calls.count()).toEqual(1);
+                expect(cursor.sort.calls.count()).toEqual(0);
+            })
+            .done(done);
         });
         
         it('should return (promise for) object containing result from findOneAsync', function (done) {
@@ -153,7 +165,9 @@ describe('simpleModel', function () {
                 r.foo = 'manchu';
                 r.bar = 'snacks';
                 expect(foo.updateOneAsync.calls.count()).toEqual(0); // to check it really gts called on save()
-                var save_res = r.save();
+                return r.save();
+            })
+            .then(function (save_res) {
                 expect(foo.updateOneAsync.calls.count()).toEqual(1);
                 expect(foo.updateOneAsync).toHaveBeenCalledWith({_id: 123}, {$set: {foo: 'manchu', bar: 'snacks'}});
                 expect(save_res).toEqual('Spam');
@@ -169,7 +183,9 @@ describe('simpleModel', function () {
                 r[0].foo = 'manchu';
                 r[0].bar = 'snacks';
                 expect(foo.updateOneAsync.calls.count()).toEqual(0); // to check it really gts called on save()
-                var save_res = r[0].save();
+                return r[0].save();
+            })
+            .then(function (save_res) {
                 expect(foo.updateOneAsync.calls.count()).toEqual(1);
                 expect(foo.updateOneAsync).toHaveBeenCalledWith({_id: 1}, {$set: {foo: 'manchu', bar: 'snacks'}});
                 expect(save_res).toEqual('Spam');

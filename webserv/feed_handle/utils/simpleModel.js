@@ -1,3 +1,4 @@
+var Promise = require('bluebird');
 
 var augment = function (collection, result) {
     Object.defineProperties(result, {
@@ -11,7 +12,7 @@ var augment = function (collection, result) {
                 Object.keys(result).forEach(function (key) {
                     set[key] = result[key];
                 });
-                return collection.updateOneAsync(q, {$set: set});
+                return collection.call('updateOneAsync', q, {$set: set});
             }
         },
         _id: {
@@ -23,17 +24,18 @@ var augment = function (collection, result) {
     return result;
 }
 module.exports = function (collection) {
-    var f = augment.bind(null, collection);
+    var c = Promise.resolve(collection), // be agnostic an passing a colection or a promise of a collection.
+        f = augment.bind(null, c);
     return {
-        findOne: function (q) {
-            return collection.findOneAsync(q)
+        findOne: function (query) {
+            return c.call('findOneAsync', query)
             .then(f);
         },
-        findMany: function (q, sort, num) {
-            var cursor = collection.find(q);
-            if (sort) { cursor = cursor.sort(sort); }
-            if (num) { cursor = cursor.limit(num); }
-            return cursor.toArrayAsync().map(f);
+        findMany: function (query, sort, num) {
+            var cursor = c.call('find', query);
+            if (sort) { cursor = cursor.call('sort', sort); }
+            if (num) { cursor = cursor.call('limit', num); }
+            return cursor.call('toArrayAsync').map(f);
         }
     };
 };
