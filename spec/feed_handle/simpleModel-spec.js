@@ -1,4 +1,4 @@
-var modelMaker = require('../../webserv/feed_handle/utils/simpleModel'),
+var modelMaker = require('../../webserv/feed_handle/utils/simpleModel').make,
     Promise = require('bluebird');
 
 describe('simpleModel', function () {
