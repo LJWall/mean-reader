@@ -1,72 +1,31 @@
 var express = require('express'),
-    router = express.Router(),
-    Promise = require('bluebird'),
-    getFeed = require("./feed_handle/getFeed.js");
-
+    app,
+    mod_views = require("./api_views"),
+    views,
+    path,
+    url_for;
     
-module.exports = router; 
+module.exports = function (mount_path) {
+    path = mount_path
+    views = views || mod_views(url_for);
+    app = app || setupRoutes();
+    return app; 
+}
 
-// Get everything
-router.get('/', function (req, res) {
-    getFeed.get()
-    .then(function (feed_data) {
-        res.status(200).json(feed_data);
-    })
-    .done();
-});
 
-// add a new feed
-router.post('/feeds', function (req, res) {
-    var newFeedURL = req.body.feedurl;
-    if (!newFeedURL) {
-        res.status(400).json({error: 'feedurl parameter required', msg: 'Something went wrong'});
-        return;
+url_for = {
+    feed: function (id) {
+        return path + '/feeds/' + id.toString();
+    },
+    item: function (id) {
+        return path + '/posts/' + id.toString();
     }
-    getFeed.add(newFeedURL)
-    .then(function (feed_data) {
-        res.status(200).json(feed_data);
-    })
-    .done();
+};
 
-});
-
-router.use(function(err, req, res, next) {
-    res.status(500).json({error: 'Unknown server error'});
-});
-
-
-router.use(function (req, res) {
-    res.status(404).json({error: 'Not found'});
-})
-
-/* 
-// get array of meta items
-router.get('/meta', function (req, res) {
-    getFeed.getMeta()
-    .then(function (feed_data) {
-        res.status(200).end(JSON.stringify(feed_data));
-    })
-    .done();
-});
-
-//get all the items
-router.get('/items', function (req, res) {
-    getFeed.getItems()
-    .then(function (feed_data) {
-        res.status(200).end(JSON.stringify(feed_data));
-    })
-    .done();
-});
-
-
-// get items by meta_id
-router.get('/items/:meta_id', function (req, res) {
-    getFeed.getItemsByID(req.params.meta_id)
-    .then(function (feed_data) {
-        res.status(200).end(JSON.stringify(feed_data));
-    })
-    .done();
-});
-
-*/
-
+function setupRoutes() {
+    var newApp = express();
+    newApp.get('/', views.getAll);
+    newApp.post('/feeds', views.postAdd);
+    newApp.use(views['404']);
+    return newApp;
+};    
