@@ -17,12 +17,13 @@ describe('getFeed', function () {
         
         spyOn(simpleModel, 'make').and.callFake(function (collection) {
             return {
-                findOne: jasmine.createSpy('findOne').and.callFake(function (query) {
-                    if (query.feedurl === 'spam') {
+                findOne: function (query) {
+                    if (query.feedurl === 'spam' || (mongoFeedStore.updateMongoFeedData.calls.count() >0 && query.feedurl === 'eggs' )) {
+                        query._id = 'spam';
                         return Promise.resolve(query);
                     }
                     return Promise.resolve(null);
-                }),
+                },
                 collection: collection
             }
         });
@@ -47,10 +48,10 @@ describe('getFeed', function () {
             
             getFeed.add('eggs')
             .then(function (result) {
-                expect(getFeedFromURL.get.calls.count()).toEqual(1);
-                expect(getFeedFromURL.get).toHaveBeenCalledWith('eggs');
+                expect(getFeedFromURL.get.calls.allArgs()).toEqual([['eggs']]);
                 expect(mongoFeedStore.updateMongoFeedData.calls.count()).toEqual(1);
                 expect(mongoFeedStore.updateMongoFeedData).toHaveBeenCalledWith(fakeDb, 'data');
+                expect(result).toEqual({feedurl: 'eggs', _id: 'spam'})
             })
             .done(done);
         });
@@ -63,6 +64,7 @@ describe('getFeed', function () {
             .then(function (result) {
                 expect(getFeedFromURL.get.calls.count()).toEqual(0);
                 expect(mongoFeedStore.updateMongoFeedData.calls.count()).toEqual(0);
+                expect(result).toEqual({feedurl: 'spam', _id: 'spam'});
             })
             .done(done);
         });

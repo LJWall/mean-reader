@@ -15,9 +15,12 @@ module.exports = function () {
         .then(function (meta) {
             if (!meta) {
                 return getFeedFromUrl.get(url)
-                .then(mongoFeedStore.updateMongoFeedData.bind(null, db_promise));
+                .then(mongoFeedStore.updateMongoFeedData.bind(null, db_promise))
+                .then(function () {
+                    return obj.posts.findOne({'feedurl': url});
+                });
             } else {
-                return null;
+                return meta;
             }
         });
     };
