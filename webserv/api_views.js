@@ -14,6 +14,26 @@ module.exports = function (url_for) {
                 res.status(200).json(data);
             })
             .done();
+        },
+        postAdd: function (req, res) {
+            if (req.body.feedurl) {
+                feedModel.add(req.body.feedurl)
+                .then(function (meta) {
+                    return Promise.props({
+                        meta: [cleanMeta(meta)],
+                        items: feedModel.posts.findMany({_id: meta._id}).map(cleanItem)
+                    });
+                })
+                .then(function (data) {
+                    res.status(201).json(data);
+                })
+                .catch(function (err) {
+                    res.status(500).json({error: err});
+                })
+                .done();
+            } else {
+                res.status(400).json({error: 'No feed URL in request body'});
+            }
         }
     };
     
@@ -38,29 +58,3 @@ module.exports = function (url_for) {
     }
 }; 
 
-
-/*
-// Get everything
-router.get('/', function (req, res) {
-    getFeed.get()
-    .then(function (feed_data) {
-        res.status(200).json(feed_data);
-    })
-    .done();
-});
-
-// add a new feed
-router.post('/feeds', function (req, res) {
-    var newFeedURL = req.body.feedurl;
-    if (!newFeedURL) {
-        res.status(400).json({error: 'feedurl parameter required', msg: 'Something went wrong'});
-        return;
-    }
-    getFeed.add(newFeedURL)
-    .then(function (feed_data) {
-        res.status(200).json(feed_data);
-    })
-    .done();
-
-});
- */

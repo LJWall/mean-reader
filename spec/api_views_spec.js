@@ -26,18 +26,30 @@ describe('api_views modulue', function () {
 
 describe('api_views object', function () {
     var api_views,
-        spyRes;
+        spyRes,
+        mockFeedModel;
+    
+    function resetSpies() {
+        spyRes.json.calls.reset();
+        spyRes.status.calls.reset();
+        mockFeedModel.add.calls.reset();
+        mockFeedModel.feeds.findOne.calls.reset();
+        mockFeedModel.feeds.findMany.calls.reset();
+        mockFeedModel.posts.findOne.calls.reset();
+        mockFeedModel.posts.findMany.calls.reset();
+    }
     
     beforeAll(function () {
-        var mockFeedModel = {
+        mockFeedModel = {
             feeds: {
-                findOne: function () {return Promise.resolve(meta[0])},
-                findMany: function () {return Promise.resolve(meta)}
+                findOne: jasmine.createSpy('feedsFindOne').and.callFake(function () {return Promise.resolve(meta[0])}),
+                findMany: jasmine.createSpy('feedsFindMany').and.callFake(function () {return Promise.resolve(meta)})
             },
             posts: {
-                findOne: function () {return Promise.resolve(item[0])},
-                findMany: function () {return Promise.resolve(item)}
-            }
+                findOne: jasmine.createSpy('postsFindOne').and.callFake(function () {return Promise.resolve(item[0])}),
+                findMany: jasmine.createSpy('postsFindMnay').and.callFake(function () {return Promise.resolve(item)})
+            },
+            add: jasmine.createSpy('feedModelAdd').and.returnValue(Promise.resolve({_id: 'spam', title: 'wombles'}))
         };
         var mockUrlFor = {
             feed: function (id) {return '/feeds/'+id},
@@ -56,26 +68,83 @@ describe('api_views object', function () {
         });
         
     });
-    beforeEach(function () {
-        spyRes.json.calls.reset();
-        spyRes.status.calls.reset();
-    });
     
     describe('getAll method', function () {
-        it('should exist', function () {
-            expect(typeof api_views.getAll).toEqual('function');
+        beforeAll(function (done) {
+            spyRes.events.once('jsonCalled', done);
+            api_views.getAll({}, spyRes)
         });
+        afterAll(resetSpies);
+        
         it('should take two paramters', function () {
             expect(api_views.getAll.length).toEqual(2);
         });
-        it('should return all the data using res.json().', function (done) {
-            api_views.getAll({}, spyRes)
-            spyRes.events.once('jsonCalled', function () {
-                expect(spyRes.status.calls.allArgs()).toEqual([[200]]);
-                expect(spyRes.json.calls.allArgs()).toEqual([[{meta: meta_res, items: item_res}]]);
-                done()
-            });
+        it('should return return a 200 code.', function () {
+            expect(spyRes.status.calls.allArgs()).toEqual([[200]]);
+        });
+        it('should return all the data using res.json()', function () {
+            expect(spyRes.json.calls.allArgs()).toEqual([[{meta: meta_res, items: item_res}]]);
         });
     });
+    
+    describe('postAdd method (with good request)', function () {
+        beforeAll(function (done) {
+            spyRes.events.once('jsonCalled', done);
+            api_views.postAdd({body: {feedurl: 'http://fake/feed/url'}}, spyRes)
+        })
+        afterAll(resetSpies);
+        
+        it('should take two paramters', function () {
+            expect(api_views.postAdd.length).toEqual(2);
+        });
+        it('should call model.add(url)', function () {
+            expect(mockFeedModel.add.calls.allArgs()).toEqual([['http://fake/feed/url']]);
+        });
+        it('should call feedModel.items.findMany to get items results', function () {
+            expect(mockFeedModel.posts.findMany.calls.allArgs()).toEqual([[{_id: 'spam'}]]);
+        });
+        it('should return the data using res.json()', function () {
+            expect(spyRes.json.calls.allArgs()).toEqual([[{
+                meta: [{title: 'wombles', feedurl: undefined, apiurl: '/feeds/spam'}],
+                items: item_res
+            }]]);
+        });
+        it('should return return a 201 code.', function () {
+            expect(spyRes.status.calls.allArgs()).toEqual([[201]]);
+        });
+        it('should included a Location header field', function () {
+            pending('not yet done...');
+        });
+    });
+    
+    describe('postAdd method (with bad request)', function () {
+        beforeAll(function (done) {
+            spyRes.events.once('jsonCalled', done);   
+            api_views.postAdd({body: {bad: 'data'}}, spyRes) 
+        })
+        afterAll(resetSpies);
+        it('should return return a 400 code.', function () {
+            expect(spyRes.status.calls.allArgs()).toEqual([[400]]);
+        });
+    });
+    
+    describe('postAdd method (with with feed add routine throwing an error)', function () {
+        beforeAll(function (done) {
+            var _add;
+            _add = mockFeedModel.add
+            mockFeedModel.add = jasmine.createSpy('feedModelAdd').and.returnValue(Promise.reject('someError'));
+            
+            spyRes.events.once('jsonCalled', function () {
+                mockFeedModel.add = _add;
+                done();
+            });
+            api_views.postAdd({body: {feedurl: 'http://fake/feed/url'}}, spyRes) 
+        })
+        afterAll(resetSpies);
+        it('should return return a 500 code.', function () {
+            expect(spyRes.status.calls.allArgs()).toEqual([[500]]);
+        });
+    });
+    
 });
 
