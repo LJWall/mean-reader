@@ -7,8 +7,8 @@ module.exports = function (url_for) {
     return {
         getAll: function (req, res) {
             Promise.props({
-                meta: feedModel.feeds.findMany({}).map(cleanMeta),
-                items: feedModel.posts.findMany({}).map(cleanItem),
+                meta: feedModel.feeds.findMany({}).reduce(reducer.bind(null, cleanMeta), []),
+                items: feedModel.posts.findMany({}).reduce(reducer.bind(null, cleanItem), [])
             })
             .then(function (data) {
                 res.status(200).json(data);
@@ -21,7 +21,7 @@ module.exports = function (url_for) {
                 .then(function (meta) {
                     return Promise.props({
                         meta: [cleanMeta(meta)],
-                        items: feedModel.posts.findMany({_id: meta._id}).map(cleanItem)
+                        items: feedModel.posts.findMany({_id: meta._id}).reduce(reducer.bind(null, cleanItem), [])
                     });
                 })
                 .then(function (data) {
@@ -34,9 +34,21 @@ module.exports = function (url_for) {
             } else {
                 res.status(400).json({error: 'No feed URL in request body'});
             }
+        },
+        '404': function (req, res) {
+            res.status(404).json({error: 'Not found'});
         }
     };
     
+    function reducer(cleaner, total, item) {
+        try {
+            total.push(cleaner(item));
+        }
+        catch (e) {
+            // loggging?
+        }
+        return total;
+    }
     
     function cleanItem (item_data) {
         var obj = {};

@@ -22,6 +22,10 @@ describe('api_views modulue', function () {
         expect(typeof api_views_maker).toEqual('function');
         expect(api_views_maker.length).toEqual(1);
     });
+    
+    it('should use nice \'cleaning\' functions', function () {
+        pending('should test the cleaning function, and the one using reduce to fileter out errors.');
+    });
 });
 
 describe('api_views object', function () {
@@ -146,5 +150,15 @@ describe('api_views object', function () {
         });
     });
     
+    describe('404 method', function () {
+        beforeAll(function (done) {
+            spyRes.events.once('jsonCalled', done);   
+            api_views['404']({}, spyRes);
+        })
+        afterAll(resetSpies);
+        it('should return return a 404 code.', function () {
+            expect(spyRes.status.calls.allArgs()).toEqual([[404]]);
+        });
+    });
 });
 
