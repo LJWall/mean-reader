@@ -1,6 +1,7 @@
 var mongoFeedStore = require('../../webserv/feed_handle/utils/mongoFeedStore.js'),
     getFeedFromURL = require('../../webserv/feed_handle/utils/getFeedFromURL.js'),
     simpleModel = require('../../webserv/feed_handle/utils/simpleModel.js'),
+    getFeedMaker = require('../../webserv/feed_handle/getFeed.js'),
     getFeed,
     Promise = require('bluebird'),
     mongoConn = require('../../webserv/mongoConnect.js');
@@ -26,7 +27,7 @@ describe('getFeed', function () {
             }
         });
         
-        getFeed = require('../../webserv/feed_handle/getFeed.js')();
+        getFeed = getFeedMaker();
     });
     
     it('should use simpleModel to make feeds object', function () {
