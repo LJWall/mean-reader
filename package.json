@@ -27,6 +27,7 @@
     "grunt-contrib-copy": "^0.8.0",
     "grunt-contrib-watch": "^0.6.1",
     "grunt-express-server": "^0.5.1",
-    "jasmine": "2.2.1"
+    "jasmine": "2.2.1",
+    "rewire": "^2.3.3"
   }
 }
