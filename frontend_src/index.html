@@ -58,7 +58,7 @@
                     <div class="row">
                         <div class="col-md-12">
                             <table class="table">
-                                <tr ng-repeat="item in ctrl.feedData.items() | filter:{feed_apiurl: ctrl.selected}" ng-class="{info: !item.read}">
+                                <tr ng-repeat="item in ctrl.feedData.items() | filter:{meta_apiurl: ctrl.selected} | orderBy:'-pubdate'" ng-class="{info: !item.read}">
                                     <td><a href ng-click="ctrl.selectItem(item)">{{item.title}}</a></td>
                                     <td>{{item.pubdate | date: 'dd/MMM/yyyy' }}</td>
                                 </tr>
