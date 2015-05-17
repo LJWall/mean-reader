@@ -22,7 +22,7 @@
             },
             addNew: function (url) {
                 $http.post('/reader/feeds', {feedurl: url}).then(function (res) {
-                    meta_data.push(res.data.meta);
+                    meta_data.push(res.data.meta[0]);
                     items = items.concat(res.data.items);
                 });
             }
