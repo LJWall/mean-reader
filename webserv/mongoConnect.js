@@ -12,7 +12,6 @@ module.exports.uri = 'mongodb://127.0.0.1:27017/meanfeed';
 
 module.exports.connection = function () {
     if (!db_promise) {
-        console.log('opening a new connection');
         db_promise = MongoClient.connectAsync(module.exports.uri)
         .then(function(_db) {
             db = _db;
