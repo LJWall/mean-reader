@@ -104,8 +104,8 @@ describe('api_views object', function () {
         it('should call model.add(url)', function () {
             expect(mockFeedModel.add.calls.allArgs()).toEqual([['http://fake/feed/url']]);
         });
-        it('should call feedModel.items.findMany to get items results', function () {
-            expect(mockFeedModel.posts.findMany.calls.allArgs()).toEqual([[{_id: 'spam'}]]);
+        it('should call feedModel.posts.findMany to get items results', function () {
+            expect(mockFeedModel.posts.findMany.calls.allArgs()).toEqual([[{meta_id: 'spam'}]]);
         });
         it('should return the data using res.json()', function () {
             expect(spyRes.json.calls.allArgs()).toEqual([[{

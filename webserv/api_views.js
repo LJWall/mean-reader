@@ -21,14 +21,14 @@ module.exports = function (url_for) {
                 .then(function (meta) {
                     return Promise.props({
                         meta: [cleanMeta(meta)],
-                        items: feedModel.posts.findMany({_id: meta._id}).reduce(reducer.bind(null, cleanItem), [])
+                        items: feedModel.posts.findMany({meta_id: meta._id}).reduce(reducer.bind(null, cleanItem), [])
                     });
                 })
                 .then(function (data) {
                     res.status(201).json(data);
                 })
                 .catch(function (err) {
-                    res.status(500).json({error: err});
+                    res.status(500).json({error: 'Unknown server error'});
                 })
                 .done();
             } else {
