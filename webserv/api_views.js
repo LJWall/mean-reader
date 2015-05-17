@@ -56,6 +56,7 @@ module.exports = function (url_for) {
         obj.meta_apiurl =  url_for.feed(item_data.meta_id.toString());
         obj.link =  item_data.link;
         obj.title = item_data.title;
+        obj.pubdate = item_data.pubdate;
         return obj;
     }
     
