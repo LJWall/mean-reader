@@ -16,15 +16,19 @@ describe('getFeed', function () {
         spyOn(mongoConn, 'connection').and.returnValue(fakeDb);
         
         spyOn(simpleModel, 'make').and.callFake(function (collection) {
-            return {
-                findOne: function (query) {
-                    if (query.feedurl === 'spam' || (mongoFeedStore.updateMongoFeedData.calls.count() >0 && query.feedurl === 'eggs' )) {
-                        query._id = 'spam';
-                        return Promise.resolve(query);
-                    }
-                    return Promise.resolve(null);
-                },
-                collection: collection
+            if (collection.name === 'feeds') {
+                return {
+                    findOne: function (query) {
+                        if (query.feedurl === 'spam' || (mongoFeedStore.updateMongoFeedData.calls.count() >0 && query.feedurl === 'eggs' )) {
+                            query._id = 'spam';
+                            return Promise.resolve(query);
+                        }
+                        return Promise.resolve(null);
+                    },
+                    collection: collection
+                }
+            } else {
+                return {collection: collection};
             }
         });
         
