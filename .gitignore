@@ -2,3 +2,4 @@ bower_components
 node_modules 
 frontend_build/*
 .DS_Store
+jasmine
