@@ -8,11 +8,11 @@ var rewire = require('rewire'),
 var meta = [{_id: new ObjectID(), feedurl: 'url1', title: 'Blog1', description: 'Interesting', surplus_data: 'junk'},
             {_id: new ObjectID(), feedurl: 'url2', title: 'Blog2', link: 'link2', surplus_data: 'junk'}],
     item = [{_id: new ObjectID(), meta_id: meta[0]._id, link: 'itemlink1', title: 'Foo', surplus_data: 'junk', pubdate: '2015-01-01'},
-            {_id: new ObjectID(), meta_id: meta[1]._id, link: 'itemlink2', title: 'Bar', surplus_data: 'junk', pubdate: '2015-01-02'}],
+            {_id: new ObjectID(), meta_id: meta[1]._id, link: 'itemlink2', title: 'Bar', surplus_data: 'junk', pubdate: '2015-01-02', read: true}],
     meta_res = [{apiurl: '/feeds/' + meta[0]._id.toString(), feedurl: 'url1', title: 'Blog1', description: 'Interesting'},
                 {apiurl: '/feeds/' + meta[1]._id.toString(), feedurl: 'url2', title: 'Blog2', link: 'link2'}],
-    item_res = [{apiurl: '/items/' + item[0]._id.toString(), meta_apiurl: '/feeds/' + meta[0]._id.toString(), link: 'itemlink1', title: 'Foo', pubdate: '2015-01-01'},
-                {apiurl: '/items/' + item[1]._id.toString(), meta_apiurl: '/feeds/' + meta[1]._id.toString(), link: 'itemlink2', title: 'Bar', pubdate: '2015-01-02'}];
+    item_res = [{apiurl: '/items/' + item[0]._id.toString(), meta_apiurl: '/feeds/' + meta[0]._id.toString(), link: 'itemlink1', title: 'Foo', pubdate: '2015-01-01', read: false},
+                {apiurl: '/items/' + item[1]._id.toString(), meta_apiurl: '/feeds/' + meta[1]._id.toString(), link: 'itemlink2', title: 'Bar', pubdate: '2015-01-02', read: true}];
     
 /* ----------------------- */
 
@@ -89,6 +89,15 @@ describe('api_views object', function () {
         it('should return all the data using res.json()', function () {
             expect(spyRes.json.calls.allArgs()).toEqual([[{meta: meta_res, items: item_res}]]);
         });
+    });
+    
+    describe('putPost method (with good request)', function () {
+        beforeAll(function (done) {
+            spyRes.events.once('jsonCalled', done);
+            api_views.putPost({body: {feedurl: 'http://fake/feed/url'}}, spyRes)
+        })
+        afterAll(resetSpies);
+        
     });
     
     describe('postAdd method (with good request)', function () {

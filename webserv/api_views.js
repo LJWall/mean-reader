@@ -37,6 +37,9 @@ module.exports = function (url_for) {
         },
         '404': function (req, res) {
             res.status(404).json({error: 'Not found'});
+        },
+        putPost: function (req, res) {
+            
         }
     };
     
@@ -57,6 +60,7 @@ module.exports = function (url_for) {
         obj.link =  item_data.link;
         obj.title = item_data.title;
         obj.pubdate = item_data.pubdate;
+        obj.read = item_data.read || false;
         return obj;
     }
     
