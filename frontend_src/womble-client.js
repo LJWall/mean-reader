@@ -7,9 +7,13 @@
         var meta_data = [];
         var items = [];
         
-        // Load all the data initally
-        $http.get('/reader').then(function (res) {
+        // Load some data initally
+        $http.get('reader').then(function (res) {
+            var i;
             meta_data = res.data.meta;
+            for (i=0; i<res.data.items.length; i++) {
+                decorateItem(res.data.items[i]);
+            }
             items = res.data.items;
         });
         
@@ -21,15 +25,23 @@
                 return items;
             },
             addNew: function (url) {
-                $http.post('/reader/feeds', {feedurl: url}).then(function (res) {
+                $http.post('reader/feeds', {feedurl: url}).then(function (res) {
                     meta_data.push(res.data.meta[0]);
                     items = items.concat(res.data.items);
                 });
             }
         };
+        
+        function decorateItem(item) {
+            item.markAsRead = function (read) {
+                item.read = read;
+                $http.put(item.apiurl, {read: read});
+            }
+        }
+        
     }]);
     
-    wombleApp.controller('wombleCtrl', ['wombleService', function (ws) {
+    wombleApp.controller('wombleCtrl', ['wombleService', '$window', function (ws, $window) {
         var self = this;
         
         self.feedData = {
@@ -38,8 +50,8 @@
         };
         
         self.selectItem = function (post) {
-            post.read = true;
-            window.open(post.link, '_blank');
+            post.markAsRead(true);
+            $window.open(post.link, '_blank');
         };
         
         self.addNew = function (url) {
