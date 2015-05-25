@@ -4,6 +4,7 @@ var rewire = require('rewire'),
 var mockApp = {
     get: jasmine.createSpy('app.get'),
     post: jasmine.createSpy('app.post'),
+    put: jasmine.createSpy('app.put'),
     use:jasmine.createSpy('app.use')
 };
 var mockExpress = function () {
@@ -13,7 +14,8 @@ var mockExpress = function () {
 var views_obj = {
         getAll: function () {return 1;},
         postAdd: function () {return 2;},
-        '404': function () {return 3;}
+        '404': function () {return 3;},
+        putPost: function () {return 4;}
 };
 
 var mockModViews = jasmine.createSpy('mod_views').and.callFake(function () {
@@ -39,6 +41,9 @@ describe('api_routes', function () {
     });
     it('should route posts to /feeds to views.postAdd', function () {
         expect(mockApp.post).toHaveBeenCalledWith('/feeds', views_obj.postAdd);
+    });
+    it('should route PUTS to /posts/:item_id to views.putPost', function () {
+        expect(mockApp.put).toHaveBeenCalledWith('/posts/:item_id', views_obj.putPost);
     });
     it('should make handle 404', function () {
         expect(mockApp.use).toHaveBeenCalledWith(views_obj['404']);

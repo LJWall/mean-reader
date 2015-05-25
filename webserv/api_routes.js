@@ -26,6 +26,7 @@ function setupRoutes() {
     var newApp = express();
     newApp.get('/', views.getAll);
     newApp.post('/feeds', views.postAdd);
+    newApp.put('/posts/:item_id', views.putPost);
     newApp.use(views['404']);
     return newApp;
 };    

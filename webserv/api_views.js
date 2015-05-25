@@ -1,5 +1,6 @@
 var feedModelMaker = require("./feed_handle/getFeed.js"),
-    Promise = require('bluebird');
+    Promise = require('bluebird'),
+    ObjectID = require('mongodb').ObjectID;
 
 
 module.exports = function (url_for) {
@@ -28,7 +29,7 @@ module.exports = function (url_for) {
                     res.status(201).json(data);
                 })
                 .catch(function (err) {
-                    res.status(500).json({error: 'Unknown server error'});
+                    res.status(500).end();
                 })
                 .done();
             } else {
@@ -36,10 +37,31 @@ module.exports = function (url_for) {
             }
         },
         '404': function (req, res) {
-            res.status(404).json({error: 'Not found'});
+            res.status(404).end();
         },
         putPost: function (req, res) {
-            
+            var obj_id;
+            if (typeof req.params.item_id !== 'string') {
+                res.status(500).end();
+                return;
+            }
+            try {
+                obj_id = ObjectID(req.params.item_id);
+            } catch(e) {
+                res.status(404).end();
+                return;
+            }
+            feedModel.posts.findOne({_id: ObjectID(req.params.item_id)})
+            .then(function (item) {
+                if (!item) {
+                    res.status(404).end();
+                    return;
+                }
+                if (typeof req.body.read === 'boolean') item.read = req.body.read;
+                res.status(200).json(cleanItem(item));
+                return item.save();
+            })
+            .done();
         }
     };
     
