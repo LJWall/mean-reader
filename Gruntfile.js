@@ -61,4 +61,29 @@ module.exports = function(grunt) {
     grunt.registerTask('default',['build']);
     grunt.registerTask('run', ['build', 'express:dev', 'watch']);
     
+    grunt.registerTask("testnode",
+        "Run server specs in Node.js",
+        function() {
+            var done = this.async(),
+                Jasmine = require('jasmine'),
+                jasmine = new Jasmine(),
+                pass = true; 
+
+            jasmine.loadConfigFile('./spec/support/jasmine.json');
+            //jasmine.onComplete(function(passed) {
+            //    done(passed);
+            //});
+            jasmine.env.addReporter({
+                suiteDone: function (result) {
+                    pass = pass && result.status!=='failed';
+                },
+                jasmineDone: function() {
+                    done(pass);
+                }
+            });
+
+            jasmine.execute();
+        }
+    );    
+
 };
