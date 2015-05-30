@@ -11,14 +11,33 @@ module.exports = function(grunt) {
     config.watch = {};
     grunt.loadNpmTasks('grunt-bower-concat');
     config.bower_concat = {};
+    grunt.loadNpmTasks('grunt-closure-compiler');
+    config['closure-compiler'] = {};
+    grunt.loadNpmTasks('grunt-contrib-jshint');
+    config.jshint = {};
 
     // Bower dependencies 
-    config.bower_concat.all = {dest: 'frontend_build/js/bower.js', cssDest: 'frontend_build/css/bower.css'};
+    config.bower_concat.all = {
+        dest: 'frontend_build/js/bower.js',
+        cssDest: 'frontend_build/css/bower.css',
+        callback: function(mainFiles, component) {
+            return mainFiles.map(function(filepath) {
+                // Use minified files if available
+                var min = filepath.replace(/\.js$/, '.min.js');
+                return grunt.file.exists(min) ? min : filepath;
+            });
+        }
+    };
     config.watch.bower = {files: ['bower.json'], tasks: ['bower_concat:all']};
     
-    // Own JavaScript
-    config.copy.js = {files: [{expand: true, filter: 'isFile', flatten: true, src: 'frontend_src/*.js', dest: 'frontend_build/js'}] };
-    config.watch.js = {files: ['frontend_src/*.js'], tasks: ['copy:js']};
+    // JavaScript
+    config['closure-compiler'].all = {
+        js: 'frontend_src/**.js',
+        jsOutputFile: 'frontend_build/js/frontend.min.js',
+        reportFile: 'closure-compiler.report.txt', 
+        options: {compilation_level: 'SIMPLE', language_in: 'ECMASCRIPT5_STRICT'}
+    };
+    config.watch.js = {files: ['frontend_src/*.js'], tasks: ['closure-compiler:all']};
 
     // HTML
     config.copy.html = {files: [{expand: true, filter: 'isFile', flatten: true, src: 'frontend_src/*.html', dest: 'frontend_build/'}] };
@@ -29,12 +48,16 @@ module.exports = function(grunt) {
     config.watch.css = {files: ['frontend_src/*.css'], tasks: ['copy:css']};
     
     // Server
-    config.express = { options: {script: 'webserv/main.js'}, dev: {}},
-    config.watch.server = {files: ['webserv/*.js', 'webserv/**/*.js'], tasks: ['express:dev:stop', 'express:dev'], options: {spawn: false}}
+    config.express = { options: {script: 'webserv/main.js'}, dev: {}};
+    config.watch.server = {files: ['webserv/*.js', 'webserv/**/*.js'], tasks: ['express:dev:stop', 'express:dev'], options: {spawn: false}};
+
+    // jshint
+    config.jshint.all = ['Gruntfile.js', 'frontend_src/**/*.js', 'spec/**/*.js', 'webserv/**/*.js'];
+
 
     grunt.initConfig(config);
 
-    grunt.registerTask('build', ['bower_concat', 'copy']);
+    grunt.registerTask('build', ['bower_concat', 'copy', 'closure-compiler']);
     grunt.registerTask('default',['build']);
     grunt.registerTask('run', ['build', 'express:dev', 'watch']);
     
