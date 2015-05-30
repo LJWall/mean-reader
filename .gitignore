@@ -5,3 +5,4 @@ frontend_build/*
 jasmine
 *.swp
 
+closure-compiler.report.txt
