@@ -36,7 +36,7 @@
             item.markAsRead = function (read) {
                 item.read = read;
                 $http.put(item.apiurl, {read: read});
-            }
+            };
         }
         
     }]);
@@ -55,7 +55,7 @@
         };
         
         self.addNew = function (url) {
-            ws.addNew(url)
+            ws.addNew(url);
         };
     }]);
     

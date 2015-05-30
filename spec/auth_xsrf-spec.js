@@ -63,7 +63,7 @@ describe('module: xsrf', function () {
             this.res = jasmine.createSpyObj('res spy', ['end', 'status']);
             this.res.status.and.returnValue(this.res);
             this.req = {session: {}, headers: {}};
-            this.next = jasmine.createSpy('next spy')
+            this.next = jasmine.createSpy('next spy');
         });
         it('should return a 401 if there is no X-XSRF-TOKEN header', function () {
             xsrf.check_xsrf_header(this.req, this.res, this.next);

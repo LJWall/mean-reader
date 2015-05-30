@@ -29,4 +29,4 @@ module.exports.startServer = function () {
     });
     
     app.listen(1337);
-}
+};

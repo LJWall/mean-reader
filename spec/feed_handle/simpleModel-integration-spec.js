@@ -74,7 +74,7 @@ describe('simpleModel [integration]', function () {
         .then(function (result) {
             expect(result).toBeNull();
         })
-        .done(done)
+        .done(done);
     });
     
     it('should return [] from .findMany() if nothing found', function (done) {
@@ -82,7 +82,7 @@ describe('simpleModel [integration]', function () {
         .then(function (result) {
             expect(result).toEqual([]);
         })
-        .done(done)
+        .done(done);
     });
     
 });

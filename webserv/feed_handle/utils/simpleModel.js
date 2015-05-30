@@ -24,7 +24,7 @@ var augment = function (collection, result) {
         });
     }
     return result;
-}
+};
 module.exports.make = function (collection) {
     var c = Promise.resolve(collection), // be agnostic on passing a collection or a promise of a collection.
         f = augment.bind(null, c);

@@ -64,7 +64,7 @@ describe('mongoFeedStore', function () {
                 mongodb.collection('posts').insertManyAsync(sampledata1.items)
             ])
             .then(function (insert_res) {
-                return mongoFeedStore.updateMongoFeedData(mongodb, sampledata2)
+                return mongoFeedStore.updateMongoFeedData(mongodb, sampledata2);
             })
             .then(function (insert_res) {
                 return Promise.all([

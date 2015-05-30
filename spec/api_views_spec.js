@@ -53,8 +53,8 @@ describe('api_views object', function () {
         resetTestData();
         mockFeedModel = {
             feeds: {
-                findOne: jasmine.createSpy('feedsFindOne').and.callFake(function () {return Promise.resolve(meta[0])}),
-                findMany: jasmine.createSpy('feedsFindMany').and.callFake(function () {return Promise.resolve(meta)})
+                findOne: jasmine.createSpy('feedsFindOne').and.callFake(function () { return Promise.resolve(meta[0]); }),
+                findMany: jasmine.createSpy('feedsFindMany').and.callFake(function () { return Promise.resolve(meta); })
             },
             posts: {
                 findOne: jasmine.createSpy('postsFindOne').and.callFake(function (q) {
@@ -64,13 +64,13 @@ describe('api_views object', function () {
                     }
                     return Promise.resolve(null);
                 }),
-                findMany: jasmine.createSpy('postsFindMnay').and.callFake(function () {return Promise.resolve(item)})
+                findMany: jasmine.createSpy('postsFindMnay').and.callFake(function () { return Promise.resolve(item); })
             },
             add: jasmine.createSpy('feedModelAdd').and.returnValue(Promise.resolve({_id: 'spam', title: 'wombles'}))
         };
         var mockUrlFor = {
-            feed: function (id) {return '/feeds/'+id},
-            item: function (id) {return '/items/'+id},
+            feed: function (id) {return '/feeds/'+id;},
+            item: function (id) {return '/items/'+id;},
         };
         
         api_views_maker.__set__('feedModelMaker', function () { return mockFeedModel; });
@@ -92,7 +92,7 @@ describe('api_views object', function () {
     describe('getAll method', function () {
         beforeAll(function (done) {
             spyRes.events.once('responseComplete', done);
-            api_views.getAll({}, spyRes)
+            api_views.getAll({}, spyRes);
         });
         afterAll(resetSpies);
         afterAll(clearListner);
@@ -181,8 +181,8 @@ describe('api_views object', function () {
     describe('postAdd method (with good request)', function () {
         beforeAll(function (done) {
             spyRes.events.once('responseComplete', done);
-            api_views.postAdd({body: {feedurl: 'http://fake/feed/url'}}, spyRes)
-        })
+            api_views.postAdd({body: {feedurl: 'http://fake/feed/url'}}, spyRes);
+        });
         afterAll(resetSpies);
         afterAll(clearListner);
         
@@ -212,8 +212,8 @@ describe('api_views object', function () {
     describe('postAdd method (with bad request)', function () {
         beforeAll(function (done) {
             spyRes.events.once('responseComplete', done);   
-            api_views.postAdd({body: {bad: 'data'}}, spyRes) 
-        })
+            api_views.postAdd({body: {bad: 'data'}}, spyRes);
+        });
         afterAll(resetSpies);
         afterAll(clearListner);
         it('should return return a 400 code.', function () {
@@ -224,15 +224,15 @@ describe('api_views object', function () {
     describe('postAdd method (with with feed add routine throwing an error)', function () {
         beforeAll(function (done) {
             var _add;
-            _add = mockFeedModel.add
+            _add = mockFeedModel.add;
             mockFeedModel.add = jasmine.createSpy('feedModelAdd').and.returnValue(Promise.reject('someError'));
             
             spyRes.events.once('responseComplete', function () {
                 mockFeedModel.add = _add;
                 done();
             });
-            api_views.postAdd({body: {feedurl: 'http://fake/feed/url'}}, spyRes) 
-        })
+            api_views.postAdd({body: {feedurl: 'http://fake/feed/url'}}, spyRes);
+        });
         afterAll(resetSpies);
         afterAll(clearListner);
         it('should return return a 500 code.', function () {
@@ -244,7 +244,7 @@ describe('api_views object', function () {
         beforeAll(function (done) {
             spyRes.events.once('responseComplete', done);   
             api_views['404']({}, spyRes);
-        })
+        });
         afterAll(resetSpies);
         afterAll(clearListner);
         it('should return return a 404 code.', function () {

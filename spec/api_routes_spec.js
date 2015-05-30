@@ -9,7 +9,7 @@ var mockApp = {
 };
 var mockExpress = function () {
     return mockApp;
-}
+};
 
 var views_obj = {
         getAll: function () {return 1;},
@@ -53,11 +53,11 @@ describe('api_routes', function () {
         it('should return /root/feeds/[id] for a feed api url', function () {
             expect(mod_api_routes.__get__('url_for').feed(1))
             .toEqual('/root/feeds/1');
-        })
+        });
         it('should return /root/posts/[id] for a post api url', function () {
             expect(mod_api_routes.__get__('url_for').item(7))
             .toEqual('/root/posts/7');
-        })
+        });
     });
     
 });

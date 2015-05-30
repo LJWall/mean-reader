@@ -12,7 +12,7 @@ angular.module('reader.xsrf', [])
                 return done.promise.then(function () { return config; });
             }
         }
-    }
+    };
 }])
 .run(['$http', 'token_state', function ($http, token_state) {
     var GET_TOKEN_URL = '/reader/api/get_xsrf_token';

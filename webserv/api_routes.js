@@ -6,11 +6,11 @@ var express = require('express'),
     url_for;
     
 module.exports = function (mount_path) {
-    path = mount_path
+    path = mount_path;
     views = views || mod_views(url_for);
     app = app || setupRoutes();
-    return app; 
-}
+    return app;
+};
 
 
 url_for = {
@@ -29,4 +29,5 @@ function setupRoutes() {
     newApp.put('/posts/:item_id', views.putPost);
     newApp.use(views['404']);
     return newApp;
-};    
+}
+    

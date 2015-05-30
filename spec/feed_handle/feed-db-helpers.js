@@ -5,7 +5,7 @@ var Promise = require('bluebird'),
     
     
 // sample data
-module.exports.sampledata = []
+module.exports.sampledata = [];
 module.exports.sampledata.push({
     meta: {_id: new ObjectID('000000000000000000000001'), link: 'url', feedurl: 'feedurl', title: 'blog'},
     items: [{guid: '1', title: 'A', link: 'linkA'}, {guid: '2', title: 'B', link: 'linkB'}]

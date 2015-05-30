@@ -26,7 +26,7 @@ describe('getFeed', function () {
                         return Promise.resolve(null);
                     },
                     collection: collection
-                }
+                };
             } else {
                 return {collection: collection};
             }
@@ -55,7 +55,7 @@ describe('getFeed', function () {
                 expect(getFeedFromURL.get.calls.allArgs()).toEqual([['eggs']]);
                 expect(mongoFeedStore.updateMongoFeedData.calls.count()).toEqual(1);
                 expect(mongoFeedStore.updateMongoFeedData).toHaveBeenCalledWith(fakeDb, 'data');
-                expect(result).toEqual({feedurl: 'eggs', _id: 'spam'})
+                expect(result).toEqual({feedurl: 'eggs', _id: 'spam'});
             })
             .done(done);
         });

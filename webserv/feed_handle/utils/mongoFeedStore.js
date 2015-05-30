@@ -6,18 +6,18 @@ module.exports.updateMongoFeedData = function (db, feed_data) {
     .then(function (_m) {       /* a promise of one.                  */
         m = _m;
         var match = {feedurl: feed_data.meta.feedurl};
-        if (feed_data.meta._id) { match._id =  feed_data.meta._id}
+        if (feed_data.meta._id) { match._id =  feed_data.meta._id; }
         return m.collection('feeds').findOneAndUpdateAsync(match, {$set: {
             feedurl: feed_data.meta.feedurl,
             title:  feed_data.meta.title,
             description: feed_data.meta.description,
             link: feed_data.meta.link,
             last_update: new Date()
-        }}, {upsert: true})
+        }}, {upsert: true});
     })
     .then(function (upsert_res) {
         feed_data.items.forEach(function (post) {
-            var meta_id = (upsert_res.lastErrorObject.updatedExisting ? upsert_res.value._id : upsert_res.lastErrorObject.upserted)
+            var meta_id = (upsert_res.lastErrorObject.updatedExisting ? upsert_res.value._id : upsert_res.lastErrorObject.upserted);
             var match = {meta_id: meta_id, guid: post.guid};
             if (post._id) { match._id = post._id; }
             ret.push(m.collection('posts').updateOneAsync(match, {$set: {

@@ -31,12 +31,12 @@ module.exports.get = function (feed_url) {
     req.setHeader('user-agent', 'Node/' + process.versions.node);
     req.setHeader('accept', 'text/html,application/xhtml+xml');
     
-    req.on('error', function (err) {def.reject(err)});
+    req.on('error', function (err) {def.reject(err); });
     req.on('response', function (res) {
         res.pipe(fp);
     });
     
-    fp.on('error', function (err) {def.reject(err)});
+    fp.on('error', function (err) {def.reject(err); });
     fp.on('meta', function (meta) {
         feed_data.meta = {title: meta.title,
                             description: meta.description,

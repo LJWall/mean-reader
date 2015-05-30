@@ -16,7 +16,7 @@ feedModel.feeds.findMany({})
         });
 })
 .then(function () {
-    console.log('Done')
+    console.log('Done');
     mongoConn.disconnect();
 })
 .done();
