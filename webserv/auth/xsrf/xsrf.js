@@ -13,7 +13,7 @@ module.exports.get_xsrf_token = function (req, res) {
 };
  
 module.exports.check_xsrf_header = function (req, res, next) {
-    if (!req.headers['X-XSRF-TOKEN'] || req.headers['X-XSRF-TOKEN'] !== req.session['XSRF-TOKEN']) {
+    if (!req.headers['x-xsrf-token'] || req.headers['x-xsrf-token'] !== req.session['XSRF-TOKEN']) {
         res.status(401).end();
     } else
     {
