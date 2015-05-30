@@ -73,7 +73,7 @@ describe('module: xsrf', function () {
             expect(this.res.end.calls.count()).toEqual(1);
         });
         it('should return a 401 if X-XSRF-TOKEN header does not match the session XSRF-TOKEN', function () {
-            this.req.headers['X-XSRF-TOKEN'] = 'foo';
+            this.req.headers['x-xsrf-token'] = 'foo';
             xsrf.check_xsrf_header(this.req, this.res, this.next);
             expect(this.next).not.toHaveBeenCalled();
             expect(this.res.status.calls.count()).toEqual(1);
@@ -81,7 +81,7 @@ describe('module: xsrf', function () {
             expect(this.res.end.calls.count()).toEqual(1);
         });
         it('should call next() if all is well, and not call end() or status() on the responce', function () {
-            this.req.headers['X-XSRF-TOKEN'] = 'foo';
+            this.req.headers['x-xsrf-token'] = 'foo';
             this.req.session['XSRF-TOKEN'] = 'foo';
             xsrf.check_xsrf_header(this.req, this.res, this.next);
             expect(this.next.calls.count()).toEqual(1);
