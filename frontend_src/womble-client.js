@@ -1,14 +1,14 @@
 (function () {
     "use strict";
     
-    var wombleApp = angular.module('wombleApp', []);
+    var wombleApp = angular.module('wombleApp', ['reader.xsrf']);
     
     wombleApp.factory('wombleService', ['$http', function ($http) {
         var meta_data = [];
         var items = [];
         
         // Load some data initally
-        $http.get('reader').then(function (res) {
+        $http.get('api').then(function (res) {
             var i;
             meta_data = res.data.meta;
             for (i=0; i<res.data.items.length; i++) {
@@ -25,7 +25,7 @@
                 return items;
             },
             addNew: function (url) {
-                $http.post('reader/feeds', {feedurl: url}).then(function (res) {
+                $http.post('api/feeds', {feedurl: url}).then(function (res) {
                     meta_data.push(res.data.meta[0]);
                     items = items.concat(res.data.items);
                 });
