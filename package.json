@@ -20,6 +20,8 @@
     "feedparser": "^1.0.1",
     "mongodb": "^2.0.31",
     "morgan": "^1.5.2",
+    "passport": "^0.2.2",
+    "passport-google-oauth": "^0.2.0",
     "request": "^2.55.0",
     "uid-safe": "^2.0.0"
   },
