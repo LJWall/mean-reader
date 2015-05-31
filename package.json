@@ -8,7 +8,7 @@
     "url": "https://github.com/LJWall/mean-reader"
   },
   "scripts": {
-    "test": "grunt jshint && grunt testnode"
+    "test": "grunt test"
   },
   "author": "Liam Wall <liam.wall@gmail.com>",
   "license": "ISC",

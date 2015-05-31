@@ -70,10 +70,10 @@ module.exports = function(grunt) {
                 pass = true; 
 
             jasmine.loadConfigFile('./spec/support/jasmine.json');
-            //jasmine.onComplete(function(passed) {
-            //    done(passed);
-            //});
             jasmine.env.addReporter({
+                specDone: function (result) {
+                    pass = pass && result.status!=='failed';
+                },
                 suiteDone: function (result) {
                     pass = pass && result.status!=='failed';
                 },
@@ -84,6 +84,7 @@ module.exports = function(grunt) {
 
             jasmine.execute();
         }
-    );    
+    );
+    grunt.registerTask('test', ['jshint', 'testnode']);
 
 };
