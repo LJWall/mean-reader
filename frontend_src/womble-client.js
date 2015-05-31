@@ -1,7 +1,7 @@
 (function () {
     "use strict";
     
-    var wombleApp = angular.module('wombleApp', ['reader.xsrf']);
+    var wombleApp = angular.module('wombleApp', ['reader.xsrf', 'reader.user']);
     
     wombleApp.factory('wombleService', ['$http', function ($http) {
         var meta_data = [];
