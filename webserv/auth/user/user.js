@@ -45,7 +45,7 @@ module.exports  = function (xsrf_checker) {
             if (req.isAuthenticated()) {
                 res.status(200).json(req.user._json);
             } else {
-                req.status(401).end();
+                res.status(401).end();
             }
         });
 
