@@ -5,7 +5,7 @@
         <link rel="stylesheet" href="css/bower.css">
         <link rel="stylesheet" href="css/mr.css"> 
     </head>
-    <body ng-app="wombleApp" ng-controller="wombleCtrl as ctrl">
+    <body ng-app="wombleApp" >
         
         <div class="modal fade" id="newFeedModal">
             <div class="modal-dialog">
@@ -34,11 +34,12 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-12">
-                    <h1>reader</h1><a href='/reader/auth/google'>Log in with Google</a>
+                    <h1>reader</h1>
+                    <reader-login></reader-login>
                     <hr>
                 </div>
             </div>
-            <div class="row">
+            <div class="row" ng-controller="wombleCtrl as ctrl">
                 <div class="col-md-3 sidebar">
                     <ul class="nav nav-sidebar" ng-repeat="meta in ctrl.feedData.meta()">
                         <li ng-class="{active: meta.apiurl===ctrl.selected}"><a href ng-bind="meta.title" ng-click="ctrl.selected=meta.apiurl"></a></li>
