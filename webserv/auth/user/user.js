@@ -1,6 +1,7 @@
 var express = require('express'),
     passport = require('passport'),
     GoogleStrategy = require('passport-google-oauth').OAuth2Strategy,
+    mongoConnect = require('../../mongoConnect'),
     router;
 
 var GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
@@ -25,12 +26,23 @@ module.exports  = function (xsrf_checker) {
             },
             function(accessToken, refreshToken, profile, done) {
                 // get user obj fro DB based on profile and return
-                return done(null, profile);
+                getUserFromDb({provider: profile.provider, provider_id: profile.id})
+                .then(function (user) {
+                    if (user) {
+                        done(null, user);
+                    } else {
+                        createUser(profile)
+                        .then(function (user) {
+                            done(null, user);
+                        });
+                    }
+                });
             }
         ));
         router.use(passport.initialize());
         router.use(passport.session());
-        router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+        router.get('/auth/google',
+            passport.authenticate('google', { scope: ['profile'] }));
         router.get('/auth/google/callback', 
             passport.authenticate('google', { failureRedirect: '/reader' }),
             function(req, res) {
@@ -53,3 +65,22 @@ module.exports  = function (xsrf_checker) {
     return router;
 };
 
+function getUserFromDb (query) {
+    return mongoConnect.connection()
+    .call('collection', 'users')
+    .call('findOneAsync', query);
+}
+
+function createUser (profile) {
+    return mongoConnect.connection()
+    .call('collection', 'users')
+    .call('insertOneAsync', {
+        provider: profile.provider,
+        provider_id: profile.id,
+        displayName: profile.displayName
+    })
+    .then(function (result) {
+        return result.ops[0];
+    });
+    
+}
