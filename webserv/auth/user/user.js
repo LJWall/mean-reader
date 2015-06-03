@@ -25,14 +25,16 @@ module.exports  = function (xsrf_checker) {
                 callbackURL: GOOGLE_CALLBACK_URL
             },
             function(accessToken, refreshToken, profile, done) {
-                // get user obj fro DB based on profile and return
+                // get user obj fro DB based (or create new one).
                 getUserFromDb({provider: profile.provider, provider_id: profile.id})
                 .then(function (user) {
                     if (user) {
+                        user.displayName = profile.displayName;
                         done(null, user);
                     } else {
                         createUser(profile)
                         .then(function (user) {
+                            user.displayName = profile.displayName;
                             done(null, user);
                         });
                     }
@@ -55,7 +57,10 @@ module.exports  = function (xsrf_checker) {
         });
         router.get('/auth/me', xsrf_checker, function (req, res) {
             if (req.isAuthenticated()) {
-                res.status(200).json(req.user._json);
+                res.status(200).json({
+                    provider: req.user.provider,
+                    displayName: req.user.displayName
+                });
             } else {
                 res.status(401).end();
             }
@@ -75,9 +80,10 @@ function createUser (profile) {
     return mongoConnect.connection()
     .call('collection', 'users')
     .call('insertOneAsync', {
+        //  Only store the provider and the provider ID.
+        // (for any other user data, read it afreash each time.)
         provider: profile.provider,
         provider_id: profile.id,
-        displayName: profile.displayName
     })
     .then(function (result) {
         return result.ops[0];
