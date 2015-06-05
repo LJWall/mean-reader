@@ -10,12 +10,14 @@ module.exports = function () {
         
     obj.feeds = simpleModel.make(db_promise.call('collection', 'feeds'));
     obj.posts = simpleModel.make(db_promise.call('collection', 'posts'));
-    obj.add = function (url) {
-        return obj.feeds.findOne({'feedurl': url})
+    obj.add = function (url, user_id) {
+        return obj.feeds.findOne({'feedurl': url, user_id: user_id})
         .then(function (meta) {
             if (!meta) {
                 return getFeedFromUrl.get(url)
-                .then(mongoFeedStore.updateMongoFeedData.bind(null, db_promise))
+                .then(function (data) {
+                    return mongoFeedStore.updateMongoFeedData(db_promise, data, user_id);
+                })
                 .then(function () {
                     return obj.feeds.findOne({'feedurl': url});
                 });

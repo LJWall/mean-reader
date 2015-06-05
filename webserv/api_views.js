@@ -8,8 +8,8 @@ module.exports = function (url_for) {
     return {
         getAll: function (req, res) {
             Promise.props({
-                meta: feedModel.feeds.findMany({}).reduce(reducer.bind(null, cleanMeta), []),
-                items: feedModel.posts.findMany({}).reduce(reducer.bind(null, cleanItem), [])
+                meta: feedModel.feeds.findMany({user_id: req.user._id}).reduce(reducer.bind(null, cleanMeta), []),
+                items: feedModel.posts.findMany({user_id: req.user._id}).reduce(reducer.bind(null, cleanItem), [])
             })
             .then(function (data) {
                 res.status(200).json(data);
@@ -18,11 +18,11 @@ module.exports = function (url_for) {
         },
         postAdd: function (req, res) {
             if (req.body.feedurl) {
-                feedModel.add(req.body.feedurl)
+                feedModel.add(req.body.feedurl, req.user._id)
                 .then(function (meta) {
                     return Promise.props({
                         meta: [cleanMeta(meta)],
-                        items: feedModel.posts.findMany({meta_id: meta._id}).reduce(reducer.bind(null, cleanItem), [])
+                        items: feedModel.posts.findMany({meta_id: meta._id, user_id: req.user._id}).reduce(reducer.bind(null, cleanItem), [])
                     });
                 })
                 .then(function (data) {
@@ -51,7 +51,7 @@ module.exports = function (url_for) {
                 res.status(404).end();
                 return;
             }
-            feedModel.posts.findOne({_id: ObjectID(req.params.item_id)})
+            feedModel.posts.findOne({_id: ObjectID(req.params.item_id), user_id: req.user._id})
             .then(function (item) {
                 if (!item) {
                     res.status(404).end();
