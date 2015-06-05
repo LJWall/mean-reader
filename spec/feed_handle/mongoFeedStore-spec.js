@@ -29,14 +29,13 @@ describe('mongoFeedStore', function () {
         .then(clearDB)
         .done(done);
     });
-
     
     describe('updateMongoFeedData', function () {
         afterEach(function (done) {
             clearDB(mongodb).done(done);
         });
         it('should put the feed data in the DB', function (done){
-            mongoFeedStore.updateMongoFeedData(mongodb, sampledata1)
+            mongoFeedStore.updateMongoFeedData(mongodb, sampledata1, 'FOO_UID')
             .then(function (insert_res) {
                 return Promise.all([
                     mongodb.collection('feeds').find({}).toArrayAsync(),
@@ -45,9 +44,10 @@ describe('mongoFeedStore', function () {
             }).then(function (db_data) {
                 expect(db_data[0].length).toEqual(1);
                 expect(db_data[0][0].title).toEqual('blog');
+                expect(db_data[0][0].user_id).toEqual('FOO_UID');
                 expect(db_data[1].length).toEqual(2);
-                expect(db_data[1]).toContain(jasmine.objectContaining({guid: '1', title: 'T1'}));
-                expect(db_data[1]).toContain(jasmine.objectContaining({guid: '2', title: 'T2'}));
+                expect(db_data[1]).toContain(jasmine.objectContaining({guid: '1', title: 'T1', user_id: 'FOO_UID'}));
+                expect(db_data[1]).toContain(jasmine.objectContaining({guid: '2', title: 'T2', user_id: 'FOO_UID'}));
             })
             .done(done);
         });
@@ -59,12 +59,16 @@ describe('mongoFeedStore', function () {
             };
             sampledata1.items[0].meta_id = sampledata1.meta._id;
             sampledata1.items[1].meta_id = sampledata1.meta._id;
+            sampledata1.items[0].user_id = 'FOO_UID';
+            sampledata1.items[1].user_id = 'FOO_UID';
+            sampledata1.meta.user_id = 'FOO_UID';
+
             Promise.all([
                 mongodb.collection('feeds').insertOneAsync(sampledata1.meta),
                 mongodb.collection('posts').insertManyAsync(sampledata1.items)
             ])
             .then(function (insert_res) {
-                return mongoFeedStore.updateMongoFeedData(mongodb, sampledata2);
+                return mongoFeedStore.updateMongoFeedData(mongodb, sampledata2, 'FOO_UID');
             })
             .then(function (insert_res) {
                 return Promise.all([

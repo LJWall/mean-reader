@@ -92,7 +92,7 @@ describe('api_views object', function () {
     describe('getAll method', function () {
         beforeAll(function (done) {
             spyRes.events.once('responseComplete', done);
-            api_views.getAll({}, spyRes);
+            api_views.getAll({user: {_id: 'FOO_UID'}}, spyRes);
         });
         afterAll(resetSpies);
         afterAll(clearListner);
@@ -106,10 +106,13 @@ describe('api_views object', function () {
         it('should return all the data using res.json()', function () {
             expect(spyRes.json.calls.allArgs()).toEqual([[{meta: meta_res, items: item_res}]]);
         });
+        it('should only return results for the authenticated user', function () {
+            expect(mockFeedModel.feeds.findMany.calls.allArgs()).toEqual([[{user_id: 'FOO_UID'}]]);
+            expect(mockFeedModel.posts.findMany.calls.allArgs()).toEqual([[{user_id: 'FOO_UID'}]]);
+        });
     });
     
     describe('putPost method', function () {
-        
         it('should take two parameters', function () {
             expect(api_views.putPost.length).toEqual(2);
         });
@@ -117,14 +120,14 @@ describe('api_views object', function () {
         describe('[usual request process]', function () {
             beforeAll(function (done) {
                 spyRes.events.once('responseComplete', done);
-                api_views.putPost({body: {}, params: {item_id: item[0]._id.toHexString()}}, spyRes);
+                api_views.putPost({user: {_id: 'FOO_UID'}, body: {}, params: {item_id: item[0]._id.toHexString()}}, spyRes);
             });
             afterAll(resetSpies);
             afterAll(resetTestData);
             afterAll(clearListner);
             
             it('should call feedModel.posts.findOne to get the item', function () {
-                expect(mockFeedModel.posts.findOne.calls.allArgs()).toEqual([[{_id: item[0]._id}]]);
+                expect(mockFeedModel.posts.findOne.calls.allArgs()).toEqual([[{_id: item[0]._id, user_id: 'FOO_UID'}]]);
             });
             
             it('should call save on the item', function () {
@@ -156,23 +159,23 @@ describe('api_views object', function () {
             afterEach(clearListner);
             
             it('should set read=true on the item when PUT data contains read=true', post(
-                function () { return {body: {read: true}, params: {item_id: item[0]._id.toHexString()}}; },
+                function () { return {user: {_id: 'FOO_UID'}, body: {read: true}, params: {item_id: item[0]._id.toHexString()}}; },
                 function () { expect(item[0].read).toEqual(true); }
             ));
             it('should set read=false on the item when PUT data contains read=false', post(
-                function () { return {body: {read: false}, params: {item_id: item[1]._id.toHexString()}}; },
+                function () { return {user: {_id: 'FOO_UID'}, body: {read: false}, params: {item_id: item[1]._id.toHexString()}}; },
                 function () { expect(item[1].read).toEqual(false); }
             ));
             it('should return 500 error if no item_id on req.params', post(
-                function () { return {body: {}, params: {}}; },
+                function () { return {user: {_id: 'FOO_UID'}, body: {}, params: {}}; },
                 function () { expect(spyRes.status.calls.allArgs()).toEqual([[500]]); }
             ));
             it('should return 404 error if item cannot be found', post(
-                function () { return {body: {}, params: {item_id: 'aaaaaaaaaaaaaaaaaaaaaaaa'}}; },
+                function () { return {user: {_id: 'FOO_UID'}, body: {}, params: {item_id: 'aaaaaaaaaaaaaaaaaaaaaaaa'}}; },
                 function () { expect(spyRes.status.calls.allArgs()).toEqual([[404]]); }
             ));
             it('should return 404 error if item_id does not make a good ObjectID', post(
-                function () { return {body: {}, params: {item_id: 'fooo*'}}; },
+                function () { return {user: {_id: 'FOO_UID'}, body: {}, params: {item_id: 'fooo*'}}; },
                 function () { expect(spyRes.status.calls.allArgs()).toEqual([[404]]); }
             ));
         });
@@ -181,7 +184,7 @@ describe('api_views object', function () {
     describe('postAdd method (with good request)', function () {
         beforeAll(function (done) {
             spyRes.events.once('responseComplete', done);
-            api_views.postAdd({body: {feedurl: 'http://fake/feed/url'}}, spyRes);
+            api_views.postAdd({user: {_id: 'FOOBAR'}, body: {feedurl: 'http://fake/feed/url'}}, spyRes);
         });
         afterAll(resetSpies);
         afterAll(clearListner);
@@ -189,11 +192,11 @@ describe('api_views object', function () {
         it('should take two paramters', function () {
             expect(api_views.postAdd.length).toEqual(2);
         });
-        it('should call model.add(url)', function () {
-            expect(mockFeedModel.add.calls.allArgs()).toEqual([['http://fake/feed/url']]);
+        it('should call model.add(url, user_id)', function () {
+            expect(mockFeedModel.add.calls.allArgs()).toEqual([['http://fake/feed/url', 'FOOBAR']]);
         });
         it('should call feedModel.posts.findMany to get items results', function () {
-            expect(mockFeedModel.posts.findMany.calls.allArgs()).toEqual([[{meta_id: 'spam'}]]);
+            expect(mockFeedModel.posts.findMany.calls.allArgs()).toEqual([[{meta_id: 'spam', user_id: 'FOOBAR'}]]);
         });
         it('should return the data (using res.json())', function () {
             expect(spyRes.json.calls.allArgs()).toEqual([[{
@@ -212,7 +215,7 @@ describe('api_views object', function () {
     describe('postAdd method (with bad request)', function () {
         beforeAll(function (done) {
             spyRes.events.once('responseComplete', done);   
-            api_views.postAdd({body: {bad: 'data'}}, spyRes);
+            api_views.postAdd({user: {_id: 'FOOBAR'}, body: {bad: 'data'}}, spyRes);
         });
         afterAll(resetSpies);
         afterAll(clearListner);
@@ -231,7 +234,7 @@ describe('api_views object', function () {
                 mockFeedModel.add = _add;
                 done();
             });
-            api_views.postAdd({body: {feedurl: 'http://fake/feed/url'}}, spyRes);
+            api_views.postAdd({user: {_id: 'FOOBAR'}, body: {feedurl: 'http://fake/feed/url'}}, spyRes);
         });
         afterAll(resetSpies);
         afterAll(clearListner);

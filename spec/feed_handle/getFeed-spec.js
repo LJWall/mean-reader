@@ -7,24 +7,26 @@ var mongoFeedStore = require('../../webserv/feed_handle/utils/mongoFeedStore.js'
     mongoConn = require('../../webserv/mongoConnect.js');
 
 describe('getFeed', function () {
-    var fakeDb;
+    var fakeDb, findOneSpy;
     beforeAll(function () {
         fakeDb = {
             collection: function (name) {return {'name': name}; },
             call: function (method, param) {return fakeDb[method](param); }
         };
         spyOn(mongoConn, 'connection').and.returnValue(fakeDb);
-        
-        spyOn(simpleModel, 'make').and.callFake(function (collection) {
-            if (collection.name === 'feeds') {
-                return {
-                    findOne: function (query) {
+
+        findOneSpy = jasmine.createSpy('findOneSpy').and.callFake(function (query) {
                         if (query.feedurl === 'spam' || (mongoFeedStore.updateMongoFeedData.calls.count() >0 && query.feedurl === 'eggs' )) {
                             query._id = 'spam';
                             return Promise.resolve(query);
                         }
                         return Promise.resolve(null);
-                    },
+        });
+
+        spyOn(simpleModel, 'make').and.callFake(function (collection) {
+            if (collection.name === 'feeds') {
+                return {
+                    findOne: findOneSpy,
                     collection: collection
                 };
             } else {
@@ -50,11 +52,11 @@ describe('getFeed', function () {
             spyOn(getFeedFromURL, 'get').and.returnValue(Promise.resolve('data'));
             spyOn(mongoFeedStore, 'updateMongoFeedData');
             
-            getFeed.add('eggs')
+            getFeed.add('eggs', 'FOOBAR')
             .then(function (result) {
                 expect(getFeedFromURL.get.calls.allArgs()).toEqual([['eggs']]);
                 expect(mongoFeedStore.updateMongoFeedData.calls.count()).toEqual(1);
-                expect(mongoFeedStore.updateMongoFeedData).toHaveBeenCalledWith(fakeDb, 'data');
+                expect(mongoFeedStore.updateMongoFeedData).toHaveBeenCalledWith(fakeDb, 'data', 'FOOBAR');
                 expect(result).toEqual({feedurl: 'eggs', _id: 'spam'});
             })
             .done(done);
@@ -64,11 +66,11 @@ describe('getFeed', function () {
             spyOn(getFeedFromURL, 'get');
             spyOn(mongoFeedStore, 'updateMongoFeedData');
             
-            getFeed.add('spam')
+            getFeed.add('spam', 'FOOBAR')
             .then(function (result) {
                 expect(getFeedFromURL.get.calls.count()).toEqual(0);
                 expect(mongoFeedStore.updateMongoFeedData.calls.count()).toEqual(0);
-                expect(result).toEqual({feedurl: 'spam', _id: 'spam'});
+                expect(result).toEqual({feedurl: 'spam', _id: 'spam', user_id: 'FOOBAR'});
             })
             .done(done);
         });
