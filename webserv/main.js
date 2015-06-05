@@ -18,7 +18,10 @@ app.use('/reader', express.static('frontend_build'));
 app.get('/reader/xsrf/get_token', xsrf.get_xsrf_token);
 app.use('/reader', user(xsrf.check_xsrf_header));
 
-app.use('/reader/api', xsrf.check_xsrf_header, api_routes('/reader/api'));
+app.use('/reader/api',
+    xsrf.check_xsrf_header,
+    user.check_authenticated,
+    api_routes('/reader/api'));
 
 
 app.listen(5667);
