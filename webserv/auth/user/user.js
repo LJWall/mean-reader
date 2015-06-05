@@ -1,14 +1,15 @@
 var express = require('express'),
     passport = require('passport'),
     GoogleStrategy = require('passport-google-oauth').OAuth2Strategy,
-    mongoConnect = require('../../mongoConnect'),
+    mongoConnect = require('../../mongoConnect.js'),
+    ObjectID = require('mongodb').ObjectID,
     router;
 
 var GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 var GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 var GOOGLE_CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL;
 
-module.exports  = function (xsrf_checker) {
+module.exports = function (xsrf_checker) {
     if (!router) {
         router = express.Router();
         // routines to serialize and deserialize from the the session..
@@ -16,6 +17,9 @@ module.exports  = function (xsrf_checker) {
             done(null, user);
         });
         passport.deserializeUser(function(obj, done) {
+            if (typeof obj._id === 'string') {
+                obj._id = ObjectID(obj._id);
+            }
             done(null, obj);
         });
 
@@ -68,6 +72,14 @@ module.exports  = function (xsrf_checker) {
 
     }
     return router;
+};
+
+module.exports.check_authenticated = function (req, res, next) {
+    if (req.isAuthenticated()) {
+        return next();
+    } else {
+        res.status(401).end();
+    }
 };
 
 function getUserFromDb (query) {
