@@ -25,8 +25,12 @@
                 return items;
             },
             addNew: function (url) {
+                var i;
                 $http.post('api/feeds', {feedurl: url}).then(function (res) {
                     meta_data.push(res.data.meta[0]);
+                    for (i=0; i<res.data.items.length; i++) {
+                        decorateItem(res.data.items[i]);
+                    }
                     items = items.concat(res.data.items);
                 });
             }
@@ -42,19 +46,20 @@
     }]);
     
     wombleApp.controller('wombleCtrl', ['wombleService', '$window', function (ws, $window) {
-        var self = this;
-        
-        self.feedData = {
+        this.feedData = {
             meta: ws.getFeedMetaList,
             items: ws.getFeedItems
         };
         
-        self.selectItem = function (post) {
+        this.selectItem = function (post) {
             post.markAsRead(true);
             $window.open(post.link, '_blank');
         };
         
-        self.addNew = function (url) {
+    }]);
+
+    wombleApp.controller('AddFeedCtrl', ['wombleService', function (ws) {
+        this.addNew = function (url) {
             ws.addNew(url);
         };
     }]);
