@@ -4,13 +4,25 @@ var express = require('express'),
     bodyParser = require('body-parser'),
     xsrf = require('./auth/xsrf/xsrf.js'),
     user = require('./auth/user/user.js'),
-    session = require('express-session');
+    session = require('express-session'),
+    mongoConnect = require('./mongoConnect.js'),
+    MongoDBStore = require('connect-mongodb-session')(session),
     app = express();
 
 app.use(morgan('dev'));
 app.use(bodyParser.json());
 
-app.use(session({secret: 'monkey business', resave: false, saveUninitialized: false}));
+var store = new MongoDBStore({
+    uri: mongoConnect.uri,
+    collection: 'sessions'
+});
+
+app.use(session({
+    secret: 'monkey business',
+    resave: false,
+    saveUninitialized: false,
+    store: store
+}));
 
 app.use('/reader', express.static('frontend_build'));
 
