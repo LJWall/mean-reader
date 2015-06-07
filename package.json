@@ -18,7 +18,7 @@
     "connect-mongodb-session": "^1.0.2",
     "express": "^4.12.3",
     "express-session": "^1.11.2",
-    "feedparser": "^1.0.1",
+    "feedparser": "1.0.1",
     "mongodb": "^2.0.31",
     "morgan": "^1.5.2",
     "passport": "^0.2.2",
