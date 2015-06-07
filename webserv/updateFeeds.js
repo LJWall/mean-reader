@@ -2,31 +2,41 @@ var getFeedFromUrl = require('./feed_handle/utils/getFeedFromURL.js'),
     mongoFeedStore = require('./feed_handle/utils/mongoFeedStore.js'),
     mongoConn = require('./mongoConnect.js'),
     db = mongoConn.connection(),
-    Promise = require('bluebird'),
-    dt = new Date();
+    Promise = require('bluebird');
 
-db.call('collection', 'feeds')
-.call('aggregateAsync', [
-    {$project: {feedurl: true, user_id:true}},
-    {$group: {_id: {feedurl: '$feedurl'}, user_ids: {$addToSet: '$user_id'} }}
-])
-.each(function (feed, index, value)  {
-    return getFeedFromUrl.get(feed._id.feedurl)
-    .then(function (feed_data) {
-        return Promise.each(feed.user_ids, function (uid) {
-            return mongoFeedStore.updateMongoFeedData(db, feed_data, uid);
+updateLoop();
+
+function updateLoop () {
+    updateFeeds()
+    .then(setTimeout.bind(null, updateLoop, 1000*60*60*2))
+    .done();
+}
+
+function updateFeeds () {
+    return db.call('collection', 'feeds')
+    .call('aggregateAsync', [
+        {$project: {feedurl: true, user_id:true}},
+        {$group: {_id: {feedurl: '$feedurl'}, user_ids: {$addToSet: '$user_id'} }}
+    ])
+    .each(function (feed, index, value)  {
+        return getFeedFromUrl.get(feed._id.feedurl)
+        .then(function (feed_data) {
+            return Promise.each(feed.user_ids, function (uid) {
+                return mongoFeedStore.updateMongoFeedData(db, feed_data, uid);
+            });
+        })
+        .then(log.bind(null, 'Updated ' + feed._id.feedurl))
+        .catch(function (err) {
+            log('Error with ' + feed._id.feedurl + '. Error' + err.toString());
         });
     })
-    .then(function () {
-        console.log(dt.toString(), 'Updated', feed._id.feedurl);
-    })
+    .then(log.bind(null, 'Done for now'))
     .catch(function (err) {
-        console.log(dt.toString(), 'Error with', feed._id.feedurl, 'Error', err);
+        log('Aborting current updates. Error' + err.toString());
     });
-})
-.then(function () {
-    console.log(dt.toString(), 'Done');
-    mongoConn.disconnect();
-})
-.done();
+}
 
+function log (msg) {
+    var dt = new Date();
+    console.log(dt, msg);
+}
