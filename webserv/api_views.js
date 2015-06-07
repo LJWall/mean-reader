@@ -18,7 +18,11 @@ module.exports = function (url_for) {
         },
         postAdd: function (req, res) {
             if (req.body.feedurl) {
-                feedModel.add(req.body.feedurl, req.user._id)
+                var feed_url = req.body.feedurl;
+                if (feed_url.slice(0, 5) === 'feed:') {
+                    feed_url = 'http:' + feed_url.slice(5);
+                }
+                feedModel.add(feed_url, req.user._id)
                 .then(function (meta) {
                     return Promise.props({
                         meta: [cleanMeta(meta)],
