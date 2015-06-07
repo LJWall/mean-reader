@@ -1,14 +1,21 @@
 var getFeedFromUrl = require('./feed_handle/utils/getFeedFromURL.js'),
     mongoFeedStore = require('./feed_handle/utils/mongoFeedStore.js'),
+    config = require('./config.js'),
     mongoConn = require('./mongoConnect.js'),
     db = mongoConn.connection(),
     Promise = require('bluebird');
 
-updateLoop();
+setTimeout(updateLoop, config.update_initwait);
 
 function updateLoop () {
     updateFeeds()
-    .then(setTimeout.bind(null, updateLoop, 1000*60*60*2))
+    .then(function () {
+        if (config.update_loopwait) {
+            setTimeout(updateLoop, config.update_loopwait);
+        } else {
+            mongoConn.disconnect();
+        }
+    })
     .done();
 }
 

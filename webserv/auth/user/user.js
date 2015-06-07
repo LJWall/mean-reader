@@ -2,12 +2,9 @@ var express = require('express'),
     passport = require('passport'),
     GoogleStrategy = require('passport-google-oauth').OAuth2Strategy,
     mongoConnect = require('../../mongoConnect.js'),
+    config = require('../../config.js'),
     ObjectID = require('mongodb').ObjectID,
     router;
-
-var GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-var GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-var GOOGLE_CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL;
 
 module.exports = function (xsrf_checker) {
     if (!router) {
@@ -24,9 +21,9 @@ module.exports = function (xsrf_checker) {
         });
 
         passport.use(new GoogleStrategy({
-                clientID: GOOGLE_CLIENT_ID,
-                clientSecret: GOOGLE_CLIENT_SECRET,
-                callbackURL: GOOGLE_CALLBACK_URL
+                clientID: config.GOOGLE_CLIENT_ID,
+                clientSecret: config.GOOGLE_CLIENT_SECRET,
+                callbackURL: config.GOOGLE_CALLBACK_URL
             },
             function(accessToken, refreshToken, profile, done) {
                 // get user obj fro DB based (or create new one).

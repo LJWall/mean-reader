@@ -6,6 +6,7 @@ var express = require('express'),
     user = require('./auth/user/user.js'),
     session = require('express-session'),
     mongoConnect = require('./mongoConnect.js'),
+    config = require('./config.js'),
     MongoDBStore = require('connect-mongodb-session')(session),
     app = express();
 
@@ -13,12 +14,12 @@ app.use(morgan('dev'));
 app.use(bodyParser.json());
 
 var store = new MongoDBStore({
-    uri: mongoConnect.uri,
+    uri: config.mongo_uri,
     collection: 'sessions'
 });
 
 app.use(session({
-    secret: 'monkey business',
+    secret: config.session_secret,
     resave: false,
     saveUninitialized: false,
     store: store
