@@ -2,7 +2,8 @@ var getFeedFromUrl = require('./feed_handle/utils/getFeedFromURL.js'),
     mongoFeedStore = require('./feed_handle/utils/mongoFeedStore.js'),
     mongoConn = require('./mongoConnect.js'),
     db = mongoConn.connection(),
-    Promise = require('bluebird');
+    Promise = require('bluebird'),
+    dt = new Date();
 
 db.call('collection', 'feeds')
 .call('aggregateAsync', [
@@ -17,14 +18,14 @@ db.call('collection', 'feeds')
         });
     })
     .then(function () {
-        console.log('Updated', feed._id.feedurl);
+        console.log(dt.toString(), 'Updated', feed._id.feedurl);
     })
     .catch(function (err) {
-        console.log('Error with', feed._id.feedurl, 'Error', err);
+        console.log(dt.toString(), 'Error with', feed._id.feedurl, 'Error', err);
     });
 })
 .then(function () {
-    console.log('Done');
+    console.log(dt.toString(), 'Done');
     mongoConn.disconnect();
 })
 .done();
