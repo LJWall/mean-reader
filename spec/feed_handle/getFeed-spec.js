@@ -49,12 +49,14 @@ describe('getFeed', function () {
     
     describe('.add', function () {
         it('should go to the source if not in the database (and store the result)', function (done) {
-            spyOn(getFeedFromURL, 'get').and.returnValue(Promise.resolve('data'));
+            spyOn(getFeedFromURL, 'makeRequest').and.returnValue({pretend: 'request'});
+            spyOn(getFeedFromURL, 'parseFeed').and.returnValue(Promise.resolve('data'));
             spyOn(mongoFeedStore, 'updateMongoFeedData');
             
             getFeed.add('eggs', 'FOOBAR')
             .then(function (result) {
-                expect(getFeedFromURL.get.calls.allArgs()).toEqual([['eggs']]);
+                expect(getFeedFromURL.makeRequest.calls.allArgs()).toEqual([['eggs']]);
+                expect(getFeedFromURL.parseFeed.calls.allArgs()).toEqual([[{pretend: 'request'}]]);
                 expect(mongoFeedStore.updateMongoFeedData.calls.count()).toEqual(1);
                 expect(mongoFeedStore.updateMongoFeedData).toHaveBeenCalledWith(fakeDb, 'data', 'FOOBAR');
                 expect(result).toEqual({feedurl: 'eggs', _id: 'spam'});
@@ -63,12 +65,12 @@ describe('getFeed', function () {
         });
         
         it('should return database results if available (and and not go out the source)', function (done) {
-            spyOn(getFeedFromURL, 'get');
+            spyOn(getFeedFromURL, 'makeRequest');
             spyOn(mongoFeedStore, 'updateMongoFeedData');
             
             getFeed.add('spam', 'FOOBAR')
             .then(function (result) {
-                expect(getFeedFromURL.get.calls.count()).toEqual(0);
+                expect(getFeedFromURL.makeRequest.calls.count()).toEqual(0);
                 expect(mongoFeedStore.updateMongoFeedData.calls.count()).toEqual(0);
                 expect(result).toEqual({feedurl: 'spam', _id: 'spam', user_id: 'FOOBAR'});
             })

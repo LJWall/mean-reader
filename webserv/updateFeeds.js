@@ -26,7 +26,7 @@ function updateFeeds () {
         {$group: {_id: {feedurl: '$feedurl'}, user_ids: {$addToSet: '$user_id'} }}
     ])
     .each(function (feed, index, value)  {
-        return getFeedFromUrl.get(feed._id.feedurl)
+        return getFeedFromUrl.parseFeed(getFeedFromUrl.makeRequest(feed._id.feedurl))
         .then(function (feed_data) {
             return Promise.each(feed.user_ids, function (uid) {
                 return mongoFeedStore.updateMongoFeedData(db, feed_data, uid);

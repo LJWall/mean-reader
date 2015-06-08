@@ -1,4 +1,4 @@
-var getFeedFromUrl = require('./utils/getFeedFromURL.js'),
+var getFeedFromURL = require('./utils/getFeedFromURL.js'),
     mongoFeedStore = require('./utils/mongoFeedStore.js'),
     mongoConnect = require('../mongoConnect.js'),
     simpleModel = require('./utils/simpleModel.js'),
@@ -14,7 +14,7 @@ module.exports = function () {
         return obj.feeds.findOne({'feedurl': url, user_id: user_id})
         .then(function (meta) {
             if (!meta) {
-                return getFeedFromURL.parseFeed(getFeedFromUrl.makeRequest(url))
+                return getFeedFromURL.parseFeed(getFeedFromURL.makeRequest(url))
                 .then(function (data) {
                     return mongoFeedStore.updateMongoFeedData(db_promise, data, user_id);
                 })
