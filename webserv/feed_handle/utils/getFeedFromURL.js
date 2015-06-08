@@ -2,44 +2,63 @@ var FeedParser = require('feedparser'),
     request = require('request'),
     Promise = require('bluebird'),
     sax = require('sax'),
-    findAlternates = require('./findAlternates.js');
+    findAlternates = require('./findAlternates.js'),
+    makeRequest,
+    parseFeed,
+    get;
 
-module.exports.makeRequest = function (feed_url) {
+
+
+get = function (feedurl, followAlternates) {
+    var req, promise;
+
+    try { req = makeRequest(feedurl); }
+    catch (e) { return Promse.reject(e); }
+
+    promise = Promise.settle([parseFeed(req), findAlternates(req)])
+    .then(function (results) {
+        if (results[0].isFulfilled()) {
+            return results[0].value();
+        } else if (results[1].isFulfilled() && followAlternates && results[1].value().length>0) {
+            return first(results[1].value(), get);
+        } else {
+            throw results[0].reason();
+        }
+    });
+
+    return promise;
+};
+
+module.exports.get = get;
+
+function first(arr, promise_maker) {
+    var errs = [];
+    return Promise.reduce(
+        arr,
+        function (total, item, index) {
+            if (total) { return total; }
+            else {
+                return promise_maker(item)
+                .catch( function (e) {
+                    errs.push(e);
+                    if (index == arr.length-1) { throw errs; }
+                    return null;
+                });
+            }
+        },
+        null
+    );
+}
+
+makeRequest = function (feed_url) {
     return request(feed_url, {timeout: 10000, pool: false, headers: {
         'user-agent': 'Node/' + process.versions.node,
         'accept': 'text/html,application/xhtml+xml'
     }});
 };
+module.exports.makeRequest = makeRequest;
 
-module.exports.followAlternate = function (req) {
-    var promise;
-
-    promise = new Promise(function (resolve, reject) {
-        req.on('response', function (res) {
-            if (/text\/html/.test(res.headers['content-type'])) {
-                findAlternates(req)
-                .then(function (alternates) {
-                    if (alternates['application/atom+xml']) {
-                        resolve(exports.makeRequest(alternates['application/atom+xml']));
-                    } else if (alternates['application/rss+xml']) {
-                        resolve(exports.makeRequest(alternates['application/rss+xml']));
-                    } else {
-                        reject(new Error('No alternates'));
-                    }
-                })
-                .catch(function (e) {
-                    reject(e);
-                })
-                .done();
-            } else {
-                resolve(req);
-            }
-        });
-    });
-    return promise;
-};
-
-module.exports.parseFeed = function (req) {
+parseFeed = function (req) {
     var feed_data = {meta: {}, items: []},
         fp = new FeedParser(),
         promise;
@@ -49,7 +68,7 @@ module.exports.parseFeed = function (req) {
             title: meta.title,
             description: meta.description,
             link: meta.link,
-            feedurl: meta.xmlurl
+            feedurl: meta.xmlurl || req.uri.href
         };
     });
     
@@ -74,4 +93,5 @@ module.exports.parseFeed = function (req) {
     return promise;
 };
 
+module.exports.parseFeed = parseFeed;
 
