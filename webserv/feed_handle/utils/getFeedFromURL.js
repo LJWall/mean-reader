@@ -1,7 +1,7 @@
 var FeedParser = require('feedparser'),
     request = require('request'),
     Promise = require('bluebird'),
-    sax = require('sax')
+    sax = require('sax'),
     findAlternates = require('./findAlternates.js');
 
 module.exports.makeRequest = function (feed_url) {
@@ -24,7 +24,7 @@ module.exports.followAlternate = function (req) {
                     } else if (alternates['application/rss+xml']) {
                         resolve(exports.makeRequest(alternates['application/rss+xml']));
                     } else {
-                        reject(new Error('No alternates');)
+                        reject(new Error('No alternates'));
                     }
                 })
                 .catch(function (e) {
@@ -35,13 +35,12 @@ module.exports.followAlternate = function (req) {
                 resolve(req);
             }
         });
-    }
+    });
     return promise;
 };
 
 module.exports.parseFeed = function (req) {
     var feed_data = {meta: {}, items: []},
-        req,
         fp = new FeedParser(),
         promise;
 

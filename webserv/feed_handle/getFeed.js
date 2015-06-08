@@ -14,7 +14,7 @@ module.exports = function () {
         return obj.feeds.findOne({'feedurl': url, user_id: user_id})
         .then(function (meta) {
             if (!meta) {
-                return getFeedFromUrl.get(url)
+                return getFeedFromURL.parseFeed(getFeedFromUrl.makeRequest(url))
                 .then(function (data) {
                     return mongoFeedStore.updateMongoFeedData(db_promise, data, user_id);
                 })
