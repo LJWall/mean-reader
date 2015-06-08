@@ -4,14 +4,18 @@ var sax = require('sax'),
 
 module.exports = function (req) {
     promise = new Promise(function (resolve, reject) {
-        var feeds={},
+        var alternates={atom: [], rss: [], xml: []},
             promise,
             saxParser = sax.createStream(false, {lowercase: true});
 
         saxParser.on('opentag', function (node) {
             if (node.name==='link' && node.attributes.rel==='alternate') {
-                if (node.attributes.type === 'application/rss+xml' || node.attributes.type === 'application/atom+xml') {
-                    feeds[node.attributes.type] = node.attributes.href;
+                if (/atom/i.test(node.attributes.type)) {
+                    alternates.atom.push(node.attributes.href);
+                } else if (/rss/i.test(node.attributes.type)) {
+                    alternates.rss.push(node.attributes.href);
+                } else if (/xml/i.test(node.attributes.type)) {
+                    alternates.xml.push(node.attributes.href);
                 }
             }
         });
@@ -20,7 +24,7 @@ module.exports = function (req) {
             reject(e);
         });
         saxParser.on('end', function () {
-            resolve(feeds);
+            resolve(alternates.atom.concat(alternates.rss).concat(alternates.xml));
         });
         req.pipe(saxParser);
     });
