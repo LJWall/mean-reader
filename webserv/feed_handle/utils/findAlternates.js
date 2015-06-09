@@ -4,19 +4,14 @@ var sax = require('sax'),
 
 module.exports = function (req) {
     promise = new Promise(function (resolve, reject) {
-        var alternates={atom: [], rss: [], xml: []},
+        var alternates=[],
             promise,
             saxParser = sax.createStream(false, {lowercase: true});
 
         saxParser.on('opentag', function (node) {
-            if (node.name==='link' && node.attributes.rel==='alternate') {
-                if (/atom/i.test(node.attributes.type)) {
-                    alternates.atom.push(node.attributes.href);
-                } else if (/rss/i.test(node.attributes.type)) {
-                    alternates.rss.push(node.attributes.href);
-                } else if (/xml/i.test(node.attributes.type)) {
-                    alternates.xml.push(node.attributes.href);
-                }
+            if (node.name==='link' && node.attributes.rel==='alternate' &&
+                    /(atom|rss|xml)/i.test(node.attributes.type)) {
+                alternates.push(node.attributes.href);
             }
         });
 
@@ -24,7 +19,7 @@ module.exports = function (req) {
             reject(e);
         });
         saxParser.on('end', function () {
-            resolve(alternates.atom.concat(alternates.rss).concat(alternates.xml));
+            resolve(alternates);
         });
         req.pipe(saxParser);
     });
