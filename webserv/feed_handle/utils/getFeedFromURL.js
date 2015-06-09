@@ -59,37 +59,36 @@ makeRequest = function (feed_url) {
 module.exports.makeRequest = makeRequest;
 
 parseFeed = function (req) {
-    var feed_data = {meta: {}, items: []},
-        fp = new FeedParser(),
-        promise;
+    var promise = new Promise(function (resolve, reject) {
+        var feed_data = {meta: {}, items: []},
+            fp = new FeedParser();
 
-    fp.on('meta', function (meta) {
-        feed_data.meta = {
-            title: meta.title,
-            description: meta.description,
-            link: meta.link,
-            feedurl: meta.xmlurl || req.uri.href
-        };
-    });
-    
-    fp.on('data', function(post) {
-        feed_data.items.push({
-            title: post.title,
-            link: post.link,
-            pubdate: post.pubdate,
-            guid: post.guid
+        fp.on('meta', function (meta) {
+            feed_data.meta = {
+                title: meta.title,
+                description: meta.description,
+                link: meta.link,
+                feedurl: meta.xmlurl || req.uri.href
+            };
         });
-    });
 
-    promise = new Promise(function (resolve, reject) {
+        fp.on('data', function(post) {
+            feed_data.items.push({
+                title: post.title,
+                link: post.link,
+                pubdate: post.pubdate,
+                guid: post.guid
+            });
+        });
+
         fp.on('error', function (err) {reject(err); });
         fp.on('end', function () {
             resolve(feed_data);
         });
         req.on('error', function (err) {reject(err); });
+        req.pipe(fp);
     });
 
-    req.pipe(fp);
     return promise;
 };
 
