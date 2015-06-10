@@ -5,15 +5,15 @@ var FeedParser = require('feedparser'),
     findAlternates = require('./findAlternates.js'),
     makeRequest,
     parseFeed,
-    get;
+    get, first;
 
 
 
-get = function (feedurl, followAlternates) {
+module.exports = get = function (feedurl, followAlternates) {
     var req, promise;
 
     try { req = makeRequest(feedurl); }
-    catch (e) { return Promse.reject(e); }
+    catch (e) { return Promise.reject(e); }
 
     promise = Promise.settle([parseFeed(req), findAlternates(req)])
     .then(function (results) {
@@ -29,9 +29,7 @@ get = function (feedurl, followAlternates) {
     return promise;
 };
 
-module.exports.get = get;
-
-function first(arr, promise_maker) {
+first = function (arr, promise_maker) {
     var errs = [];
     return Promise.reduce(
         arr,
@@ -48,7 +46,7 @@ function first(arr, promise_maker) {
         },
         null
     );
-}
+};
 
 makeRequest = function (feed_url) {
     return request(feed_url, {timeout: 10000, pool: false, headers: {
@@ -56,7 +54,6 @@ makeRequest = function (feed_url) {
         'accept': 'text/html,application/xhtml+xml'
     }});
 };
-module.exports.makeRequest = makeRequest;
 
 parseFeed = function (req) {
     var promise = new Promise(function (resolve, reject) {
@@ -92,5 +89,4 @@ parseFeed = function (req) {
     return promise;
 };
 
-module.exports.parseFeed = parseFeed;
 
