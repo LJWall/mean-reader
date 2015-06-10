@@ -28,16 +28,35 @@ describe('getFeedFromURL', function () {
             expect(data.items).toContain(jasmine.objectContaining({title: 'Life vs Surfing'}));
             expect(data.items.length).toEqual(25);
         })
+        .done(done);
+    });
+
+    it('should reject promise if url nor alternates are feeds', function (done) {
+        Promise.settle([getFeedFromURL.get('http://127.0.0.1:1337/bad_alternates.html')])
+        .then(function (results) {
+            expect(results[0].isRejected()).toBe(true);
+            expect(results[0].reason().message).toEqual('Not a feed');
+        })
+        .done(done);
+    });
+
+
+    it('should reject promise if url doesn\'t give a feed and can\'t follow alternates', function (done) {
+        Promise.settle([getFeedFromURL.get('http://127.0.0.1:1337/not_a_feed.html')])
+        .then(function (results) {
+            expect(results[0].isRejected()).toBe(true);
+            expect(results[0].reason().message).toEqual('Not a feed');
+        })
         .done(done);  
     });
 
-    it('should reject promise if url doesn\'t work', function (done) {
+   it('should reject promise if url doesn\'t work', function (done) {
         Promise.settle([getFeedFromURL.get('http://127.0.0.1:1337/cant_be_found.xml')])
         .then(function (results) {
             expect(results[0].isRejected()).toBe(true);
             expect(results[0].reason().message).toEqual('Not a feed');
-            done();
-        });
+        })
+        .done(done);
     });
 });
 
