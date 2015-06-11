@@ -1,0 +1,6 @@
+<div ng-controller="CurrentUserCtrl as c">
+    <span ng-show="c.isAuthenticated()">{{c.data().displayName}}
+        <a href ng-click="c.logout()">Log out</a>
+    </span>
+    <span ng-show="!c.isAuthenticated()"><a href="/reader/auth/google">Log in with Google</a></span>
+</div>
