@@ -43,12 +43,7 @@ angular.module('reader.user', [])
 }])
 .directive('readerLogin', [function (currentUser) {
     return {
-        template:   '<div ng-controller="CurrentUserCtrl as c">' +
-            '<span ng-show="c.isAuthenticated()">{{c.data().displayName}} ' +
-            '<a href ng-click="c.logout()">Log out</a>' +
-            '</span>' +
-            '<span ng-show="!c.isAuthenticated()"><a href="/reader/auth/google">Log in with Google</a></span>' +
-            '</div>',
+        template: 'user.html',
         restrict: 'AE',
         scope: {}
     };
