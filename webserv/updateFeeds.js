@@ -26,7 +26,7 @@ function updateFeeds () {
         {$group: {_id: {feedurl: '$feedurl'}, user_ids: {$addToSet: '$user_id'} }}
     ])
     .each(function (feed, index, value)  {
-        return getFeedFromUrl(feed._id.feedurl)
+        return getFeedFromUrl(feed._id.feedurl, false, false)
         .then(function (feed_data) {
             /* Write over the returned feed URL, incase it's been replaced with a differnt
                cannonical URL */
