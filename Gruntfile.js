@@ -32,12 +32,15 @@ module.exports = function(grunt) {
     
     // JavaScript
     config['closure-compiler'].all = {
-        js: 'frontend_src/**.js',
+        js: 'frontend_src/js/**/*.js',
         jsOutputFile: 'frontend_build/js/frontend.min.js',
         reportFile: 'closure-compiler.report.txt', 
         options: {compilation_level: 'SIMPLE', language_in: 'ECMASCRIPT5_STRICT'}
     };
-    config.watch.js = {files: ['frontend_src/*.js'], tasks: ['closure-compiler:all']};
+    config.watch.js = {files: ['frontend_src/**/*.js'], tasks: ['closure-compiler:all']};
+
+    config.copy.htmlTemplates = {files: [{expand: true, filter: 'isFile', flatten: true, src: 'frontend_src/js/**/*.html', dest: 'frontend_build/js'}] };
+    config.watch.htmlTemplates = {files: ['frontend_src/**/*.html'], tasks: ['copy:htmlTemplates']};
 
     // HTML
     config.copy.html = {files: [{expand: true, filter: 'isFile', flatten: true, src: 'frontend_src/*.html', dest: 'frontend_build/'}] };

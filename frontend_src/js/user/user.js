@@ -43,7 +43,7 @@ angular.module('reader.user', [])
 }])
 .directive('readerLogin', [function (currentUser) {
     return {
-        template: 'user.html',
+        templateUrl: 'js/user.html',
         restrict: 'AE',
         scope: {}
     };
