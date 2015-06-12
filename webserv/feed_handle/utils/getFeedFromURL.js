@@ -7,15 +7,22 @@ var FeedParser = require('feedparser'),
     parseFeed,
     get, first;
 
+require('array.prototype.find');
 
 
-module.exports = get = function (feedurl, followAlternates) {
-    var req, promise;
+module.exports = get = function (feedurl, followAlternates, followNext) {
+    var req, promise,
+        pf = parseFeed(), fa = findAlternates();
 
     try { req = makeRequest(feedurl); }
     catch (e) { return Promise.reject(e); }
 
-    promise = Promise.settle([parseFeed(req), findAlternates(req)])
+    req.on('response', function() {
+        req.pipe(pf.stream);
+        req.pipe(fa.stream);
+    });
+
+    promise = Promise.settle([pf.result, fa.result])
     .then(function (results) {
         if (results[0].isFulfilled()) {
             return results[0].value();
@@ -24,6 +31,24 @@ module.exports = get = function (feedurl, followAlternates) {
         } else {
             throw results[0].reason();
         }
+    })
+    .then(function (feedData) {
+        if (followNext && feedData.fullMeta['atom:link'] && feedData.fullMeta['atom:link'].length) {
+            var next = feedData.fullMeta['atom:link'].find(function (ele) {
+                return (ele['@'] && ele['@'].rel === 'next');       
+            });
+            if (next) {
+                return get(next['@'].href, followAlternates, true)
+                .then(function (nextData) {
+                    feedData.items = feedData.items.concat(nextData.items);
+                    return feedData;
+                })
+                .catch(function (e) {
+                    return feedData;
+                });
+            }
+        }
+        return feedData;
     });
 
     return promise;
@@ -49,16 +74,22 @@ first = function (arr, promise_maker) {
 };
 
 makeRequest = function (feed_url) {
-    return request(feed_url, {timeout: 10000, pool: false, headers: {
-        'user-agent': 'Node/' + process.versions.node,
-        'accept': 'text/html,application/xhtml+xml'
-    }});
+    return request(feed_url, {
+        timeout: 10000,
+        followRedirect: true,
+        pool: false,
+        headers: {
+            'user-agent': 'Node/' + process.versions.node,
+        }
+    });
 };
 
-parseFeed = function (req) {
-    var promise = new Promise(function (resolve, reject) {
-        var feed_data = {meta: {}, items: []},
-            fp = new FeedParser();
+parseFeed = function () {
+    var fp, promise;
+
+    promise = new Promise(function (resolve, reject) {
+        var feed_data = {meta: {}, items: []};
+        fp = new FeedParser();
 
         fp.on('meta', function (meta) {
             feed_data.meta = {
@@ -67,6 +98,7 @@ parseFeed = function (req) {
                 link: meta.link,
                 feedurl: meta.xmlurl || req.uri.href
             };
+            feed_data.fullMeta = meta;
         });
 
         fp.on('data', function(post) {
@@ -82,11 +114,9 @@ parseFeed = function (req) {
         fp.on('end', function () {
             resolve(feed_data);
         });
-        req.on('error', function (err) {reject(err); });
-        req.pipe(fp);
     });
 
-    return promise;
+    return {stream: fp, result: promise};
 };
 
 

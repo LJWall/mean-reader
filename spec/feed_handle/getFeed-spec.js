@@ -17,7 +17,7 @@ describe('getFeed', function () {
         spyOn(mongoConn, 'connection').and.returnValue(fakeDb);
 
         findOneSpy = jasmine.createSpy('findOneSpy').and.callFake(function (query) {
-                        if (query.feedurl === 'spam' || (mongoFeedStore.updateMongoFeedData.calls.count() >0 && query.feedurl === 'eggs' )) {
+                        if (query.feedurl === 'http://cannonical' || (mongoFeedStore.updateMongoFeedData.calls.count() >0 && query.feedurl === 'eggs' )) {
                             query._id = 'spam';
                             return Promise.resolve(query);
                         }
@@ -50,35 +50,23 @@ describe('getFeed', function () {
     
     describe('.add', function () {
         beforeAll(function () {
-            this.getFeedFromURLSpy = jasmine.createSpy('getFeedFromURL').and.returnValue(Promise.resolve('data'));
+            this.fakeFeedData = {meta: {feedurl: 'http://cannonical'}};
+            this.getFeedFromURLSpy = jasmine.createSpy('getFeedFromURL').and.returnValue(Promise.resolve(this.fakeFeedData));
             getFeedMaker.__set__('getFeedFromURL', this.getFeedFromURLSpy);
         });
         beforeEach(function () {
             this.getFeedFromURLSpy.calls.reset();
         });
 
-        it('should go to the source if not in the database (and store the result)', function (done) {
+        it('should go to the source (and store the result)', function (done) {
             var self = this;
             spyOn(mongoFeedStore, 'updateMongoFeedData');
             getFeed.add('eggs', 'FOOBAR')
             .then(function (result) {
-                expect(self.getFeedFromURLSpy.calls.allArgs()).toEqual([['eggs']]);
+                expect(self.getFeedFromURLSpy.calls.allArgs()).toEqual([['eggs', true, true]]);
                 expect(mongoFeedStore.updateMongoFeedData.calls.count()).toEqual(1);
-                expect(mongoFeedStore.updateMongoFeedData).toHaveBeenCalledWith(fakeDb, 'data', 'FOOBAR');
-                expect(result).toEqual({feedurl: 'eggs', _id: 'spam'});
-            })
-            .done(done);
-        });
-        
-        it('should return database results if available (and and not go out the source)', function (done) {
-            var self = this;
-            spyOn(mongoFeedStore, 'updateMongoFeedData');
-            
-            getFeed.add('spam', 'FOOBAR')
-            .then(function (result) {
-                expect(self.getFeedFromURLSpy.calls.count()).toEqual(0);
-                expect(mongoFeedStore.updateMongoFeedData.calls.count()).toEqual(0);
-                expect(result).toEqual({feedurl: 'spam', _id: 'spam', user_id: 'FOOBAR'});
+                expect(mongoFeedStore.updateMongoFeedData).toHaveBeenCalledWith(fakeDb, self.fakeFeedData, 'FOOBAR');
+                expect(result).toEqual({feedurl: 'http://cannonical', _id: 'spam'});
             })
             .done(done);
         });

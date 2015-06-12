@@ -13,8 +13,10 @@ describe('getFeedFromURL', function () {
     });
 
     it('should find the alternate links in a webpage', function (done) {
-        findAlternates(request('http://127.0.0.1:1337/not_a_feed.html'))
-        .then(function (alts) {
+        var req = request('http://127.0.0.1:1337/not_a_feed.html'),
+            fa = findAlternates();
+        req.pipe(fa.stream);
+        fa.result.then(function (alts) {
             expect(alts).toEqual([
                 'http://127.0.0.1:1337/404.xml',
                 'http://127.0.0.1:1337/404.rss',
