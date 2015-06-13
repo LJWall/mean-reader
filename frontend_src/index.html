@@ -1,55 +1,34 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>read</title>
-        <link rel="stylesheet" href="css/bower.css">
-        <link rel="stylesheet" href="css/mr.css"> 
-        <link href='//fonts.googleapis.com/css?family=Monofett' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="css/reader.css"> 
+        <link rel="stylesheet" href="css/font-awesome.min.css"> 
+        <link href='http://fonts.googleapis.com/css?family=Alfa+Slab+One' rel='stylesheet' type='text/css'>
     </head>
-    <body ng-app="wombleApp" >
-        
-        <div class="modal fade" id="newFeedModal" ng-controller="AddFeedCtrl as ctrl">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title">Add new feed</h4>
-                    </div>
-                    <form ng-submit="ctrl.addNew(ctrl.newFeedURL)">
-                        <div class="modal-body">
-                            <div class="form-group">
-                                <label for="newFeedURL">Feed URL</label>
-                                <input type="url" class="form-control" id="newFeedURL" ng-model="ctrl.newFeedURL"></input>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Add</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-        
-        
+    <body ng-app="wombleApp">
+
+        <div class="reader-navbar">
+            <span class="brand-text">reader</span>
+            <span reader-login></span>
+        </div> 
+
         <div class="container-fluid">
-            <div class="row">
-                <div class="col-md-12">
-                    <h1 style="font-family: 'Monofett'; font-size: 550%">reader</h1>
-                    <reader-login></reader-login>
-                    <hr>
-                </div>
-            </div>
             <div class="row" ng-controller="wombleCtrl as ctrl">
                 <div class="col-md-3 sidebar">
                     <ul class="nav nav-sidebar" ng-repeat="meta in ctrl.feedData.meta()">
                         <li ng-class="{active: meta.apiurl===ctrl.selected}"><a href ng-bind="meta.title" ng-click="ctrl.selected=meta.apiurl"></a></li>
                     </ul>
                     <hr>
-                    <ul class="nav nav-sidebar">
-                        <li ><a href ng-click="" data-toggle="modal" data-target="#newFeedModal">Add feed</a></li>
-                    </ul>
-                    
+                    <form ng-submit="ctrl.addNew(ctrl.newFeedURL)">
+                        <div class="form-group">
+                            <label for="newFeedURL">New feed URL</label>
+                            <input type="url" class="form-control" id="newFeedURL" ng-model="ctrl.newFeedURL"></input>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add</button>
+                    </form>
+ 
                 </div>
                 <div class="col-md-9 main">
 
@@ -66,7 +45,7 @@
                 </div>
             </div>
         </div>
-        <script src="js/bower.js"></script>
+        <script src="js/angular.min.js"></script>
         <script src="js/frontend.min.js"></script> 
     </body>
 </html>

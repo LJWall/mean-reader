@@ -9,27 +9,20 @@ module.exports = function(grunt) {
     config.express = {};
     grunt.loadNpmTasks('grunt-contrib-watch'); 
     config.watch = {};
-    grunt.loadNpmTasks('grunt-bower-concat');
-    config.bower_concat = {};
     grunt.loadNpmTasks('grunt-closure-compiler');
     config['closure-compiler'] = {};
     grunt.loadNpmTasks('grunt-contrib-jshint');
     config.jshint = {};
+    grunt.loadNpmTasks('grunt-contrib-less');
+    config.less= {};
 
-    // Bower dependencies 
-    config.bower_concat.all = {
-        dest: 'frontend_build/js/bower.js',
-        cssDest: 'frontend_build/css/bower.css',
-        callback: function(mainFiles, component) {
-            return mainFiles.map(function(filepath) {
-                // Use minified files if available
-                var min = filepath.replace(/\.js$/, '.min.js');
-                return grunt.file.exists(min) ? min : filepath;
-            });
-        }
-    };
-    config.watch.bower = {files: ['bower.json'], tasks: ['bower_concat:all']};
-    
+    // (some) Bower dependencies
+    config.copy.bower = { files: [
+        {expand: true, flatten: true, src: 'bower_components/angular/angular.min.*', dest: 'frontend_build/js'},
+        {expand: true, flatten: true, src: 'bower_components/font-awesome/css/font-awesome.*', dest: 'frontend_build/css'},
+        {expand: true, flatten: true, src: 'bower_components/font-awesome/fonts/*', dest: 'frontend_build/fonts'}
+    ]};
+
     // JavaScript
     config['closure-compiler'].all = {
         js: 'frontend_src/js/**/*.js',
@@ -46,10 +39,13 @@ module.exports = function(grunt) {
     config.copy.html = {files: [{expand: true, filter: 'isFile', flatten: true, src: 'frontend_src/*.html', dest: 'frontend_build/'}] };
     config.watch.html = {files: ['frontend_src/*.html'], tasks: ['copy:html']};
 
-    // Own CSS
-    config.copy.css = {files: [{expand: true, filter: 'isFile', flatten: true, src: 'frontend_src/*.css', dest: 'frontend_build/css'}] };
-    config.watch.css = {files: ['frontend_src/*.css'], tasks: ['copy:css']};
-    
+    // Own LESS/CSS
+    config.less.all = {
+        options: { paths: ['bower_components/bootstrap/less'] },
+        files: {'frontend_build/css/reader.css': 'frontend_src/less/index.less'}
+    };
+    config.watch.less = {files: ['frontend_src/less/**/*.less'], tasks: ['less']};
+
     // Server
     config.express = { options: {script: 'webserv/main.js'}, dev: {}};
     config.watch.server = {files: ['webserv/*.js', 'webserv/**/*.js'], tasks: ['express:dev:stop', 'express:dev'], options: {spawn: false}};
@@ -60,7 +56,7 @@ module.exports = function(grunt) {
 
     grunt.initConfig(config);
 
-    grunt.registerTask('build', ['bower_concat', 'copy', 'closure-compiler']);
+    grunt.registerTask('build', ['less', 'copy', 'closure-compiler']);
     grunt.registerTask('default',['build']);
     grunt.registerTask('run', ['build', 'express:dev', 'watch']);
     

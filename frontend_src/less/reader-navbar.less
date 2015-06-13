@@ -1,0 +1,47 @@
+
+.reader-navbar {
+    position: fixed;
+    right: 0;
+    left: 0;
+    top: 0;
+    z-index: 99;
+    height: @navbar-height; // Ensure a navbar always shows (e.g., without a .navbar-brand in collapsed mode)
+    margin-bottom: @navbar-margin-bottom;
+    border: 1px solid transparent;
+
+    // Prevent floats from breaking the navbar
+    &:extend(.clearfix all);
+    background-color: @navbar-default-bg;
+    //border-color: @navbar-default-border;
+    border-radius: 0;
+}
+
+
+.reader-navbar > .brand-text {
+    font-family: 'Alfa Slab One', cursive;
+    font-size: (@navbar-height * 0.9);
+    padding: 0em 0.1em 0em 0.1em;
+    margin: 0em;
+    color: white;
+    text-shadow: 1px 1px 2px hsl(195, 100%, 10%); 
+    line-height: 1em;
+    cursor: default;
+    float: left;
+}
+
+.reader-navbar .navbar-lump {
+    .button-size(@padding-base-vertical; @padding-base-horizontal; @font-size-base; @line-height-base; 5px);
+    margin: (@navbar-height - 28px - 2px - 2*@padding-base-vertical)/2 4px;
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    background-color: @variantDark;
+    color: white;
+    border-style: none;
+    line-height: 28px;
+    &:hover {
+        text-decoration: none;
+        background-color: lighten(@variantDark, 5%);
+    }
+}
