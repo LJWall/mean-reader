@@ -3,7 +3,10 @@ var getFeedFromUrl = require('./feed_handle/utils/getFeedFromURL.js'),
     config = require('./config.js'),
     mongoConn = require('./mongoConnect.js'),
     db = mongoConn.connection(),
-    Promise = require('bluebird');
+    Promise = require('bluebird'),
+    request = Promise.promisifyAll(require('request'));
+
+
 
 setTimeout(updateLoop, config.update_initwait);
 
@@ -22,11 +25,25 @@ function updateLoop () {
 function updateFeeds () {
     return db.call('collection', 'feeds')
     .call('aggregateAsync', [
-        {$project: {feedurl: true, user_id:true}},
-        {$group: {_id: {feedurl: '$feedurl'}, user_ids: {$addToSet: '$user_id'} }}
+        {$project: {feedurl: true, user_id:true, last_update: true}},
+        {$group: {_id: {feedurl: '$feedurl'}, user_ids: {$addToSet: '$user_id'}, last_update: {$min: '$last_update'} }}
     ])
     .each(function (feed, index, value)  {
-        return getFeedFromUrl(feed._id.feedurl, false, false)
+        return request.headAsync(feed._id.feedurl)
+        .then(function (results) {
+            var last_mod;
+            try {
+                last_mod = new Date(results[0].headers['last-modified']);
+            } catch (e) {
+                return;
+            }
+            if (feed.last_update > last_mod) {
+                // Not sure it's idiomatic to use errors for control flow
+                // in JS, but hey ho...
+                throw new Error('No recent modifications');
+            }
+        })
+        .then(getFeedFromUrl.bind(null, feed._id.feedurl, false, false))
         .then(function (feed_data) {
             /* Write over the returned feed URL, incase it's been replaced with a differnt
                cannonical URL */
@@ -37,12 +54,13 @@ function updateFeeds () {
         })
         .then(log.bind(null, 'Updated ' + feed._id.feedurl))
         .catch(function (err) {
-            log('Error with ' + feed._id.feedurl + '. Error' + err.toString());
+            log('Not updating ' + feed._id.feedurl + '. Reason: ' + err.message);
         });
     })
     .then(log.bind(null, 'Done for now'))
     .catch(function (err) {
-        log('Aborting current updates. Error' + err.toString());
+        log('Aborting current updates. Error' + err.message);
+        console.log(err.stack);
     });
 }
 
