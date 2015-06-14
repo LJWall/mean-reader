@@ -4,15 +4,15 @@ angular.module('reader.feeds.view')
         templateUrl: 'js/viewFeeds.html',
         scope: {onSelect: '&'},
         restrict: 'AE',
-        link: function ($scope) {
-            var selected;
+        require: '^readerView',
+        link: function ($scope, $element, $attr, readerCtrl) {
             $scope.list = fs.getFeedMetaList;
             $scope.select = function (apiurl) {
-                selected = apiurl;
+                readerCtrl.selectFeed(apiurl);
                 $scope.onSelect({apiurl: apiurl});
             };
             $scope.selected = function (apiurl) {
-                return (selected===apiurl);
+                return readerCtrl.isSelected(apiurl);
             };
         }
     };
