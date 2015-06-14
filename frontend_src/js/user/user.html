@@ -1,9 +1,9 @@
-<span ng-controller="CurrentUserCtrl as c" class="pull-right">
-  <button class="signin-btn" ng-show="c.isAuthenticated()" ng-click="c.logout()">
+<span class="pull-right">
+  <button class="signin-btn" ng-show="isAuthenticated()" ng-click="logout()">
     <span class="signin-btn-icon fa fa-google fa-lg"></span>
-    <span class="signin-btn-text">Sign out {{c.data().displayName}}</span>
+    <span class="signin-btn-text">Sign out {{data().displayName}}</span>
   </button>
-  <a class="signin-btn" href="/reader/auth/google" ng-show="!c.isAuthenticated()">
+  <a class="signin-btn" href="/reader/auth/google" ng-show="!isAuthenticated()">
     <span class="signin-btn-icon fa fa-google fa-lg"></span>
     <span class="signin-btn-text">Sign in</span>
   </a>

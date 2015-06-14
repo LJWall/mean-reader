@@ -36,16 +36,17 @@ angular.module('reader.user', [])
         });
     }
 }])
-.controller('CurrentUserCtrl', ['currentUserService', function (userService) {
-    this.data = function () {return userService.data(); };
-    this.isAuthenticated = function () {return userService.isAuthenticated(); };
-    this.logout = function () {return userService.logout(); };
-}])
-.directive('readerLogin', [function (currentUser) {
+.directive('readerLogin', ['currentUserService', function (currentUser) {
     return {
         templateUrl: 'js/user.html',
         restrict: 'AE',
-        scope: {}
+        scope: {},
+        link: function ($scope) {
+            $scope.data = function () {return currentUser.data(); };
+            $scope.isAuthenticated = function () {return currentUser.isAuthenticated(); };
+            $scope.logout = function () {return currentUser.logout(); };
+
+         }
     };
 }]);
 
