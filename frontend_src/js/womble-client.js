@@ -1,7 +1,7 @@
 (function () {
     "use strict";
     
-    var wombleApp = angular.module('wombleApp', ['reader.xsrf', 'reader.user']);
+    var wombleApp = angular.module('wombleApp', ['reader.xsrf', 'reader.user', 'reader.feeds.add']);
     
     wombleApp.factory('wombleService', ['$http', function ($http) {
         var meta_data = [];
@@ -50,18 +50,10 @@
             meta: ws.getFeedMetaList,
             items: ws.getFeedItems
         };
-        
+
         this.selectItem = function (post) {
             post.markAsRead(true);
             $window.open(post.link, '_blank');
         };
-        
     }]);
-
-    wombleApp.controller('AddFeedCtrl', ['wombleService', function (ws) {
-        this.addNew = function (url) {
-            ws.addNew(url);
-        };
-    }]);
-    
 })();

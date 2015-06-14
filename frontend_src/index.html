@@ -29,13 +29,7 @@
           </li>
         </ul>
         <hr>
-        <form ng-submit="ctrl.addNew(ctrl.newFeedURL)">
-          <div class="form-group">
-            <label for="newFeedURL">New feed URL</label>
-            <input type="url" class="form-control" id="newFeedURL" ng-model="ctrl.newFeedURL"></input>
-          </div>
-          <button type="submit" class="btn btn-primary">Add</button>
-        </form>
+        <div reader-add-feed-form></div>
       </div>
 
       <div class="col-sm-9">
