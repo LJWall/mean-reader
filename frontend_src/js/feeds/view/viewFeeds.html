@@ -1,0 +1,7 @@
+<ul class="nav nav-sidebar" ng-repeat="meta in list()">
+  <li ng-class="{active: selected(meta.apiurl)}">
+    <a href ng-click="select(meta.apiurl)">
+      <i ng-class="{fa: true, 'fa-folder': !selected(meta.apiurl),  'fa-folder-open': selected(meta.apiurl)}"></i> {{meta.title}}
+    </a>
+  </li>
+</ul>

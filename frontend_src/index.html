@@ -19,15 +19,9 @@
     <div class="col-sm-9"><button class="btn btn-primary">Mark all as read</button></div>
   </div></div></div>
   <div ng-controller="wombleCtrl as ctrl" class="container-fluid">
-    <div class="row">
+    <div reader-view class="row">
       <div class="col-sm-3 hidden-xs sidebar">
-        <ul class="nav nav-sidebar" ng-repeat="meta in ctrl.feedData.meta()">
-          <li ng-class="{active: meta.apiurl===ctrl.selected}">
-            <a href ng-click="ctrl.selected=meta.apiurl">
-              <i ng-class="{fa: true, 'fa-folder': !(meta.apiurl===ctrl.selected),  'fa-folder-open': (meta.apiurl===ctrl.selected)}"></i> {{meta.title}}
-            </a>
-          </li>
-        </ul>
+        <div reader-view-feeds on-select="ctrl.selectFeed(apiurl)"></div>
         <hr>
         <div reader-add-feed-form></div>
       </div>

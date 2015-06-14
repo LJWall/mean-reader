@@ -1,5 +1,5 @@
 angular.module('reader.feeds.add')
-.directive('readerAddFeedForm', ['wombleService', function (feedService) {
+.directive('readerAddFeedForm', ['feedService', function (feedService) {
     return {
         templateUrl: 'js/add.html',
         restrict: 'AE',
