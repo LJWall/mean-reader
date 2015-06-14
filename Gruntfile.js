@@ -15,23 +15,33 @@ module.exports = function(grunt) {
     config.jshint = {};
     grunt.loadNpmTasks('grunt-contrib-less');
     config.less= {};
+    grunt.loadNpmTasks('grunt-contrib-concat');
+    config.concat = {};
 
     // (some) Bower dependencies
     config.copy.bower = { files: [
-        {expand: true, flatten: true, src: 'bower_components/angular/angular.min.*', dest: 'frontend_build/js'},
+        {expand: true, flatten: true, src: 'bower_components/angular/angular.*', dest: 'frontend_build/js'},
         {expand: true, flatten: true, src: 'bower_components/font-awesome/css/font-awesome.*', dest: 'frontend_build/css'},
         {expand: true, flatten: true, src: 'bower_components/font-awesome/fonts/*', dest: 'frontend_build/fonts'}
     ]};
 
-    // JavaScript
+    // frontend JavaScript (minified and optimised)
     config['closure-compiler'].all = {
         js: 'frontend_src/js/**/*.js',
         jsOutputFile: 'frontend_build/js/frontend.min.js',
         reportFile: 'closure-compiler.report.txt', 
         options: {compilation_level: 'SIMPLE', language_in: 'ECMASCRIPT5_STRICT'}
     };
-    config.watch.js = {files: ['frontend_src/**/*.js'], tasks: ['closure-compiler:all']};
 
+    // frontend Javascript (basic concat)
+    config.concat.frontendjs = {
+        src: ['frontend_src/js/**/*.js'],
+        dest: 'frontend_build/js/frontend.js'
+    };
+
+    config.watch.js = {files: ['frontend_src/**/*.js'], tasks: ['closure-compiler:all', 'concat']};
+
+    // Angual tempales
     config.copy.htmlTemplates = {files: [{expand: true, filter: 'isFile', flatten: true, src: 'frontend_src/js/**/*.html', dest: 'frontend_build/js'}] };
     config.watch.htmlTemplates = {files: ['frontend_src/**/*.html'], tasks: ['copy:htmlTemplates']};
 
@@ -56,7 +66,7 @@ module.exports = function(grunt) {
 
     grunt.initConfig(config);
 
-    grunt.registerTask('build', ['less', 'copy', 'closure-compiler']);
+    grunt.registerTask('build', ['less', 'copy', 'closure-compiler', 'concat']);
     grunt.registerTask('default',['build']);
     grunt.registerTask('run', ['build', 'express:dev', 'watch']);
     
