@@ -1,51 +1,55 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>read</title>
-        <link rel="stylesheet" href="css/reader.css"> 
-        <link rel="stylesheet" href="css/font-awesome.min.css"> 
-        <link href='//fonts.googleapis.com/css?family=Alfa+Slab+One' rel='stylesheet' type='text/css'>
-    </head>
-    <body ng-app="wombleApp">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>read</title>
+  <link rel="stylesheet" href="css/reader.css">
+  <link rel="stylesheet" href="css/font-awesome.min.css">
+  <link href='//fonts.googleapis.com/css?family=Alfa+Slab+One' rel='stylesheet' type='text/css'>
+</head>
+<body ng-app="wombleApp">
+  <div class="reader-navbar">
+    <span class="brand-text"><i class="fa fa-book hidden-xs"></i> reader</span>
+    <span reader-login></span>
+  </div>
+  <div class="reader-navbar-two"><div class="container-fluid"><div class="row">
+    <div class="col-sm-3 hidden-xs">
+      <!--<button class="btn btn-primary"><i class="fa fa-plus"></i> Add feed</button>-->
+    </div>
+    <div class="col-sm-9"><button class="btn btn-primary">Mark all as read</button></div>
+  </div></div></div>
+  <div ng-controller="wombleCtrl as ctrl" class="container-fluid">
+    <div class="row">
+      <div class="col-sm-3 hidden-xs sidebar">
+        <ul class="nav nav-sidebar" ng-repeat="meta in ctrl.feedData.meta()">
+          <li ng-class="{active: meta.apiurl===ctrl.selected}">
+            <a href ng-click="ctrl.selected=meta.apiurl">
+              <i ng-class="{fa: true, 'fa-folder': !(meta.apiurl===ctrl.selected),  'fa-folder-open': (meta.apiurl===ctrl.selected)}"></i> {{meta.title}}
+            </a>
+          </li>
+        </ul>
+        <hr>
+        <form ng-submit="ctrl.addNew(ctrl.newFeedURL)">
+          <div class="form-group">
+            <label for="newFeedURL">New feed URL</label>
+            <input type="url" class="form-control" id="newFeedURL" ng-model="ctrl.newFeedURL"></input>
+          </div>
+          <button type="submit" class="btn btn-primary">Add</button>
+        </form>
+      </div>
 
-        <div class="reader-navbar">
-            <span class="brand-text">reader</span>
-            <span reader-login></span>
-        </div> 
+      <div class="col-sm-9">
+        <table class="table">
+          <tr ng-repeat="item in ctrl.feedData.items() | filter:{meta_apiurl: ctrl.selected} | orderBy:'-pubdate'" ng-class="{info: !item.read}">
+            <td><a href ng-click="ctrl.selectItem(item)">{{item.title}}</a></td>
+            <td>{{item.pubdate | date: 'dd/MMM/yyyy' }}</td>
+          </tr>
+        </table>
+      </div>
+    </div>
 
-        <div class="container-fluid">
-            <div class="row" ng-controller="wombleCtrl as ctrl">
-                <div class="col-md-3 sidebar">
-                    <ul class="nav nav-sidebar" ng-repeat="meta in ctrl.feedData.meta()">
-                        <li ng-class="{active: meta.apiurl===ctrl.selected}"><a href ng-bind="meta.title" ng-click="ctrl.selected=meta.apiurl"></a></li>
-                    </ul>
-                    <hr>
-                    <form ng-submit="ctrl.addNew(ctrl.newFeedURL)">
-                        <div class="form-group">
-                            <label for="newFeedURL">New feed URL</label>
-                            <input type="url" class="form-control" id="newFeedURL" ng-model="ctrl.newFeedURL"></input>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Add</button>
-                    </form>
- 
-                </div>
-                <div class="col-md-9 main">
-
-                    <div class="row">
-                        <div class="col-md-12">
-                            <table class="table">
-                                <tr ng-repeat="item in ctrl.feedData.items() | filter:{meta_apiurl: ctrl.selected} | orderBy:'-pubdate'" ng-class="{info: !item.read}">
-                                    <td><a href ng-click="ctrl.selectItem(item)">{{item.title}}</a></td>
-                                    <td>{{item.pubdate | date: 'dd/MMM/yyyy' }}</td>
-                                </tr>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <script src="js/angular.min.js"></script>
-        <script src="js/frontend.min.js"></script> 
-    </body>
+  </div>
+  <script src="js/angular.min.js"></script>
+  <script src="js/frontend.min.js"></script>
+</body>
 </html>

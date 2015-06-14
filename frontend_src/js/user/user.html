@@ -1,16 +1,11 @@
-<span ng-controller="CurrentUserCtrl as c">
-    <button class="navbar-lump pull-right" ng-show="c.isAuthenticated()" ng-click="c.logout()"> 
-         <span class="fa-stack">
-            <i class="fa fa-square-o fa-stack-2x"></i>
-            <i class="fa fa-google fa-stack-1x"></i>
-        </span>
-        {{c.data().displayName}}
-    </button>
-    <a class="navbar-lump pull-right" href="/reader/auth/google" ng-show="!c.isAuthenticated()">
-        Sign in with 
-        <span class="fa-stack">
-            <i class="fa fa-square-o fa-stack-2x"></i>
-            <i class="fa fa-google fa-stack-1x"></i>
-        </span>
-    </a>
+<span ng-controller="CurrentUserCtrl as c" class="pull-right">
+  <button class="signin-btn" ng-show="c.isAuthenticated()" ng-click="c.logout()">
+    <span class="signin-btn-icon fa fa-google fa-lg"></span>
+    <span class="signin-btn-text">Sign out {{c.data().displayName}}</span>
+  </button>
+  <a class="signin-btn" href="/reader/auth/google" ng-show="!c.isAuthenticated()">
+    <span class="signin-btn-icon fa fa-google fa-lg"></span>
+    <span class="signin-btn-text">Sign in</span>
+  </a>
 </span>
+
