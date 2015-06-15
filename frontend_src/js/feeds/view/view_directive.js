@@ -4,7 +4,7 @@ angular.module('reader.feeds.view')
         template: '<div ng-transclude></div>',
         transclude: true,
         retrict: 'AE',
-        controller: ['$scope', function ($scope) {
+        controller: function () {
             var selected;
             this.selectFeed = function (apiurl) {
                 selected = apiurl;
@@ -15,6 +15,6 @@ angular.module('reader.feeds.view')
             this.selected = function () {
                 return selected;
             };
-        }]
+        }
     };
 }]);

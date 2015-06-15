@@ -1,0 +1,6 @@
+<table class="table">
+  <tr ng-repeat="item in items() | filter:{meta_apiurl: selected()} | orderBy:'-pubdate'" ng-class="{info: !item.read}">
+    <td><a href ng-click="selectItem(item)">{{item.title}}</a></td>
+    <td>{{item.pubdate | date: 'dd/MMM/yyyy' }}</td>
+  </tr>
+</table>

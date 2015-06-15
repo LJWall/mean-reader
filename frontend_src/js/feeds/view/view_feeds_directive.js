@@ -11,9 +11,7 @@ angular.module('reader.feeds.view')
                 readerCtrl.selectFeed(apiurl);
                 $scope.onSelect({apiurl: apiurl});
             };
-            $scope.selected = function (apiurl) {
-                return readerCtrl.isSelected(apiurl);
-            };
+            $scope.selected = readerCtrl.isSelected;
         }
     };
 }]);

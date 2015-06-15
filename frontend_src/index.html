@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="css/font-awesome.min.css">
   <link href='//fonts.googleapis.com/css?family=Alfa+Slab+One' rel='stylesheet' type='text/css'>
 </head>
-<body ng-app="wombleApp">
+<body ng-app="readerApp">
   <div class="reader-navbar">
     <span class="brand-text"><i class="fa fa-book hidden-xs"></i> reader</span>
     <span class="pull-right" reader-login></span>
@@ -18,7 +18,7 @@
     </div>
     <div class="col-sm-9"><button class="btn btn-primary">Mark all as read</button></div>
   </div></div></div>
-  <div ng-controller="wombleCtrl as ctrl" class="container-fluid">
+  <div class="container-fluid">
     <div reader-view class="row">
       <div class="col-sm-3 hidden-xs sidebar">
         <div reader-view-feeds on-select="ctrl.selectFeed(apiurl)"></div>
@@ -26,14 +26,7 @@
         <div reader-add-feed-form></div>
       </div>
 
-      <div class="col-sm-9">
-        <table class="table">
-          <tr ng-repeat="item in ctrl.feedData.items() | filter:{meta_apiurl: ctrl.selected} | orderBy:'-pubdate'" ng-class="{info: !item.read}">
-            <td><a href ng-click="ctrl.selectItem(item)">{{item.title}}</a></td>
-            <td>{{item.pubdate | date: 'dd/MMM/yyyy' }}</td>
-          </tr>
-        </table>
-      </div>
+      <div class="col-sm-9" reader-view-items></div>
     </div>
 
   </div>
