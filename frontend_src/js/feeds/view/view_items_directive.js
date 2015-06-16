@@ -1,5 +1,5 @@
 angular.module('reader.feeds.view')
-.directive('readerViewItems', ['feedService', '$window', function (fs) {
+.directive('readerViewItems', ['feedService', '$window', function (fs, $window) {
     return {
         templateUrl: 'js/viewItems.html',
         scope: {},
@@ -9,8 +9,8 @@ angular.module('reader.feeds.view')
             $scope.items = fs.getFeedItems;
             $scope.selected = readerCtrl.selected;
             $scope.selectItem = function (item) {
-                post.markAsRead(true);
-                $window.open(post.link, '_blank');
+                item.markAsRead(true);
+                $window.open(item.link, '_blank');
             };
         }
     };
