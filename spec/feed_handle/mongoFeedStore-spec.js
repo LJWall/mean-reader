@@ -45,9 +45,12 @@ describe('mongoFeedStore', function () {
                 expect(db_data[0].length).toEqual(1);
                 expect(db_data[0][0].title).toEqual('blog');
                 expect(db_data[0][0].user_id).toEqual('FOO_UID');
+                expect(db_data[0][0].last_update).toBeDefined();
                 expect(db_data[1].length).toEqual(2);
                 expect(db_data[1]).toContain(jasmine.objectContaining({guid: '1', title: 'T1', user_id: 'FOO_UID'}));
                 expect(db_data[1]).toContain(jasmine.objectContaining({guid: '2', title: 'T2', user_id: 'FOO_UID'}));
+                expect(db_data[1][0].last_update).toBeDefined();
+                expect(db_data[1][1].last_update).toBeDefined();
             })
             .done(done);
         });
