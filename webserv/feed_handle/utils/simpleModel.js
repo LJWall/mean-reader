@@ -13,10 +13,18 @@ var augment = function (collection, result) {
                     Object.keys(result).forEach(function (key) {
                         set[key] = result[key];
                     });
-                    return collection.call('updateOneAsync', q, {$set: set});
+                    return collection.call('updateOneAsync', q, {
+                        $set: set,
+                        $currentDate: {last_update: true}
+                    });
                 }
             },
             _id: {
+                enumerable: false,
+                configurable: false,
+                writable: false
+            },
+            last_update: {
                 enumerable: false,
                 configurable: false,
                 writable: false

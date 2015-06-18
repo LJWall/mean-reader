@@ -43,7 +43,7 @@ describe('simpleModel [integration]', function () {
         .then(function (result) {
             expect(result.length).toEqual(3);
             expect(result).toContain({_id: 100, foo: 1, bar: 'a'});
-            expect(result).toContain({_id: 101, foo: 2, bar: 'b', more: {hello: 'world'}});
+            expect(result).toContain(jasmine.objectContaining({_id: 101, foo: 2, bar: 'b', more: {hello: 'world'}}));
             expect(result).toContain({_id: 102, foo: 3, bar: 'c'});
         })
         .done(done);
@@ -64,11 +64,22 @@ describe('simpleModel [integration]', function () {
             expect(result.length).toEqual(3);
             expect(result).toContain({_id: 100, foo: 1, bar: 'a'});
             expect(result).toContain({_id: 101, foo: 2, bar: 'b'});
-            expect(result).toContain({_id: 102, foo: 3, bar: 'c', more: {tea: 'time'}});
+            expect(result).toContain(jasmine.objectContaining({_id: 102, foo: 3, bar: 'c', more: {tea: 'time'}}));
         })
         .done(done);
     });
-    
+    it('should add a last_update field on save()', function (done) {
+        model.findOne({foo: 2})
+        .call('save')
+        .then(function () {
+            return  model.findOne({foo: 2});
+        })
+        .then(function (result) {
+            expect(result.last_update).toBeDefined();
+        })
+        .done(done);
+    });
+
     it('should return null from .findOne() if not found', function (done) {
         model.findOne({foo: 42})
         .then(function (result) {
