@@ -7,12 +7,23 @@ module.exports = function (url_for) {
     var feedModel = feedModelMaker();
     return {
         getAll: function (req, res) {
+            var last_update = {dt: new Date('2000-01-01')},
+                query = {user_id: req.user._id};
+            if (req.query.updated_since) {
+                try {
+                    var dt = new Date(req.query.updated_since);
+                    query.last_update = {$gt: dt};
+                }
+                catch (e) {
+                    res.status(500).end();
+                }
+            }
             Promise.props({
-                meta: feedModel.feeds.findMany({user_id: req.user._id}).reduce(reducer.bind(null, cleanMeta), []),
-                items: feedModel.posts.findMany({user_id: req.user._id}).reduce(reducer.bind(null, cleanItem), [])
+                meta: feedModel.feeds.findMany(query).reduce(reducer.bind(last_update, cleanMeta), []),
+                items: feedModel.posts.findMany(query).reduce(reducer.bind(last_update, cleanItem), [])
             })
             .then(function (data) {
-                res.status(200).json(data);
+                res.status(200).set('last-modified', last_update.dt).json(data);
             })
             .done();
         },
@@ -72,6 +83,9 @@ module.exports = function (url_for) {
     function reducer(cleaner, total, item) {
         try {
             total.push(cleaner(item));
+            if (item.last_update && item.last_update.getTime() > this.dt.getTime()) {
+                this.dt = item.last_update;
+            }
         }
         catch (e) {
             // loggging?

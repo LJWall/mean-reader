@@ -22,10 +22,10 @@ describe('api_views object', function () {
         meta, item, meta_res, item_res;
         
     function resetTestData() {
-        meta = [{_id: new ObjectID(), feedurl: 'url1', title: 'Blog1', description: 'Interesting', surplus_data: 'junk', save: saveSpy},
-                {_id: new ObjectID(), feedurl: 'url2', title: 'Blog2', link: 'link2', surplus_data: 'junk', save: saveSpy}];
-        item = [{_id: new ObjectID(), meta_id: meta[0]._id, link: 'itemlink1', title: 'Foo', surplus_data: 'junk', pubdate: '2015-01-01', save: saveSpy},
-                {_id: new ObjectID(), meta_id: meta[1]._id, link: 'itemlink2', title: 'Bar', surplus_data: 'junk', pubdate: '2015-01-02', read: true, save: saveSpy}];
+        meta = [{_id: new ObjectID(), feedurl: 'url1', title: 'Blog1', description: 'Interesting', surplus_data: 'junk', save: saveSpy, last_update: new Date('2000-01-01 12:00')},
+                {_id: new ObjectID(), feedurl: 'url2', title: 'Blog2', link: 'link2', surplus_data: 'junk', save: saveSpy, last_update: new Date('2000-01-01 14:00')}];
+        item = [{_id: new ObjectID(), meta_id: meta[0]._id, link: 'itemlink1', title: 'Foo', surplus_data: 'junk', pubdate: '2015-01-01', save: saveSpy, last_update: new Date('2000-01-01 13:00')},
+                {_id: new ObjectID(), meta_id: meta[1]._id, link: 'itemlink2', title: 'Bar', surplus_data: 'junk', pubdate: '2015-01-02', read: true, save: saveSpy, last_update: new Date('2000-01-01 15:00')}];
         meta_res = [{apiurl: '/feeds/' + meta[0]._id.toString(), feedurl: 'url1', title: 'Blog1', description: 'Interesting'},
                     {apiurl: '/feeds/' + meta[1]._id.toString(), feedurl: 'url2', title: 'Blog2', link: 'link2'}];
         item_res = [{apiurl: '/items/' + item[0]._id.toString(), meta_apiurl: '/feeds/' + meta[0]._id.toString(), link: 'itemlink1', title: 'Foo', pubdate: '2015-01-01', read: false},
@@ -36,6 +36,7 @@ describe('api_views object', function () {
     function resetSpies() {
         spyRes.json.calls.reset();
         spyRes.status.calls.reset();
+        spyRes.set.calls.reset();
         mockFeedModel.add.calls.reset();
         mockFeedModel.feeds.findOne.calls.reset();
         mockFeedModel.feeds.findMany.calls.reset();
@@ -76,8 +77,9 @@ describe('api_views object', function () {
         api_views_maker.__set__('feedModelMaker', function () { return mockFeedModel; });
         api_views = api_views_maker(mockUrlFor);
         
-        spyRes = jasmine.createSpyObj('res', ['json', 'status', 'end']);
+        spyRes = jasmine.createSpyObj('res', ['json', 'status', 'end', 'set']);
         spyRes.status.and.returnValue(spyRes);
+        spyRes.set.and.returnValue(spyRes);
         spyRes.events = new events.EventEmitter();
         spyRes.json.and.callFake(function () {
             setTimeout(spyRes.events.emit.bind(spyRes.events, 'responseComplete'), 0);
@@ -92,7 +94,7 @@ describe('api_views object', function () {
     describe('getAll method', function () {
         beforeAll(function (done) {
             spyRes.events.once('responseComplete', done);
-            api_views.getAll({user: {_id: 'FOO_UID'}}, spyRes);
+            api_views.getAll({user: {_id: 'FOO_UID'}, query: {}}, spyRes);
         });
         afterAll(resetSpies);
         afterAll(clearListner);
@@ -106,9 +108,26 @@ describe('api_views object', function () {
         it('should return all the data using res.json()', function () {
             expect(spyRes.json.calls.allArgs()).toEqual([[{meta: meta_res, items: item_res}]]);
         });
-        it('should only return results for the authenticated user', function () {
+        it('should only look for results for the authenticated user', function () {
             expect(mockFeedModel.feeds.findMany.calls.allArgs()).toEqual([[{user_id: 'FOO_UID'}]]);
             expect(mockFeedModel.posts.findMany.calls.allArgs()).toEqual([[{user_id: 'FOO_UID'}]]);
+        });
+        it('should set a last-modified header', function () {
+            expect(spyRes.set.calls.argsFor(0)).toEqual(['last-modified', new Date('2000-01-01 15:00')]);
+        });
+    });
+
+    describe('getAll method with updated_since query paramter', function () {
+        beforeAll(function (done) {
+            this.updated_since =  new Date('2000-01-01 13:30');
+            spyRes.events.once('responseComplete', done);
+            api_views.getAll({user: {_id: 'FOO_UID'}, query: {updated_since: this.updated_since}}, spyRes);
+        });
+        afterAll(resetSpies);
+        afterAll(clearListner);
+        it('should only look for subsequntly updated data', function () {
+            expect(mockFeedModel.feeds.findMany.calls.allArgs()).toEqual([[{user_id: 'FOO_UID', last_update: {$gt: this.updated_since}}]]);
+            expect(mockFeedModel.posts.findMany.calls.allArgs()).toEqual([[{user_id: 'FOO_UID', last_update: {$gt: this.updated_since}}]]);
         });
     });
     
