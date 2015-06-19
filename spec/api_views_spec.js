@@ -11,10 +11,6 @@ describe('api_views modulue', function () {
         expect(typeof api_views_maker).toEqual('function');
         expect(api_views_maker.length).toEqual(1);
     });
-    
-    it('should use nice \'cleaning\' functions', function () {
-        pending('should test the cleaning function, and the one using reduce to filter out errors.');
-    });
 });
 
 describe('api_views object', function () {
@@ -131,6 +127,21 @@ describe('api_views object', function () {
         });
     });
     
+    describe('headAll', function () {
+        beforeAll(function (done) {
+            spyRes.events.once('responseComplete', done);
+            api_views.headAll({user: {_id: 'FOO_UID'}}, spyRes);
+        });
+        afterAll(resetSpies);
+        afterAll(clearListner);
+        it('should return a 200 code', function () {
+            expect(spyRes.status).toHaveBeenCalledWith(200);
+        });
+        it('should include a last-modified header', function () {
+            pending('Refactor the test routines to use actual mongo not mock mongo');
+        });
+    });
+
     describe('putPost method', function () {
         it('should take two parameters', function () {
             expect(api_views.putPost.length).toEqual(2);

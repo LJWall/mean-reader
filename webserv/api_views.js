@@ -27,6 +27,9 @@ module.exports = function (url_for) {
             })
             .done();
         },
+        headAll: function (req, res) {
+            res.status(200).end();
+        },
         postAdd: function (req, res) {
             if (req.body.feedurl) {
                 var feed_url = req.body.feedurl;
