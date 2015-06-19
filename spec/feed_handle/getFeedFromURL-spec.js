@@ -4,12 +4,8 @@ var feed_server = require('./test_atomserv/feed_server'),
 
     
 describe('getFeedFromURL', function () {
-    beforeAll(function () {
-        feed_server.startServer();
-    });
-    afterAll(function () {
-        feed_server.stopServer();
-    });
+    beforeAll(feed_server.startServer);
+    afterAll(feed_server.stopServer);
 
     it('should should be able to follow alternate links in a webpage', function (done) {
         getFeedFromURL('http://127.0.0.1:1337/not_a_feed.html', true)
