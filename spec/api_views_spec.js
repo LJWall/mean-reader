@@ -2,8 +2,48 @@ var rewire = require('rewire'),
     api_views_maker = rewire('../webserv/api_views'),
     Promise = require('bluebird'),
     ObjectID = require('mongodb').ObjectID,
-    events = require('events');
+    events = require('events'),
+    test_data = require('./api_views_test_data.json'),
+    mongoConn = require('../webserv/mongoConnect.js'),
+    feed_server = require('./feed_handle/test_atomserv/feed_server'),
+    i, mockUrlFor;
 
+
+function prepTestData () {
+    for (i=0; i<test_data.meta.length; i++) {
+        test_data.meta[i].last_update = new Date(test_data.meta[i].last_update);
+    }
+    for (i=0; i<test_data.item.length; i++) {
+        test_data.item[i].last_update = new Date(test_data.item[i].last_update);
+        test_data.item[i].pubdate = new Date(test_data.item[i].pubdate);
+    }
+}
+
+function insertTestData (done) {
+    var conn = mongoConn.connection(),
+        insert_res = conn.call('collection', 'feeds').call('insertManyAsync', test_data.meta);
+
+    var p1 = Promise.each(insert_res.get('ops'), function (meta, i) {
+        test_data.meta[i]._id = test_data.item[i].meta_id = meta._id;
+    });
+
+    var p2 = p1.then(function () {
+        return conn.call('collection', 'posts').call('insertManyAsync', test_data.item);
+    });
+
+    Promise.each(p2.get('ops'), function (item, i) {
+        test_data.item[i]._id = item._id;
+    })
+    .done(done);
+}
+function deleteTestData (done) {
+    var conn = mongoConn.connection();
+    Promise.join(
+        conn.call('collection', 'feeds').call('deleteManyAsync', {}),
+        conn.call('collection', 'posts').call('deleteManyAsync', {})
+    )
+    .done(done);
+}
 
 
 describe('api_views modulue', function () {
@@ -16,63 +56,29 @@ describe('api_views modulue', function () {
 describe('api_views object', function () {
     var api_views, spyRes, mockFeedModel, saveSpy,
         meta, item, meta_res, item_res;
-        
-    function resetTestData() {
-        meta = [{_id: new ObjectID(), feedurl: 'url1', title: 'Blog1', description: 'Interesting', surplus_data: 'junk', save: saveSpy, last_update: new Date('2000-01-01 12:00')},
-                {_id: new ObjectID(), feedurl: 'url2', title: 'Blog2', link: 'link2', surplus_data: 'junk', save: saveSpy, last_update: new Date('2000-01-01 14:00')}];
-        item = [{_id: new ObjectID(), meta_id: meta[0]._id, link: 'itemlink1', title: 'Foo', surplus_data: 'junk', pubdate: '2015-01-01', save: saveSpy, last_update: new Date('2000-01-01 13:00')},
-                {_id: new ObjectID(), meta_id: meta[1]._id, link: 'itemlink2', title: 'Bar', surplus_data: 'junk', pubdate: '2015-01-02', read: true, save: saveSpy, last_update: new Date('2000-01-01 15:00')}];
-        meta_res = [{apiurl: '/feeds/' + meta[0]._id.toString(), feedurl: 'url1', title: 'Blog1', description: 'Interesting'},
-                    {apiurl: '/feeds/' + meta[1]._id.toString(), feedurl: 'url2', title: 'Blog2', link: 'link2'}];
-        item_res = [{apiurl: '/items/' + item[0]._id.toString(), meta_apiurl: '/feeds/' + meta[0]._id.toString(), link: 'itemlink1', title: 'Foo', pubdate: '2015-01-01', read: false},
-                    {apiurl: '/items/' + item[1]._id.toString(), meta_apiurl: '/feeds/' + meta[1]._id.toString(), link: 'itemlink2', title: 'Bar', pubdate: '2015-01-02', read: true}];
-    }
-        
-            
+
+    beforeAll(prepTestData);
+    beforeAll(feed_server.startServer);
+    afterAll(feed_server.stopServer);
+
     function resetSpies() {
         spyRes.json.calls.reset();
         spyRes.status.calls.reset();
         spyRes.set.calls.reset();
-        mockFeedModel.add.calls.reset();
-        mockFeedModel.feeds.findOne.calls.reset();
-        mockFeedModel.feeds.findMany.calls.reset();
-        mockFeedModel.posts.findOne.calls.reset();
-        mockFeedModel.posts.findMany.calls.reset();
-        saveSpy.calls.reset();
     }
-    
+
     function clearListner() {
         spyRes.events.removeAllListeners();
     }
-    
+
     beforeAll(function () {
-        saveSpy = jasmine.createSpy('modelSave').and.callFake(function () { return Promise.resolve(this); });
-        resetTestData();
-        mockFeedModel = {
-            feeds: {
-                findOne: jasmine.createSpy('feedsFindOne').and.callFake(function () { return Promise.resolve(meta[0]); }),
-                findMany: jasmine.createSpy('feedsFindMany').and.callFake(function () { return Promise.resolve(meta); })
-            },
-            posts: {
-                findOne: jasmine.createSpy('postsFindOne').and.callFake(function (q) {
-                    if (q && q._id) {
-                        if (q._id.toHexString()===item[0]._id.toHexString()) return Promise.resolve(item[0]);
-                        if (q._id.toHexString()===item[1]._id.toHexString()) return Promise.resolve(item[1]);
-                    }
-                    return Promise.resolve(null);
-                }),
-                findMany: jasmine.createSpy('postsFindMnay').and.callFake(function () { return Promise.resolve(item); })
-            },
-            add: jasmine.createSpy('feedModelAdd').and.returnValue(Promise.resolve({_id: 'spam', title: 'wombles'}))
-        };
-        var mockUrlFor = {
+        mockUrlFor = {
             feed: function (id) {return '/feeds/'+id;},
             item: function (id) {return '/items/'+id;},
         };
-        
-        api_views_maker.__set__('feedModelMaker', function () { return mockFeedModel; });
+
         api_views = api_views_maker(mockUrlFor);
-        
+
         spyRes = jasmine.createSpyObj('res', ['json', 'status', 'end', 'set']);
         spyRes.status.and.returnValue(spyRes);
         spyRes.set.and.returnValue(spyRes);
@@ -86,48 +92,68 @@ describe('api_views object', function () {
             return spyRes;
         });
     });
-    
+
     describe('getAll method', function () {
+        beforeAll(insertTestData);
+        afterAll(deleteTestData);
         beforeAll(function (done) {
             spyRes.events.once('responseComplete', done);
             api_views.getAll({user: {_id: 'FOO_UID'}, query: {}}, spyRes);
         });
         afterAll(resetSpies);
         afterAll(clearListner);
-        
+
         it('should take two paramters', function () {
             expect(api_views.getAll.length).toEqual(2);
         });
         it('should return return a 200 code.', function () {
             expect(spyRes.status.calls.allArgs()).toEqual([[200]]);
         });
-        it('should return all the data using res.json()', function () {
-            expect(spyRes.json.calls.allArgs()).toEqual([[{meta: meta_res, items: item_res}]]);
-        });
-        it('should only look for results for the authenticated user', function () {
-            expect(mockFeedModel.feeds.findMany.calls.allArgs()).toEqual([[{user_id: 'FOO_UID'}]]);
-            expect(mockFeedModel.posts.findMany.calls.allArgs()).toEqual([[{user_id: 'FOO_UID'}]]);
+        it('should return data (for the authenticated user) using res.json()', function () {
+            expect(spyRes.json.calls.count()).toEqual(1);
+            var data = spyRes.json.calls.argsFor(0)[0];
+            expect(data.meta.length).toEqual(1);
+            expect(data.meta[0]).toEqual({
+                feedurl: test_data.meta[0].feedurl,
+                title: test_data.meta[0].title,
+                description: test_data.meta[0].description,
+                apiurl: mockUrlFor.feed(test_data.meta[0]._id)
+            });
+            expect(data.items.length).toEqual(1);
+            expect(data.items[0]).toEqual({
+                apiurl: mockUrlFor.item(test_data.item[0]._id),
+                meta_apiurl:  mockUrlFor.feed(test_data.item[0].meta_id),
+                link: test_data.item[0].link,
+                title: test_data.item[0].title,
+                pubdate: test_data.item[0].pubdate,
+                read: false
+            });
         });
         it('should set a last-modified header', function () {
-            expect(spyRes.set.calls.argsFor(0)).toEqual(['last-modified', new Date('2000-01-01 15:00')]);
+            expect(spyRes.set.calls.argsFor(0)).toEqual(['last-modified', new Date('2000-01-01 13:00')]);
         });
     });
 
     describe('getAll method with updated_since query paramter', function () {
+        beforeAll(insertTestData);
+        afterAll(deleteTestData);
         beforeAll(function (done) {
-            this.updated_since =  new Date('2000-01-01 13:30');
+            this.updated_since =  new Date('2000-01-01 12:30');
             spyRes.events.once('responseComplete', done);
             api_views.getAll({user: {_id: 'FOO_UID'}, query: {updated_since: this.updated_since}}, spyRes);
         });
         afterAll(resetSpies);
         afterAll(clearListner);
-        it('should only look for subsequntly updated data', function () {
-            expect(mockFeedModel.feeds.findMany.calls.allArgs()).toEqual([[{user_id: 'FOO_UID', last_update: {$gt: this.updated_since}}]]);
-            expect(mockFeedModel.posts.findMany.calls.allArgs()).toEqual([[{user_id: 'FOO_UID', last_update: {$gt: this.updated_since}}]]);
+        it('should only return newly updated data', function () {
+            var data = spyRes.json.calls.argsFor(0)[0];
+            expect(data.meta.length).toEqual(0);
+            expect(data.items.length).toEqual(1);
         });
     });
-    
+
     describe('headAll', function () {
+        beforeAll(insertTestData);
+        afterAll(deleteTestData);
         beforeAll(function (done) {
             spyRes.events.once('responseComplete', done);
             api_views.headAll({user: {_id: 'FOO_UID'}}, spyRes);
@@ -146,55 +172,74 @@ describe('api_views object', function () {
         it('should take two parameters', function () {
             expect(api_views.putPost.length).toEqual(2);
         });
-        
+
         describe('[usual request process]', function () {
+            beforeAll(insertTestData);
+            afterAll(deleteTestData);
             beforeAll(function (done) {
                 spyRes.events.once('responseComplete', done);
-                api_views.putPost({user: {_id: 'FOO_UID'}, body: {}, params: {item_id: item[0]._id.toHexString()}}, spyRes);
+                api_views.putPost({user: {_id: 'FOO_UID'}, body: {}, params: {item_id: test_data.item[0]._id.toHexString()}}, spyRes);
             });
             afterAll(resetSpies);
-            afterAll(resetTestData);
             afterAll(clearListner);
-            
-            it('should call feedModel.posts.findOne to get the item', function () {
-                expect(mockFeedModel.posts.findOne.calls.allArgs()).toEqual([[{_id: item[0]._id, user_id: 'FOO_UID'}]]);
-            });
-            
-            it('should call save on the item', function () {
-                expect(saveSpy.calls.count()).toEqual(1);
-            });
+
             it('should return a 200 code', function () {
                 expect(spyRes.status.calls.allArgs()).toEqual([[200]]);
             });
             it('should return the item data', function () {
-                expect(spyRes.json.calls.allArgs()).toEqual([[item_res[0]]]);
+                expect(spyRes.json.calls.count()).toEqual(1);
+                expect(spyRes.json.calls.argsFor(0)[0]).toEqual({
+                    apiurl: mockUrlFor.item(test_data.item[0]._id),
+                    meta_apiurl:  mockUrlFor.feed(test_data.item[0].meta_id),
+                    link: test_data.item[0].link,
+                    title: test_data.item[0].title,
+                    pubdate: test_data.item[0].pubdate,
+                    read: false
+                });
             });
         });
-        
+
         // Helper function whcih returns function which posts the given data and calls the
         // callback on response.
         function post(post_data, test_cb) {
             return function (done) {
                 spyRes.events.once('responseComplete', function () {
-                    test_cb();
-                    done();
+                    test_cb(done);
+                    if (test_cb.length === 0) { done(); }
                 });
                 api_views.putPost(post_data(), spyRes);
             };
         }
-        
+
         describe('[detail]', function () {
+            beforeEach(insertTestData);
+            afterEach(deleteTestData);
             afterEach(resetSpies);
-            afterEach(resetTestData);
             afterEach(clearListner);
-            
+
             it('should set read=true on the item when PUT data contains read=true', post(
-                function () { return {user: {_id: 'FOO_UID'}, body: {read: true}, params: {item_id: item[0]._id.toHexString()}}; },
-                function () { expect(item[0].read).toEqual(true); }
+                function () { return {user: {_id: 'FOO_UID'}, body: {read: true}, params: {item_id: test_data.item[0]._id.toHexString()}}; },
+                function (done) {
+                    expect(spyRes.json.calls.argsFor(0)[0].read).toEqual(true);
+                    mongoConn.connection().call('collection', 'posts')
+                    .call('findOneAsync', {_id: test_data.item[0]._id})
+                    .then(function (item) {
+                        expect(item.read).toBe(true);
+                    })
+                    .done(done);
+                }
             ));
             it('should set read=false on the item when PUT data contains read=false', post(
-                function () { return {user: {_id: 'FOO_UID'}, body: {read: false}, params: {item_id: item[1]._id.toHexString()}}; },
-                function () { expect(item[1].read).toEqual(false); }
+                function () { return {user: {_id: 'FOO_UID'}, body: {read: false}, params: {item_id: test_data.item[0]._id.toHexString()}}; },
+                function (done) {
+                    expect(spyRes.json.calls.argsFor(0)[0].read).toEqual(false);
+                    mongoConn.connection().call('collection', 'posts')
+                    .call('findOneAsync', {_id: test_data.item[0]._id})
+                    .then(function (item) {
+                        expect(item.read).toBe(false);
+                    })
+                    .done(done);
+                }
             ));
             it('should return 500 error if no item_id on req.params', post(
                 function () { return {user: {_id: 'FOO_UID'}, body: {}, params: {}}; },
@@ -210,29 +255,25 @@ describe('api_views object', function () {
             ));
         });
     });
-    
+
     describe('postAdd method (with good request)', function () {
+        afterAll(deleteTestData);
         beforeAll(function (done) {
             spyRes.events.once('responseComplete', done);
-            api_views.postAdd({user: {_id: 'FOOBAR'}, body: {feedurl: 'http://fake/feed/url'}}, spyRes);
+            api_views.postAdd({user: {_id: 'FOOBAR'}, body: {feedurl: 'http://127.0.0.1:1337/short.atom'}}, spyRes);
         });
         afterAll(resetSpies);
         afterAll(clearListner);
-        
+
         it('should take two paramters', function () {
             expect(api_views.postAdd.length).toEqual(2);
         });
-        it('should call model.add(url, user_id)', function () {
-            expect(mockFeedModel.add.calls.allArgs()).toEqual([['http://fake/feed/url', 'FOOBAR']]);
-        });
-        it('should call feedModel.posts.findMany to get items results', function () {
-            expect(mockFeedModel.posts.findMany.calls.allArgs()).toEqual([[{meta_id: 'spam', user_id: 'FOOBAR'}]]);
-        });
         it('should return the data (using res.json())', function () {
-            expect(spyRes.json.calls.allArgs()).toEqual([[{
-                meta: [{title: 'wombles', feedurl: undefined, apiurl: '/feeds/spam'}],
-                items: item_res
-            }]]);
+            expect(spyRes.json.calls.count()).toEqual(1);
+            var data = spyRes.json.calls.argsFor(0)[0];
+            expect(data.meta[0].title).toEqual('Example Feed');
+            expect(data.items.length).toEqual(1);
+            expect(data.items[0].title).toEqual('Atom-Powered Robots Run Amok');
         });
         it('should return return a 201 code.', function () {
             expect(spyRes.status.calls.allArgs()).toEqual([[201]]);
@@ -241,7 +282,7 @@ describe('api_views object', function () {
             pending('not yet done...');
         });
     });
-    
+
     describe('postAdd method (with bad request)', function () {
         beforeAll(function (done) {
             spyRes.events.once('responseComplete', done);   
@@ -253,18 +294,13 @@ describe('api_views object', function () {
             expect(spyRes.status.calls.allArgs()).toEqual([[400]]);
         });
     });
-    
-    describe('postAdd method (with with feed add routine throwing an error)', function () {
+
+    describe('postAdd method (with with feed add routine rejecting promise)', function () {
         beforeAll(function (done) {
-            var _add;
-            _add = mockFeedModel.add;
-            mockFeedModel.add = jasmine.createSpy('feedModelAdd').and.returnValue(Promise.reject('someError'));
-            
             spyRes.events.once('responseComplete', function () {
-                mockFeedModel.add = _add;
                 done();
             });
-            api_views.postAdd({user: {_id: 'FOOBAR'}, body: {feedurl: 'http://fake/feed/url'}}, spyRes);
+            api_views.postAdd({user: {_id: 'FOOBAR'}, body: {feedurl: 'http://127.0.0.1:9999/blah'}}, spyRes);
         });
         afterAll(resetSpies);
         afterAll(clearListner);
@@ -272,7 +308,7 @@ describe('api_views object', function () {
             expect(spyRes.status.calls.allArgs()).toEqual([[500]]);
         });
     });
-    
+
     describe('404 method', function () {
         beforeAll(function (done) {
             spyRes.events.once('responseComplete', done);   
