@@ -1,4 +1,4 @@
-angular.module('reader.feeds.add')
+angular.module('reader.feeds')
 .directive('readerAddFeedForm', ['feedService', function (feedService) {
     return {
         templateUrl: 'js/add.html',

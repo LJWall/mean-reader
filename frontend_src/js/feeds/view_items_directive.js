@@ -1,4 +1,4 @@
-angular.module('reader.feeds.view')
+angular.module('reader.feeds')
 .directive('readerViewItems', ['feedService', '$window', function (fs, $window) {
     return {
         templateUrl: 'js/viewItems.html',

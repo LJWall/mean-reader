@@ -1,4 +1,4 @@
-angular.module('reader.feeds.coordinator')
+angular.module('reader.feeds')
 .factory('feedService', ['$http', '$q', function ($http, $q) {
     var meta_data = [],
         items = [],
