@@ -8,30 +8,31 @@
   <link rel="shortcut icon" href="favicon.ico">
   <link href='//fonts.googleapis.com/css?family=Alfa+Slab+One' rel='stylesheet' type='text/css'>
 </head>
-<body ng-app="readerApp" reader-view>
+<body ng-app="readerApp" ng-controller="ReaderCtrl as ctrl" >
   <div class="reader-navbar">
     <span class="brand-text"><i class="fa fa-book hidden-xs"></i> reader</span>
     <span class="pull-right" reader-login></span>
   </div>
   <div class="reader-navbar-two"><div class="container-fluid"><div class="row">
     <div class="col-sm-3 hidden-xs">
-      <!-- <button class="btn btn-primary"><i class="fa fa-plus"></i></button> -->
       <button class="btn"><i class="fa fa-plus"></i> Add feeds</button>
       <button class="btn disabled fa fa-trash"></button>
     </div>
-    <div class="col-sm-9"><button class="btn btn-primary">Mark all as read</button></div>
+    <div class="col-sm-9">
+      <button class="btn btn-primary">Mark all as read</button>
+      <button class="btn btn-primary fa fa-refresh"></button>
+    </div>
   </div></div></div>
   <div class="container-fluid">
     <div class="row">
       <div class="col-sm-3 hidden-xs sidebar">
-        <div reader-view-feeds></div>
+        <div reader-view-feeds feed-list="ctrl.feedList()" highlight-feed="ctrl.displayedFeed()" view-feed="ctrl.viewFeed(feedObj)"></div>
         <hr>
         <div reader-add-feed-form></div>
       </div>
 
-      <div class="col-sm-9" reader-view-items></div>
+      <div class="col-sm-9" reader-view-items item-list="ctrl.itemsList()" item-filter="ctrl.itemFilter" view-item="ctrl.viewItem(itemObj)"></div>
     </div>
-
   </div>
   <script src="js/angular.min.js"></script>
   <script src="js/frontend.min.js"></script>

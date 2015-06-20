@@ -1,7 +1,7 @@
-<ul class="nav nav-sidebar" ng-repeat="meta in list()">
-  <li ng-class="{active: selected(meta.apiurl)}">
-    <a href ng-click="select(meta.apiurl)">
-      <i ng-class="{fa: true, 'fa-folder': !selected(meta.apiurl),  'fa-folder-open': selected(meta.apiurl)}"></i> {{meta.title}}
+<ul class="nav nav-sidebar" ng-repeat="meta in feedList">
+  <li ng-class="{active: (meta.apiurl===highlightFeed)}">
+    <a href ng-click="viewFeed({feedObj: meta})">
+      <i ng-class="{fa: true, 'fa-folder': !(meta.apiurl===hightlightFeed),  'fa-folder-open': (meta.apiurl===highlightFeed)}"></i> {{meta.title}}
     </a>
   </li>
 </ul>

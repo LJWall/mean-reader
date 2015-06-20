@@ -1,6 +1,6 @@
 <table class="table">
-  <tr ng-repeat="item in items() | filter:{meta_apiurl: selected()} | orderBy:'-pubdate'" ng-class="{info: !item.read}">
-    <td><a href ng-click="selectItem(item)" ng-bind="item.title || '(link)'"></a></td>
+  <tr ng-repeat="item in itemList | filter:itemFilter | orderBy:'-pubdate'" ng-class="{info: !item.read}">
+    <td><a href ng-click="viewItem({itemObj: item})" ng-bind="item.title || '(link)'"></a></td>
     <td>{{item.pubdate | date: 'dd/MMM/yyyy' }}</td>
   </tr>
 </table>

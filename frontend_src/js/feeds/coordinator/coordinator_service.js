@@ -1,8 +1,9 @@
 angular.module('reader.feeds.coordinator')
-.factory('feedService', ['$http', function ($http) {
-    var meta_data = [];
-    var items = [];
-    
+.factory('feedService', ['$http', '$q', function ($http, $q) {
+    var meta_data = [],
+        items = [],
+        loaded = $q.defer();
+
     // Load some data initally
     $http.get('api').then(function (res) {
         var i;
@@ -11,8 +12,9 @@ angular.module('reader.feeds.coordinator')
             decorateItem(res.data.items[i]);
         }
         items = res.data.items;
+        loaded.resolve(true);
     });
-    
+
     return {
         getFeedMetaList: function () {
             return meta_data;
@@ -29,7 +31,8 @@ angular.module('reader.feeds.coordinator')
                 }
                 items = items.concat(res.data.items);
             });
-        }
+        },
+        loaded: function () { return loaded.promise; }
     };
     
     function decorateItem(item) {
