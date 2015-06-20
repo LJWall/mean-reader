@@ -48,6 +48,7 @@ module.exports = function(grunt) {
     // HTML
     config.copy.html = {files: [{expand: true, filter: 'isFile', flatten: true, src: 'frontend_src/*.html', dest: 'frontend_build/'}] };
     config.watch.html = {files: ['frontend_src/*.html'], tasks: ['copy:html']};
+    config.copy.favicon = {files: [{src: 'frontend_src/favicon.ico', dest: 'frontend_build/favicon.ico'}] };
 
     // Own LESS/CSS
     config.less.all = {
