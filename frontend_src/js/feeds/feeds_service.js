@@ -8,9 +8,6 @@ angular.module('reader.feeds')
     $http.get('api').then(function (res) {
         var i;
         meta_data = res.data.meta;
-        for (i=0; i<res.data.items.length; i++) {
-            decorateItem(res.data.items[i]);
-        }
         items = res.data.items;
         loaded.resolve(true);
     });
@@ -32,14 +29,10 @@ angular.module('reader.feeds')
                 items = items.concat(res.data.items);
             });
         },
-        loaded: function () { return loaded.promise; }
-    };
-    
-    function decorateItem(item) {
-        item.markAsRead = function (read) {
+        markAsRead: function (item, read) {
             item.read = read;
             $http.put(item.apiurl, {read: read});
-        };
-    }
-    
+        },
+        loaded: function () { return loaded.promise; }
+    };
 }]);

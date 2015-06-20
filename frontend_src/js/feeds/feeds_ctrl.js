@@ -21,7 +21,7 @@ angular.module('reader.feeds')
     };
 
     this.viewItem = function (itemObj) {
-        itemObj.markAsRead(true);
+        fs.markAsRead(itemObj, true);
         $window.open(itemObj.link, '_blank');
     };
 
