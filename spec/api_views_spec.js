@@ -151,23 +151,6 @@ describe('api_views object', function () {
         });
     });
 
-    describe('headAll', function () {
-        beforeAll(insertTestData);
-        afterAll(deleteTestData);
-        beforeAll(function (done) {
-            spyRes.events.once('responseComplete', done);
-            api_views.headAll({user: {_id: 'FOO_UID'}}, spyRes);
-        });
-        afterAll(resetSpies);
-        afterAll(clearListner);
-        it('should return a 200 code', function () {
-            expect(spyRes.status).toHaveBeenCalledWith(200);
-        });
-        it('should include a last-modified header', function () {
-            pending('Refactor the test routines to use actual mongo not mock mongo');
-        });
-    });
-
     describe('putPost method', function () {
         it('should take two parameters', function () {
             expect(api_views.putPost.length).toEqual(2);
