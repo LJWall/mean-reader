@@ -36,11 +36,20 @@ describe('getFeedFromURL', function () {
         .done(done);  
     });
 
-   it('should reject promise if url doesn\'t work', function (done) {
+   it('should reject promise if url returns 404', function (done) {
         Promise.settle([getFeedFromURL('http://127.0.0.1:1337/cant_be_found.xml')])
         .then(function (results) {
             expect(results[0].isRejected()).toBe(true);
             expect(results[0].reason().message).toEqual('Not a feed');
+        })
+        .done(done);
+    });
+
+    it('should reject promise on connections refused', function (done) {
+        Promise.settle([getFeedFromURL('http://127.0.0.1:9999/will_be_refused.xml')])
+        .then(function (results) {
+            expect(results[0].isRejected()).toBe(true);
+            expect(results[0].reason().message).toEqual('connect ECONNREFUSED');
         })
         .done(done);
     });

@@ -17,12 +17,16 @@ module.exports = get = function (feedurl, followAlternates, followNext) {
     try { req = makeRequest(feedurl); }
     catch (e) { return Promise.reject(e); }
 
-    req.on('response', function() {
-        req.pipe(pf.stream);
-        req.pipe(fa.stream);
-    });
-
-    promise = Promise.settle([pf.result, fa.result])
+    promise = new Promise(function (resolve, reject) {
+        req.on('response', function() {
+            req.pipe(pf.stream);
+            req.pipe(fa.stream);
+            resolve(Promise.settle([pf.result, fa.result]));
+        });
+        req.on('error', function (e) {
+            reject(e);
+        });
+    })
     .then(function (results) {
         if (results[0].isFulfilled()) {
             return results[0].value();
