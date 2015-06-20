@@ -23,7 +23,10 @@ module.exports = function (url_for) {
                 items: feedModel.posts.findMany(query).reduce(reducer.bind(last_update, cleanItem), [])
             })
             .then(function (data) {
-                res.status(200).set('last-modified', last_update.dt).json(data);
+                res.status(200)
+                .set('last-modified', last_update.dt)
+                .set('cache-control', 'private, max-age=0, no-cache')
+                .json(data);
             })
             .done();
         },

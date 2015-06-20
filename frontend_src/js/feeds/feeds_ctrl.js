@@ -25,6 +25,8 @@ angular.module('reader.feeds')
         $window.open(itemObj.link, '_blank');
     };
 
+    this.updateData = fs.updateData.bind(fs);
+
     var self = this;
     fs.loaded().then(function () {
         var meta_list = fs.getFeedMetaList();
