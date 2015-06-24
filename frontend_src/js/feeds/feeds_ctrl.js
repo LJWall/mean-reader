@@ -1,8 +1,9 @@
 angular.module('reader.feeds')
-.controller('ReaderCtrl', ['feedService', '$window', function (fs, $window) {
+.controller('ReaderCtrl', ['currentUserService', 'feedService', '$window', function (user, fs, $window) {
     var selected;
 
     this.itemFilter = {};
+    this.updating = false;
 
     this.feedList = function () {
         return fs.getFeedMetaList();
@@ -25,13 +26,15 @@ angular.module('reader.feeds')
         $window.open(itemObj.link, '_blank');
     };
 
-    this.updateData = fs.updateData.bind(fs);
+    var self=this;
+    this.updateData = function () {
+        this.updating = true;
+        fs.updateData()
+        .then(done, done);
+        function done () {self.updating = false; };
+    };
 
-    var self = this;
-    fs.loaded().then(function () {
-        var meta_list = fs.getFeedMetaList();
-        if (meta_list[0]) {
-            self.viewFeed(meta_list[0]);
-        }
-    });
+    this.isUserAuthenticated = function () {
+        return user.isAuthenticated();
+    };
 }]);

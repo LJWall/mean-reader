@@ -14,4 +14,19 @@
   background-color: #428bca;
 }
 
+.feeds-list-text {
+    display: inline-block;
+    margin-right: 0.5em;
+}
 
+.feeds-cb-holder {
+    visibility: hidden;
+    position: absolute;
+    right: @padding-base-horizontal;
+    top: extract(@nav-link-padding, 1);
+    //color: white;
+}
+
+.nav-sidebar  a:hover .feeds-cb-holder {
+    visibility: visible;
+}

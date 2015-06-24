@@ -4,7 +4,7 @@ var ME_URL = '/reader/auth/me';
 
 angular.module('reader.user')
 .service('currentUserService', ['$http', function ($http) {
-    var userData;
+    var userData, signOutCallbacks = [];
 
     activate();
 
@@ -13,7 +13,8 @@ angular.module('reader.user')
         isAuthenticated: function () {
             return (userData ? true : false);
         },
-        logout: logout
+        logout: logout,
+        onSignOut: onSignOut
     };
 
     function activate() {
@@ -34,6 +35,12 @@ angular.module('reader.user')
         .then(function () {
             updateUser();
         });
+        signOutCallbacks.forEach(function (callback) {
+            callback();
+        });
+    }
+    function onSignOut (callback) {
+        signOutCallbacks.push(callback);
     }
 }]);
 

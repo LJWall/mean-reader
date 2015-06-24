@@ -1,11 +1,10 @@
 angular.module('reader.feeds')
-.factory('feedService', ['$http', '$q', function ($http, $q) {
+.factory('feedService', ['$http', 'currentUserService', function ($http, userService) {
     var meta_data = [],
         items = [],
         last_modified,
         meta_data_map,
-        item_map,
-        loaded = $q.defer();
+        item_map
 
     // Load some data initally
     $http.get('api').then(function (res) {
@@ -16,6 +15,11 @@ angular.module('reader.feeds')
         item_map = buildMap(items);
         last_modified = res.headers('last-modified');
         loaded.resolve(true);
+    });
+
+    userService.onSignOut(function () {
+        meta_data = [];
+        items = [];
     });
 
     return {
@@ -48,7 +52,7 @@ angular.module('reader.feeds')
         if (last_modified) {
             config.params = {updated_since: last_modified};
         }
-        $http.get('api', config)
+        return $http.get('api', config)
         .then(function (res) {
             last_modified = res.headers('last-modified');
             res.data.meta.forEach(function (metaObj) {

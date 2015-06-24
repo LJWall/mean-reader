@@ -1,7 +1,8 @@
 <ul class="nav nav-sidebar" ng-repeat="meta in feedList">
   <li ng-class="{active: (meta.apiurl===highlightFeed)}">
     <a href ng-click="viewFeed({feedObj: meta})">
-      <i ng-class="{fa: true, 'fa-folder': !(meta.apiurl===hightlightFeed),  'fa-folder-open': (meta.apiurl===highlightFeed)}"></i> {{meta.title}}
+      <div class="feeds-list-text"><i ng-class="{fa: true, 'fa-folder': !(meta.apiurl===hightlightFeed),  'fa-folder-open': (meta.apiurl===highlightFeed)}"></i> {{meta.title}}</div>
+      <!-- <div class="feeds-cb-holder"><i class="fa fa-square-o"></i></div> -->
     </a>
   </li>
 </ul>

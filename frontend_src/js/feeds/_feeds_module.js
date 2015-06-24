@@ -1,1 +1,1 @@
-angular.module('reader.feeds', []);
+angular.module('reader.feeds', ['reader.user']);

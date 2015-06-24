@@ -13,17 +13,17 @@
     <span class="brand-text"><i class="fa fa-book hidden-xs"></i> reader</span>
     <span class="pull-right" reader-login></span>
   </div>
-  <div class="reader-navbar-two"><div class="container-fluid"><div class="row">
+  <div ng-class="{hidden: !ctrl.isUserAuthenticated()}" class="reader-navbar-two"><div class="container-fluid"><div class="row">
     <div class="col-sm-3 hidden-xs">
-      <!-- <button class="btn"><i class="fa fa-plus"></i> Add feeds</button> -->
-      <button class="btn disabled fa fa-trash pull-right"></button>
+      <!-- <button class="btn"><i class="fa fa-plus"></i> Add feeds</button> 
+      <button class="btn disabled fa fa-trash pull-right"></button>-->
     </div>
     <div class="col-sm-9">
       <button class="btn btn-primary">Mark all as read</button>
-      <button class="btn btn-primary fa fa-refresh" ng-click="ctrl.updateData()"></button>
+      <button class="btn btn-primary" ng-click="ctrl.updateData()"><i class="fa fa-refresh" ng-class="{'fa-spin': ctrl.updating, 'disabled': ctrl.updating}"></i></button>
     </div>
   </div></div></div>
-  <div class="container-fluid">
+  <div ng-class="{hidden: !ctrl.isUserAuthenticated()}" class="container-fluid">
     <div class="row">
       <div class="col-sm-3 hidden-xs sidebar">
         <div reader-view-feeds feed-list="ctrl.feedList()" highlight-feed="ctrl.displayedFeed()" view-feed="ctrl.viewFeed(feedObj)"></div>
@@ -34,6 +34,9 @@
 
       <div class="col-sm-9" reader-view-items item-list="ctrl.itemsList()" item-filter="ctrl.itemFilter" view-item="ctrl.viewItem(itemObj)"></div>
     </div>
+  </div>
+  <div ng-class="{hidden: ctrl.isUserAuthenticated()}" class="container-fluid">
+    <div class="row"><div class="col-xs-12"><h1>Sign in to begin</h1></div></div>
   </div>
   <script src="js/angular.min.js"></script>
   <script src="js/frontend.min.js"></script>
