@@ -20,7 +20,7 @@
     </div>
     <div class="col-sm-9">
       <button class="btn btn-primary">Mark all as read</button>
-      <button class="btn btn-primary" ng-click="ctrl.updateData()"><i class="fa fa-refresh" ng-class="{'fa-spin': ctrl.updating, 'disabled': ctrl.updating}"></i></button>
+      <button class="btn btn-primary" ng-click="ctrl.updateData()" ng-class="{'disabled': ctrl.updating}"><i class="fa fa-refresh" ng-class="{'fa-spin': ctrl.updating}"></i></button>
     </div>
   </div></div></div>
   <div ng-class="{hidden: !ctrl.isUserAuthenticated()}" class="container-fluid">
