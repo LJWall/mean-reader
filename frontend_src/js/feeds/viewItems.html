@@ -3,4 +3,5 @@
     <td><a href ng-click="viewItem({itemObj: item})" ng-bind="item.title || '(link)'"></a></td>
     <td>{{item.pubdate | date: 'dd/MMM/yyyy' }}</td>
   </tr>
+  <tr ng-show="isMore"><td><button class="btn btn-default" ng-click="getMore()">Load more</button></td></tr>
 </table>

@@ -32,7 +32,13 @@
         <hr>
       </div>
 
-      <div class="col-sm-9" reader-view-items item-list="ctrl.itemsList()" item-filter="ctrl.itemFilter" view-item="ctrl.viewItem(itemObj)"></div>
+      <div class="col-sm-9" reader-view-items
+        item-list="ctrl.itemsList()"
+        item-filter="ctrl.itemFilter"
+        view-item="ctrl.viewItem(itemObj)"
+        is-more="ctrl.isMore()"
+        get-more="ctrl.getMore()">
+      </div>
     </div>
   </div>
   <div ng-class="{hidden: ctrl.isUserAuthenticated()}" class="container-fluid">

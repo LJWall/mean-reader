@@ -5,6 +5,7 @@ var mockApp = {
     get: jasmine.createSpy('app.get'),
     post: jasmine.createSpy('app.post'),
     put: jasmine.createSpy('app.put'),
+    param: jasmine.createSpy('app.param'),
     use:jasmine.createSpy('app.use')
 };
 var mockExpress = function () {
@@ -12,10 +13,11 @@ var mockExpress = function () {
 };
 
 var views_obj = {
-        getAll: function () {return 1;},
-        postAdd: function () {return 2;},
-        '404': function () {return 3;},
-        putPost: function () {return 4;}
+        getAll: function () {},
+        getFeed: function () {},
+        postAdd: function () {},
+        '404': function () {},
+        putPost: function () {}
 };
 
 var mockModViews = jasmine.createSpy('mod_views').and.callFake(function () {
@@ -36,14 +38,17 @@ describe('api_routes', function () {
         expect(mockModViews).toHaveBeenCalledWith(mod_api_routes.__get__('url_for'));
     });
     
-    it('should route / to views.getAll', function () {
+    it('should route GET / to views.getAll', function () {
         expect(mockApp.get).toHaveBeenCalledWith('/', views_obj.getAll);
     });
-    it('should route posts to /feeds to views.postAdd', function () {
+    it('should route POST to /feeds to views.postAdd', function () {
         expect(mockApp.post).toHaveBeenCalledWith('/feeds', views_obj.postAdd);
     });
-    it('should route PUTS to /posts/:item_id to views.putPost', function () {
-        expect(mockApp.put).toHaveBeenCalledWith('/posts/:item_id', views_obj.putPost);
+    it('should route GET /feeds/:ObjectID to views.getFeed', function () {
+        expect(mockApp.get).toHaveBeenCalledWith('/feeds/:ObjectID', views_obj.getFeed);
+    });
+    it('should route PUT to /posts/:ObjectID to views.putPost', function () {
+        expect(mockApp.put).toHaveBeenCalledWith('/posts/:ObjectID', views_obj.putPost);
     });
     it('should make handle 404', function () {
         expect(mockApp.use).toHaveBeenCalledWith(views_obj['404']);

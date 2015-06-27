@@ -1,14 +1,15 @@
 var feedModelMaker = require("./feed_handle/getFeed.js"),
-    Promise = require('bluebird'),
-    ObjectID = require('mongodb').ObjectID;
-
+    Promise = require('bluebird');
 
 module.exports = function (url_for) {
     var feedModel = feedModelMaker();
     return {
         getAll: function (req, res) {
             var last_update = {dt: new Date('2000-01-01')},
-                query = {user_id: req.user._id};
+                query = {user_id: req.user._id},
+                num,
+                meta_promise, items_promise;
+
             if (req.query.updated_since) {
                 try {
                     var dt = new Date(req.query.updated_since);
@@ -18,9 +19,27 @@ module.exports = function (url_for) {
                     res.status(500).end();
                 }
             }
+            meta_promise = feedModel.feeds.findMany(query).reduce(reducer.bind(last_update, cleanMeta), []);
+
+            num = 10;
+            if (req.query.N) {
+                try {
+                    num = parseInt(req.query.N);
+                }
+                catch (e) {}
+            }
+            if (req.query.older_than) {
+                try {
+                    var dtOlderThan = new Date(req.query.older_than);
+                    query.pubdate = {$lt: dtOlderThan};
+                }
+                catch (e) {}
+            }
+            items_promise = feedModel.posts.findMany(query, {pubdate: -1}, num).reduce(reducer.bind(last_update, cleanItem), []);
+
             Promise.props({
-                meta: feedModel.feeds.findMany(query).reduce(reducer.bind(last_update, cleanMeta), []),
-                items: feedModel.posts.findMany(query).reduce(reducer.bind(last_update, cleanItem), [])
+                meta: meta_promise,
+                items: items_promise
             })
             .then(function (data) {
                 res.status(200)
@@ -29,6 +48,33 @@ module.exports = function (url_for) {
                 .json(data);
             })
             .done();
+        },
+        getFeed: function (req, res) {
+            var query_meta = {user_id: req.user._id, _id: req.params.ObjectID},
+                query_items = {user_id: req.user._id, meta_id: req.params.ObjectID},
+                num = 10;
+            if (req.query.N) {
+                try {
+                    num = parseInt(req.query.N);
+                }
+                catch (e) {}
+            }
+            if (req.query.older_than) {
+                try {
+                    var dtOlderThan = new Date(req.query.older_than);
+                    query_items.pubdate = {$lt: dtOlderThan};
+                }
+                catch (e) {}
+            }
+            Promise.props({
+                meta: feedModel.feeds.findMany(query_meta).reduce(reducer.bind(null, cleanMeta), []),
+                items: feedModel.posts.findMany(query_items, {pubdate: -1}, num).reduce(reducer.bind(null, cleanItem), [])
+            })
+            .then(function (data) {
+                res.status(200)
+                .set('cache-control', 'private, max-age=0, no-cache')
+                .json(data);
+            });
         },
         postAdd: function (req, res) {
             if (req.body.feedurl) {
@@ -58,18 +104,7 @@ module.exports = function (url_for) {
             res.status(404).end();
         },
         putPost: function (req, res) {
-            var obj_id;
-            if (typeof req.params.item_id !== 'string') {
-                res.status(500).end();
-                return;
-            }
-            try {
-                obj_id = ObjectID(req.params.item_id);
-            } catch(e) {
-                res.status(404).end();
-                return;
-            }
-            feedModel.posts.findOne({_id: ObjectID(req.params.item_id), user_id: req.user._id})
+            feedModel.posts.findOne({_id: req.params.ObjectID, user_id: req.user._id})
             .then(function (item) {
                 if (!item) {
                     res.status(404).end();

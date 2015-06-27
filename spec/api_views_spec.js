@@ -1,7 +1,6 @@
 var rewire = require('rewire'),
     api_views_maker = rewire('../webserv/api_views'),
     Promise = require('bluebird'),
-    ObjectID = require('mongodb').ObjectID,
     events = require('events'),
     test_data = require('./api_views_test_data.json'),
     mongoConn = require('../webserv/mongoConnect.js'),
@@ -58,6 +57,7 @@ describe('api_views object', function () {
         meta, item, meta_res, item_res;
 
     beforeAll(prepTestData);
+    beforeAll(deleteTestData);
     beforeAll(feed_server.startServer);
     afterAll(feed_server.stopServer);
 
@@ -75,6 +75,7 @@ describe('api_views object', function () {
         mockUrlFor = {
             feed: function (id) {return '/feeds/'+id;},
             item: function (id) {return '/items/'+id;},
+            apiroot: function () {return '/';}
         };
 
         api_views = api_views_maker(mockUrlFor);
@@ -130,7 +131,10 @@ describe('api_views object', function () {
             });
         });
         it('should set a last-modified header', function () {
-            expect(spyRes.set.calls.argsFor(0)).toEqual(['last-modified', new Date('2000-01-01 13:00')]);
+            expect(spyRes.set.calls.allArgs()).toContain(['last-modified', new Date('2000-01-01 13:00')]);
+        });
+        it('should set a cache control header', function () {
+            expect(spyRes.set.calls.allArgs()).toContain(['cache-control', 'private, max-age=0, no-cache']);
         });
     });
 
@@ -151,6 +155,51 @@ describe('api_views object', function () {
         });
     });
 
+    describe('getAll method with older_than query paramter', function () {
+        it('should return the right data');
+    });
+
+    describe('getFeed method', function () {
+        beforeAll(insertTestData);
+        afterAll(deleteTestData);
+        beforeAll(function (done) {
+            spyRes.events.once('responseComplete', done);
+            api_views.getFeed({user: {_id: 'IMPOSTER'}, query: {}, params: {ObjectID: test_data.meta[1]._id}}, spyRes);
+        });
+        afterAll(resetSpies);
+        afterAll(clearListner);
+        it('should return a 200 code', function () {
+            expect(spyRes.status.calls.allArgs()).toEqual([[200]]);
+        });
+        it('should return data using res.json()', function () {
+            expect(spyRes.json.calls.count()).toEqual(1);
+            var data = spyRes.json.calls.argsFor(0)[0];
+            expect(data.meta.length).toEqual(1);
+            expect(data.meta[0]).toEqual({
+                feedurl: test_data.meta[1].feedurl,
+                title: test_data.meta[1].title,
+                link: test_data.meta[1].link,
+                apiurl: mockUrlFor.feed(test_data.meta[1]._id)
+            });
+            expect(data.items.length).toEqual(1);
+            expect(data.items[0]).toEqual({
+                apiurl: mockUrlFor.item(test_data.item[1]._id),
+                meta_apiurl:  mockUrlFor.feed(test_data.item[1].meta_id),
+                link: test_data.item[1].link,
+                title: test_data.item[1].title,
+                pubdate: test_data.item[1].pubdate,
+                read: false
+            });
+        });
+        it('should set a cache control header', function () {
+            expect(spyRes.set.calls.allArgs()).toContain(['cache-control', 'private, max-age=0, no-cache']);
+        });
+    });
+
+    describe('getFeed method with older_than query paramter', function () {
+        it('should return the right data');
+    });
+
     describe('putPost method', function () {
         it('should take two parameters', function () {
             expect(api_views.putPost.length).toEqual(2);
@@ -161,7 +210,7 @@ describe('api_views object', function () {
             afterAll(deleteTestData);
             beforeAll(function (done) {
                 spyRes.events.once('responseComplete', done);
-                api_views.putPost({user: {_id: 'FOO_UID'}, body: {}, params: {item_id: test_data.item[0]._id.toHexString()}}, spyRes);
+                api_views.putPost({user: {_id: 'FOO_UID'}, body: {}, params: {ObjectID: test_data.item[0]._id}}, spyRes);
             });
             afterAll(resetSpies);
             afterAll(clearListner);
@@ -201,7 +250,7 @@ describe('api_views object', function () {
             afterEach(clearListner);
 
             it('should set read=true on the item when PUT data contains read=true', post(
-                function () { return {user: {_id: 'FOO_UID'}, body: {read: true}, params: {item_id: test_data.item[0]._id.toHexString()}}; },
+                function () { return {user: {_id: 'FOO_UID'}, body: {read: true}, params: {ObjectID: test_data.item[0]._id}}; },
                 function (done) {
                     expect(spyRes.json.calls.argsFor(0)[0].read).toEqual(true);
                     mongoConn.connection().call('collection', 'posts')
@@ -213,7 +262,7 @@ describe('api_views object', function () {
                 }
             ));
             it('should set read=false on the item when PUT data contains read=false', post(
-                function () { return {user: {_id: 'FOO_UID'}, body: {read: false}, params: {item_id: test_data.item[0]._id.toHexString()}}; },
+                function () { return {user: {_id: 'FOO_UID'}, body: {read: false}, params: {ObjectID: test_data.item[0]._id}}; },
                 function (done) {
                     expect(spyRes.json.calls.argsFor(0)[0].read).toEqual(false);
                     mongoConn.connection().call('collection', 'posts')
@@ -223,10 +272,6 @@ describe('api_views object', function () {
                     })
                     .done(done);
                 }
-            ));
-            it('should return 500 error if no item_id on req.params', post(
-                function () { return {user: {_id: 'FOO_UID'}, body: {}, params: {}}; },
-                function () { expect(spyRes.status.calls.allArgs()).toEqual([[500]]); }
             ));
             it('should return 404 error if item cannot be found', post(
                 function () { return {user: {_id: 'FOO_UID'}, body: {}, params: {item_id: 'aaaaaaaaaaaaaaaaaaaaaaaa'}}; },
@@ -260,9 +305,6 @@ describe('api_views object', function () {
         });
         it('should return return a 201 code.', function () {
             expect(spyRes.status.calls.allArgs()).toEqual([[201]]);
-        });
-        it('should included a Location header field', function () {
-            pending('not yet done...');
         });
     });
 

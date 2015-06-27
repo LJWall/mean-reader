@@ -5,6 +5,8 @@ angular.module('reader.feeds')
         scope: {
             itemList: '=',
             itemFilter: '=',
+            isMore: '=',
+            getMore: '&',
             viewItem: '&'
         },
         restrict: 'AE'

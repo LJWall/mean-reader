@@ -3,7 +3,8 @@ var express = require('express'),
     mod_views = require("./api_views"),
     views,
     path,
-    url_for;
+    url_for,
+    ObjectID = require('mongodb').ObjectID;
     
 module.exports = function (mount_path) {
     path = mount_path;
@@ -19,14 +20,29 @@ url_for = {
     },
     item: function (id) {
         return path + '/posts/' + id.toString();
+    },
+    apiroot: function () {
+        return path;
     }
+};
+
+var processObjectID = function processObjectID (req, res, next, id) {
+    try {
+        req.params.ObjectID = ObjectID.createFromHexString(id);
+    }
+    catch (e) {
+        return res.end(400);
+    }
+    next();
 };
 
 function setupRoutes() {
     var newApp = express();
+    newApp.param('ObjectID', processObjectID);
     newApp.get('/', views.getAll);
+    newApp.get('/feeds/:ObjectID', views.getFeed);
     newApp.post('/feeds', views.postAdd);
-    newApp.put('/posts/:item_id', views.putPost);
+    newApp.put('/posts/:ObjectID', views.putPost);
     newApp.use(views['404']);
     return newApp;
 }

@@ -31,7 +31,23 @@ angular.module('reader.feeds')
         this.updating = true;
         fs.updateData()
         .then(done, done);
-        function done () {self.updating = false; };
+        function done () {self.updating = false;}
+    };
+
+    this.isMore = function () {
+        if (selected) {
+            return !!fs.isMore()[selected];
+        } else {
+            return !!fs.isMore().root;
+        }
+    };
+
+    this.getMore = function () {
+        if (selected) {
+            fs.getMore(selected);
+        } else {
+            fs.getMore('root');
+        }
     };
 
     this.isUserAuthenticated = function () {
