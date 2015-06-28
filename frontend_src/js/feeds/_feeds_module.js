@@ -1,1 +1,1 @@
-angular.module('reader.feeds', ['reader.user']);
+angular.module('reader.feeds', ['reader.user', 'infinite-scroll']);

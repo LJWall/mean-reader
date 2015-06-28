@@ -69,7 +69,7 @@ angular.module('reader.feeds')
         if (feedOldestItem[apiurl]) {
             config.params.older_than = feedOldestItem[apiurl].toString();
         }
-        $http.get(apiurl, config)
+        return $http.get(apiurl, config)
         .then(function (res) {
             processItemDates(res.data);
             workInNewData(res.data);

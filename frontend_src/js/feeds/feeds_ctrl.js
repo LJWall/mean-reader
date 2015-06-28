@@ -44,10 +44,9 @@ angular.module('reader.feeds')
 
     this.getMore = function () {
         if (selected) {
-            fs.getMore(selected);
-        } else {
-            fs.getMore(apiRoot);
+            return fs.getMore(selected);
         }
+        return fs.getMore(apiRoot);
     };
 
     this.isUserAuthenticated = function () {

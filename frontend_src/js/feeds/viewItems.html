@@ -1,7 +1,12 @@
-<table class="table">
+<table class="table"
+    infinite-scroll="infScrollGetMore()"
+    infinite-scroll-distance="0.5"
+    infinite-scroll-disabled="await || !isMore"
+    infinite-scroll-listen-for-event="itemFilterChange" >
   <tr ng-repeat="item in itemList | filter:itemFilter | orderBy:'-pubdate'" ng-class="{info: !item.read}">
     <td><a href ng-click="viewItem({itemObj: item})" ng-bind="item.title || '(link)'"></a></td>
     <td>{{item.pubdate | date: 'dd/MMM/yyyy' }}</td>
   </tr>
-  <tr ng-show="isMore"><td><button class="btn btn-default" ng-click="getMore()">Load more</button></td></tr>
+  <tr ng-show="await"><td><i class="fa fa-circle-o-notch fa-spin"></i> loading more...</td></tr>
+  <tr ng-show="!isMore"><td>[No more items]</td></tr>
 </table>
