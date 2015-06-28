@@ -53,5 +53,21 @@ describe('getFeedFromURL', function () {
         })
         .done(done);
     });
+
+    it('should set the feed URL to the canonical URL specified by the feed, if given', function (done) {
+        getFeedFromURL('http://127.0.0.1:1337/short.atom')
+        .then(function (data) {
+            expect(data.meta.feedurl).toEqual('http://example.org/feed/');
+        })
+        .done(done);
+    });
+
+    it('should set the feed URL to the reqest URL if no cannonical URL specified by the feed', function (done) {
+        getFeedFromURL('http://127.0.0.1:1337/short2.atom')
+        .then(function (data) {
+            expect(data.meta.feedurl).toEqual('http://127.0.0.1:1337/short2.atom');
+        })
+        .done(done);
+    });
 });
 
