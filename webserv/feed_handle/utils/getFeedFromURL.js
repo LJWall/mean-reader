@@ -37,6 +37,9 @@ module.exports = get = function (feedurl, followAlternates, followNext) {
         }
     })
     .then(function (feedData) {
+        if (!feedData.meta.feedurl) {
+            feedData.meta.feedurl = req.uri.href;
+        }
         if (followNext && feedData.fullMeta['atom:link'] && feedData.fullMeta['atom:link'].length) {
             var next = feedData.fullMeta['atom:link'].find(function (ele) {
                 return (ele['@'] && ele['@'].rel === 'next');       
@@ -100,7 +103,7 @@ parseFeed = function () {
                 title: meta.title,
                 description: meta.description,
                 link: meta.link,
-                feedurl: meta.xmlurl || req.uri.href
+                feedurl: meta.xmlurl
             };
             feed_data.fullMeta = meta;
         });
