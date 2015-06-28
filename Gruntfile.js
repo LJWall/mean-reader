@@ -21,6 +21,8 @@ module.exports = function(grunt) {
     // (some) Bower dependencies
     config.copy.bower = { files: [
         {expand: true, flatten: true, src: 'bower_components/angular/angular.*', dest: 'frontend_build/js'},
+        {expand: true, flatten: true, src: 'bower_components/jquery/dist/jquery.*', dest: 'frontend_build/js'},
+        {expand: true, flatten: true, src: 'bower_components/ngInfiniteScroll/build/ng-infinite-scroll.*', dest: 'frontend_build/js'},
         {expand: true, flatten: true, src: 'bower_components/font-awesome/css/font-awesome.*', dest: 'frontend_build/css'},
         {expand: true, flatten: true, src: 'bower_components/font-awesome/fonts/*', dest: 'frontend_build/fonts'}
     ]};
