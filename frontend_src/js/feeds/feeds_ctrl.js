@@ -1,5 +1,5 @@
 angular.module('reader.feeds')
-.controller('ReaderCtrl', ['currentUserService', 'feedService', '$window', function (user, fs, $window) {
+.controller('ReaderCtrl', ['currentUserService', 'feedService', '$window', 'apiRoot', function (user, fs, $window, apiRoot) {
     var selected;
 
     this.itemFilter = {};
@@ -38,7 +38,7 @@ angular.module('reader.feeds')
         if (selected) {
             return !!fs.isMore()[selected];
         } else {
-            return !!fs.isMore().root;
+            return !!fs.isMore()[apiRoot];
         }
     };
 
@@ -46,7 +46,7 @@ angular.module('reader.feeds')
         if (selected) {
             fs.getMore(selected);
         } else {
-            fs.getMore('root');
+            fs.getMore(apiRoot);
         }
     };
 
