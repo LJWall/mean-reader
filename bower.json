@@ -1,8 +1,8 @@
 {
-  "name": "womble-reader",
+  "name": "mean-reader",
   "version": "0.0.0",
   "authors": [
-    "Liam Wall <liam.wall@gmail.com>"
+    "ljw <ljw.dev@gmail.com>"
   ],
   "description": "rss reader",
   "moduleType": [

@@ -1,5 +1,5 @@
 {
-  "name": "womble-reader",
+  "name": "mean-reader",
   "version": "1.0.0",
   "description": "",
   "main": "",
@@ -10,7 +10,7 @@
   "scripts": {
     "test": "grunt test"
   },
-  "author": "Liam Wall <liam.wall@gmail.com>",
+  "author": "ljw <ljw.dev@gmail.com>",
   "license": "ISC",
   "dependencies": {
     "array.prototype.find": "^1.0.0",
