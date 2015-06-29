@@ -16,7 +16,6 @@ module.exports = get = function (feedurl, followAlternates, followNext) {
 
     try { req = makeRequest(feedurl); }
     catch (e) { return Promise.reject(e); }
-
     promise = new Promise(function (resolve, reject) {
         req.on('response', function() {
             req.pipe(pf.stream);
@@ -85,6 +84,7 @@ makeRequest = function (feed_url) {
         timeout: 10000,
         followRedirect: true,
         pool: false,
+        gzip: true,
         headers: {
             'user-agent': 'Node/' + process.versions.node,
         }
