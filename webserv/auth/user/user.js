@@ -80,13 +80,13 @@ module.exports.check_authenticated = function (req, res, next) {
 };
 
 function getUserFromDb (query) {
-    return mongoConnect.connection()
+    return mongoConnect.connection
     .call('collection', 'users')
     .call('findOneAsync', query);
 }
 
 function createUser (profile) {
-    return mongoConnect.connection()
+    return mongoConnect.connection
     .call('collection', 'users')
     .call('insertOneAsync', {
         //  Only store the provider and the provider ID.
