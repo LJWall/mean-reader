@@ -84,13 +84,7 @@ module.exports = function (url_for) {
                 }
                 feedModel.add(feed_url, req.user._id)
                 .then(function (meta) {
-                    return Promise.props({
-                        meta: [cleanMeta(meta)],
-                        items: feedModel.posts.findMany({meta_id: meta._id, user_id: req.user._id}).reduce(reducer.bind(null, cleanItem), [])
-                    });
-                })
-                .then(function (data) {
-                    res.status(201).json(data);
+                    res.status(201).set('Location', url_for.feed(meta._id.toString())).end();
                 })
                 .catch(function (err) {
                     res.status(500).end();

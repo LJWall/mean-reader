@@ -45,7 +45,11 @@ angular.module('reader.feeds')
             return items;
         },
         addNew: function (url) {
-            return $http.post('api/feeds', {feedurl: url}).then(function (res) {
+            return $http.post('api/feeds', {feedurl: url})
+            .then(function (res) {
+                return $http.get(res.headers('Location'));
+            })
+            .then(function (res) {
                 processItemDates(res.data);
                 workInNewData(res.data);
             });

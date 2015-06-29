@@ -80,18 +80,18 @@ describe('api_views object', function () {
 
         api_views = api_views_maker(mockUrlFor);
 
-        spyRes = jasmine.createSpyObj('res', ['json', 'status', 'end', 'set']);
+        spyRes = jasmine.createSpyObj('res', ['json', 'status', 'end', 'set', 'redirect']);
         spyRes.status.and.returnValue(spyRes);
         spyRes.set.and.returnValue(spyRes);
         spyRes.events = new events.EventEmitter();
-        spyRes.json.and.callFake(function () {
+        spyRes.json.and.callFake(emitResponseComplete);
+        spyRes.end.and.callFake(emitResponseComplete);
+        spyRes.redirect.and.callFake(emitResponseComplete);
+
+        function emitResponseComplete () {
             setTimeout(spyRes.events.emit.bind(spyRes.events, 'responseComplete'), 0);
             return spyRes;
-        });
-        spyRes.end.and.callFake(function () {
-            setTimeout(spyRes.events.emit.bind(spyRes.events, 'responseComplete'), 0);
-            return spyRes;
-        });
+        }
     });
 
     describe('getAll method', function () {
@@ -285,6 +285,7 @@ describe('api_views object', function () {
     });
 
     describe('postAdd method (with good request)', function () {
+        beforeAll(deleteTestData);
         afterAll(deleteTestData);
         beforeAll(function (done) {
             spyRes.events.once('responseComplete', done);
@@ -296,15 +297,12 @@ describe('api_views object', function () {
         it('should take two paramters', function () {
             expect(api_views.postAdd.length).toEqual(2);
         });
-        it('should return the data (using res.json())', function () {
-            expect(spyRes.json.calls.count()).toEqual(1);
-            var data = spyRes.json.calls.argsFor(0)[0];
-            expect(data.meta[0].title).toEqual('Example Feed');
-            expect(data.items.length).toEqual(1);
-            expect(data.items[0].title).toEqual('Atom-Powered Robots Run Amok');
-        });
-        it('should return return a 201 code.', function () {
+        it('should set a 201 response code', function () {
             expect(spyRes.status.calls.allArgs()).toEqual([[201]]);
+        });
+        it('should redirect Location header to /feed/[feedID]', function () {
+            pending('Refactor add routines first...');
+            expect(spyRes.set.calls.allArgs()).toEqual([['Location', 'Something or other...']]);
         });
     });
 
