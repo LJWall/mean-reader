@@ -14,7 +14,7 @@ describe('getFeed', function () {
             collection: function (name) {return {'name': name}; },
             call: function (method, param) {return fakeDb[method](param); }
         };
-        spyOn(mongoConn, 'connection').and.returnValue(fakeDb);
+        getFeedMaker.__set__('mongoConnect', {connection: fakeDb});
 
         findOneSpy = jasmine.createSpy('findOneSpy').and.callFake(function (query) {
                         if (query.feedurl === 'http://cannonical' || (mongoFeedStore.updateMongoFeedData.calls.count() >0 && query.feedurl === 'eggs' )) {

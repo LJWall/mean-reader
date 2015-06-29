@@ -7,7 +7,7 @@ describe('simpleModel [integration]', function () {
         model;
     
     beforeAll(function (done) {
-        mongoConn.connection()
+        mongoConn.connection
         .then(function(_db) {
             collection = _db.collection('simpleModelTest');
             db = _db;

@@ -19,7 +19,7 @@ function prepTestData () {
 }
 
 function insertTestData (done) {
-    var conn = mongoConn.connection(),
+    var conn = mongoConn.connection,
         insert_res = conn.call('collection', 'feeds').call('insertManyAsync', test_data.meta);
 
     var p1 = Promise.each(insert_res.get('ops'), function (meta, i) {
@@ -36,7 +36,7 @@ function insertTestData (done) {
     .done(done);
 }
 function deleteTestData (done) {
-    var conn = mongoConn.connection();
+    var conn = mongoConn.connection;
     Promise.join(
         conn.call('collection', 'feeds').call('deleteManyAsync', {}),
         conn.call('collection', 'posts').call('deleteManyAsync', {})
@@ -253,7 +253,7 @@ describe('api_views object', function () {
                 function () { return {user: {_id: 'FOO_UID'}, body: {read: true}, params: {ObjectID: test_data.item[0]._id}}; },
                 function (done) {
                     expect(spyRes.json.calls.argsFor(0)[0].read).toEqual(true);
-                    mongoConn.connection().call('collection', 'posts')
+                    mongoConn.connection.call('collection', 'posts')
                     .call('findOneAsync', {_id: test_data.item[0]._id})
                     .then(function (item) {
                         expect(item.read).toBe(true);
@@ -265,7 +265,7 @@ describe('api_views object', function () {
                 function () { return {user: {_id: 'FOO_UID'}, body: {read: false}, params: {ObjectID: test_data.item[0]._id}}; },
                 function (done) {
                     expect(spyRes.json.calls.argsFor(0)[0].read).toEqual(false);
-                    mongoConn.connection().call('collection', 'posts')
+                    mongoConn.connection.call('collection', 'posts')
                     .call('findOneAsync', {_id: test_data.item[0]._id})
                     .then(function (item) {
                         expect(item.read).toBe(false);

@@ -21,7 +21,7 @@ describe('mongoFeedStore', function () {
         };
     
     beforeAll(function (done) {
-        mongoConn.connection()
+        mongoConn.connection
         .then(function(db) {
             mongodb = db;
             return db;

@@ -6,7 +6,7 @@ var getFeedFromURL = require('./utils/getFeedFromURL.js'),
 
 module.exports = function () {
     var obj = {},
-        db_promise = mongoConnect.connection();
+        db_promise = mongoConnect.connection;
         
     obj.feeds = simpleModel.make(db_promise.call('collection', 'feeds'));
     obj.posts = simpleModel.make(db_promise.call('collection', 'posts'));
