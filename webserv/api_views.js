@@ -1,4 +1,5 @@
-var feedModelMaker = require("./feed_handle/getFeed.js"),
+var feedModelMaker = require('./feed_handle/getFeed.js'),
+    db = require('./mongoConnect.js'),
     Promise = require('bluebird');
 
 module.exports = function (url_for) {
@@ -19,7 +20,7 @@ module.exports = function (url_for) {
                     res.status(500).end();
                 }
             }
-            meta_promise = feedModel.feeds.findMany(query).reduce(reducer.bind(last_update, cleanMeta), []);
+            meta_promise = db.feeds.find(query).toArrayAsync().reduce(reducer.bind(last_update, cleanMeta), []);
 
             num = 10;
             if (req.query.N) {
@@ -35,7 +36,8 @@ module.exports = function (url_for) {
                 }
                 catch (e) {}
             }
-            items_promise = feedModel.posts.findMany(query, {pubdate: -1}, num).reduce(reducer.bind(last_update, cleanItem), []);
+            items_promise = db.posts.find(query).sort({pubdate: -1}).limit(num).toArrayAsync()
+                .reduce(reducer.bind(last_update, cleanItem), []);
 
             Promise.props({
                 meta: meta_promise,
@@ -67,8 +69,8 @@ module.exports = function (url_for) {
                 catch (e) {}
             }
             Promise.props({
-                meta: feedModel.feeds.findMany(query_meta).reduce(reducer.bind(null, cleanMeta), []),
-                items: feedModel.posts.findMany(query_items, {pubdate: -1}, num).reduce(reducer.bind(null, cleanItem), [])
+                meta: db.feeds.find(query_meta).toArrayAsync().reduce(reducer.bind(null, cleanMeta), []),
+                items: db.posts.find(query_items).sort({pubdate: -1}).limit(num).toArrayAsync().reduce(reducer.bind(null, cleanItem), [])
             })
             .then(function (data) {
                 res.status(200)
@@ -98,15 +100,18 @@ module.exports = function (url_for) {
             res.status(404).end();
         },
         putPost: function (req, res) {
-            feedModel.posts.findOne({_id: req.params.ObjectID, user_id: req.user._id})
+            var q = {_id: req.params.ObjectID, user_id: req.user._id};
+            db.posts.findOneAsync(q)
             .then(function (item) {
                 if (!item) {
                     res.status(404).end();
                     return;
                 }
-                if (typeof req.body.read === 'boolean') item.read = req.body.read;
+                if (typeof req.body.read === 'boolean') {
+                    item.read = req.body.read;
+                }
                 res.status(200).json(cleanItem(item));
-                return item.save();
+                return db.posts.call('updateOneAsync', q, {$set: {read: item.read},  $currentDate: {last_update: true}});
             })
             .done();
         }
