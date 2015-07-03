@@ -118,7 +118,8 @@ describe('api_views object', function () {
                 feedurl: test_data.meta[0].feedurl,
                 title: test_data.meta[0].title,
                 description: test_data.meta[0].description,
-                apiurl: mockUrlFor.feed(test_data.meta[0]._id)
+                apiurl: mockUrlFor.feed(test_data.meta[0]._id),
+                unread: 1
             });
             expect(data.items.length).toEqual(1);
             expect(data.items[0]).toEqual({
@@ -179,7 +180,8 @@ describe('api_views object', function () {
                 feedurl: test_data.meta[1].feedurl,
                 title: test_data.meta[1].title,
                 link: test_data.meta[1].link,
-                apiurl: mockUrlFor.feed(test_data.meta[1]._id)
+                apiurl: mockUrlFor.feed(test_data.meta[1]._id),
+                unread: 1
             });
             expect(data.items.length).toEqual(1);
             expect(data.items[0]).toEqual({
