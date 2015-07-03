@@ -10,7 +10,7 @@ angular.module('reader.feeds')
 
     // Load some data initally
     $http.get(apiRoot, {params: {N: getMoreNumber}}).then(function (res) {
-        processItemDates(res.data);
+        cleanReturnData(res.data);
         meta_data = res.data.meta;
         items = res.data.items;
         meta_data_map = buildMap(meta_data);
@@ -50,11 +50,18 @@ angular.module('reader.feeds')
                 return $http.get(res.headers('Location'));
             })
             .then(function (res) {
-                processItemDates(res.data);
+                cleanReturnData(res.data);
                 workInNewData(res.data);
             });
         },
         markAsRead: function (item, read) {
+            if (Boolean(item.read) !== read) {
+                if (read) {
+                    meta_data[meta_data_map[item.meta_apiurl]].unread--;
+                } else {
+                    meta_data[meta_data_map[item.meta_apiurl]].unread++;
+                }
+            }
             item.read = read;
             $http.put(item.apiurl, {read: read});
         },
@@ -65,9 +72,13 @@ angular.module('reader.feeds')
                         item.read=true;
                     }
                 });
+                meta_data[meta_data_map[apiurl]].unread = 0;
             } else {
                 items.forEach(function (item) {
                     item.read=true;
+                });
+                meta_data.forEach(function (m) {
+                    m.unread = 0;
                 });
                 apiurl = apiRoot;
             }
@@ -90,7 +101,7 @@ angular.module('reader.feeds')
         }
         return $http.get(apiurl, config)
         .then(function (res) {
-            processItemDates(res.data);
+            cleanReturnData(res.data);
             workInNewData(res.data);
             if (res.data.items.length < getMoreNumber) {
                 feedIsMore[apiurl]=false;
@@ -118,7 +129,7 @@ angular.module('reader.feeds')
         return $http.get('api', config)
         .then(function (res) {
             last_modified = res.headers('last-modified');
-            processItemDates(res.data);
+            cleanReturnData(res.data);
             workInNewData(res.data);
         });
     }
@@ -142,9 +153,12 @@ angular.module('reader.feeds')
         });
     }
 
-    function processItemDates (data) {
+    function cleanReturnData (data) {
         data.items.forEach(function (item) {
             item.pubdate = new Date(item.pubdate);
+        });
+        data.meta.forEach(function (m) {
+            if (!m.unread) m.unread = 0;
         });
     }
 
