@@ -1,8 +1,9 @@
-<form ng-submit="addNew($scope.newFeedURL)">
+<form ng-submit="addNew(newFeedURL)">
   <div class="form-group">
     <label for="newFeedURL">New feed URL</label>
-    <input placeholder="http://" type="url" class="form-control" id="newFeedURL" ng-model="$scope.newFeedURL"></input>
+    <input placeholder="http://" type="url" class="form-control" id="newFeedURL" ng-model="newFeedURL"></input>
   </div>
   <button type="submit" class="btn btn-primary">Add</button>
 </form>
-<p><div ng-show="alertmsg" class="alert alert-danger" ng-bind="alertmsg"></div></p>
+<p></p>
+<div ng-repeat="msg in messages.slice().reverse()"><div ng-class="msg.class">{{msg.text}}</div></div>
