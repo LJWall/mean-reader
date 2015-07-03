@@ -1,9 +1,8 @@
-var feedModelMaker = require('./feed_handle/getFeed.js'),
+var addFeed = require('./feed_handle/getFeed.js'),
     db = require('./mongoConnect.js'),
     Promise = require('bluebird');
 
 module.exports = function (url_for) {
-    var feedModel = feedModelMaker();
     return {
         getAll: function (req, res) {
             var last_update = {dt: new Date('2000-01-01')},
@@ -84,7 +83,7 @@ module.exports = function (url_for) {
                 if (feed_url.slice(0, 5) === 'feed:') {
                     feed_url = 'http:' + feed_url.slice(5);
                 }
-                feedModel.add(feed_url, req.user._id)
+                addFeed(feed_url, req.user._id)
                 .then(function (meta) {
                     res.status(201).set('Location', url_for.feed(meta._id.toString())).end();
                 })

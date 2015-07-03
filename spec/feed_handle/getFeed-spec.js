@@ -1,22 +1,16 @@
 var rewire = require('rewire'),
     mongoFeedStore = require('../../webserv/feed_handle/utils/mongoFeedStore.js'),
     getFeedFromURL = require('../../webserv/feed_handle/utils/getFeedFromURL.js'),
-    getFeedMaker = rewire('../../webserv/feed_handle/getFeed.js'),
-    getFeed,
+    getFeed = rewire('../../webserv/feed_handle/getFeed.js'),
     Promise = require('bluebird'),
     db = require('../../webserv/mongoConnect.js');
 
 describe('getFeed', function () {
-    var fakeDb;
-    beforeAll(function () {
-        getFeed = getFeedMaker();
-    });
-
     describe('.add', function () {
         beforeAll(function () {
             this.fakeFeedData = {meta: {feedurl: 'http://cannonical'}};
             this.getFeedFromURLSpy = jasmine.createSpy('getFeedFromURL').and.returnValue(Promise.resolve(this.fakeFeedData));
-            getFeedMaker.__set__('getFeedFromURL', this.getFeedFromURLSpy);
+            getFeed.__set__('getFeedFromURL', this.getFeedFromURLSpy);
             spyOn(db.feeds, 'findOneAsync');
             spyOn(mongoFeedStore, 'updateMongoFeedData');
         });
@@ -26,7 +20,7 @@ describe('getFeed', function () {
 
         it('should go to the source (and store the result)', function (done) {
             var self = this;
-            getFeed.add('eggs', 'FOOBAR')
+            getFeed('eggs', 'FOOBAR')
             .then(function (result) {
                 expect(self.getFeedFromURLSpy.calls.allArgs()).toEqual([['eggs', true, true]]);
                 expect(mongoFeedStore.updateMongoFeedData.calls.count()).toEqual(1);
