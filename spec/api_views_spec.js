@@ -368,9 +368,11 @@ describe('api_views object', function () {
         it('should set a 201 response code', function () {
             expect(spyRes.status.calls.allArgs()).toEqual([[201]]);
         });
-        it('should redirect Location header to /feed/[feedID]', function () {
-            pending('Refactor add routines first...');
-            expect(spyRes.set.calls.allArgs()).toEqual([['Location', 'Something or other...']]);
+        it('should redirect Location header to /feed/[feedID]', function (done) {
+            mongoConn.feeds.findOneAsync().then(function (feed) {
+                expect(spyRes.set.calls.allArgs()).toEqual([['Location', mockUrlFor.feed(feed._id.toString())]]);
+            })
+            .done(done);
         });
     });
 
