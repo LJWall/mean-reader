@@ -6,7 +6,7 @@ var rewire = require('rewire'),
     db = require('../../webserv/mongoConnect.js');
 
 describe('getFeed', function () {
-    describe('.add', function () {
+    describe('[basic process]', function () {
         beforeAll(function () {
             this.fakeFeedData = {meta: {feedurl: 'http://cannonical'}};
             this.getFeedFromURLSpy = jasmine.createSpy('getFeedFromURL').and.returnValue(Promise.resolve(this.fakeFeedData));
@@ -16,17 +16,35 @@ describe('getFeed', function () {
         });
         beforeEach(function () {
             this.getFeedFromURLSpy.calls.reset();
+            db.feeds.findOneAsync.calls.reset();
+            mongoFeedStore.updateMongoFeedData.calls.reset();
+        });
+        afterAll(function () {
+             getFeed.__set__('getFeedFromURL', getFeedFromURL);
         });
 
         it('should go to the source (and store the result)', function (done) {
             var self = this;
             getFeed('eggs', 'FOOBAR')
             .then(function (result) {
-                expect(self.getFeedFromURLSpy.calls.allArgs()).toEqual([['eggs', true, true]]);
+                expect(self.getFeedFromURLSpy.calls.allArgs()).toEqual([['eggs', true]]);
                 expect(mongoFeedStore.updateMongoFeedData.calls.count()).toEqual(1);
                 expect(mongoFeedStore.updateMongoFeedData).toHaveBeenCalledWith(self.fakeFeedData, 'FOOBAR');
                 expect(db.feeds.findOneAsync.calls.count()).toEqual(1);
                 expect(db.feeds.findOneAsync.calls.argsFor(0)).toEqual([{'feedurl': 'http://cannonical', user_id: 'FOOBAR'}]);
+            })
+            .done(done);
+        });
+    });
+
+    describe('[with connection refused]', function () {
+        it('should reject a returned promise', function (done) {
+            getFeed('http://localhost:9999/blah', 'FOOBAR')
+            .then(function () {
+                done.fail('This code should not run...');
+            })
+            .catch(function (err) {
+                expect(err.message).toEqual('connect ECONNREFUSED');
             })
             .done(done);
         });

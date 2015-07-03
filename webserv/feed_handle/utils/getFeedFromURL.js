@@ -10,12 +10,13 @@ var FeedParser = require('feedparser'),
 require('array.prototype.find');
 
 
-module.exports = get = function (feedurl, followAlternates, followNext) {
+module.exports = get = function (feedurl, followAlternates) {
     var req, promise,
         pf = parseFeed(), fa = findAlternates();
 
     try { req = makeRequest(feedurl); }
     catch (e) { return Promise.reject(e); }
+
     promise = new Promise(function (resolve, reject) {
         req.on('response', function() {
             req.pipe(pf.stream);
@@ -38,21 +39,6 @@ module.exports = get = function (feedurl, followAlternates, followNext) {
     .then(function (feedData) {
         if (!feedData.meta.feedurl) {
             feedData.meta.feedurl = req.uri.href;
-        }
-        if (followNext && feedData.fullMeta['atom:link'] && feedData.fullMeta['atom:link'].length) {
-            var next = feedData.fullMeta['atom:link'].find(function (ele) {
-                return (ele['@'] && ele['@'].rel === 'next');       
-            });
-            if (next) {
-                return get(next['@'].href, followAlternates, true)
-                .then(function (nextData) {
-                    feedData.items = feedData.items.concat(nextData.items);
-                    return feedData;
-                })
-                .catch(function (e) {
-                    return feedData;
-                });
-            }
         }
         return feedData;
     });

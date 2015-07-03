@@ -42,7 +42,7 @@ function updateFeeds () {
                 throw new Error('No recent modifications');
             }
         })
-        .then(getFeedFromUrl.bind(null, feed._id.feedurl, false, false))
+        .then(getFeedFromUrl.bind(null, feed._id.feedurl, false))
         .then(function (feed_data) {
             /* Write over the returned feed URL, incase it's been replaced with a differnt
                cannonical URL */

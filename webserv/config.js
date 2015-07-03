@@ -17,6 +17,8 @@ if (process.env.MEAN_ENV === 'test') {
     process.exit(1);
 }
 
+exports.addFeedFollowNext = true;
+
 exports.session_secret = process.env.SESSION_SECRET || 'monkey business';
 
 exports.GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || 'GOOGLE_CLIENT_ID';
