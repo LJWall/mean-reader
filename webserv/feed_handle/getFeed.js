@@ -7,7 +7,7 @@ module.exports = function (url, user_id) {
     return getFeedFromURL(url, true, true)
     .then(function (data) {
         newUrl = data.meta.feedurl;
-        return mongoFeedStore.updateMongoFeedData(db.connection, data, user_id);
+        return mongoFeedStore.updateMongoFeedData(data, user_id);
     })
     .then(function () {
         return db.feeds.findOneAsync({'feedurl': newUrl, user_id: user_id});

@@ -1,8 +1,7 @@
 var getFeedFromUrl = require('./feed_handle/utils/getFeedFromURL.js'),
     mongoFeedStore = require('./feed_handle/utils/mongoFeedStore.js'),
     config = require('./config.js'),
-    mongoConn = require('./mongoConnect.js'),
-    db = mongoConn.connection(),
+    db = require('./mongoConnect.js'),
     Promise = require('bluebird'),
     request = Promise.promisifyAll(require('request'));
 
@@ -16,14 +15,14 @@ function updateLoop () {
         if (config.update_loopwait) {
             setTimeout(updateLoop, config.update_loopwait);
         } else {
-            mongoConn.disconnect();
+            db.disconnect();
         }
     })
     .done();
 }
 
 function updateFeeds () {
-    return db.call('collection', 'feeds')
+    return db.feeds
     .call('aggregateAsync', [
         {$project: {feedurl: true, user_id:true, last_update: true}},
         {$group: {_id: {feedurl: '$feedurl'}, user_ids: {$addToSet: '$user_id'}, last_update: {$min: '$last_update'} }}
@@ -49,7 +48,7 @@ function updateFeeds () {
                cannonical URL */
             feed_data.meta.feedurl = feed._id.feedurl; 
             return Promise.each(feed.user_ids, function (uid) {
-                return mongoFeedStore.updateMongoFeedData(db, feed_data, uid);
+                return mongoFeedStore.updateMongoFeedData(feed_data, uid);
             });
         })
         .then(log.bind(null, 'Updated ' + feed._id.feedurl))

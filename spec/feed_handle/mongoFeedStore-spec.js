@@ -35,7 +35,7 @@ describe('mongoFeedStore', function () {
             clearDB(mongodb).done(done);
         });
         it('should put the feed data in the DB', function (done){
-            mongoFeedStore.updateMongoFeedData(mongodb, sampledata1, 'FOO_UID')
+            mongoFeedStore.updateMongoFeedData(sampledata1, 'FOO_UID')
             .then(function (insert_res) {
                 return Promise.all([
                     mongodb.collection('feeds').find({}).toArrayAsync(),
@@ -71,7 +71,7 @@ describe('mongoFeedStore', function () {
                 mongodb.collection('posts').insertManyAsync(sampledata1.items)
             ])
             .then(function (insert_res) {
-                return mongoFeedStore.updateMongoFeedData(mongodb, sampledata2, 'FOO_UID');
+                return mongoFeedStore.updateMongoFeedData(sampledata2, 'FOO_UID');
             })
             .then(function (insert_res) {
                 return Promise.all([

@@ -24,7 +24,7 @@ describe('getFeed', function () {
             .then(function (result) {
                 expect(self.getFeedFromURLSpy.calls.allArgs()).toEqual([['eggs', true, true]]);
                 expect(mongoFeedStore.updateMongoFeedData.calls.count()).toEqual(1);
-                expect(mongoFeedStore.updateMongoFeedData).toHaveBeenCalledWith(db.connection, self.fakeFeedData, 'FOOBAR');
+                expect(mongoFeedStore.updateMongoFeedData).toHaveBeenCalledWith(self.fakeFeedData, 'FOOBAR');
                 expect(db.feeds.findOneAsync.calls.count()).toEqual(1);
                 expect(db.feeds.findOneAsync.calls.argsFor(0)).toEqual([{'feedurl': 'http://cannonical', user_id: 'FOOBAR'}]);
             })
