@@ -1,8 +1,6 @@
 var getFeedFromURL = require('./utils/getFeedFromURL.js'),
     mongoFeedStore = require('./utils/mongoFeedStore.js'),
-    db = require('../mongoConnect.js'),
-    simpleModel = require('./utils/simpleModel.js'),
-    Promise = require('bluebird');
+    db = require('../mongoConnect.js');
 
 module.exports = function (url, user_id) {
     var newUrl;
