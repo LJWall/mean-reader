@@ -1,45 +1,35 @@
 var mongoFeedStore = require('../../webserv/feed_handle/utils/mongoFeedStore.js'),
     Promise = require('bluebird'),
-    mongoConn = require('../../webserv/mongoConnect.js'),
+    db = require('../../webserv/mongoConnect.js'),
     ObjectID = require('mongodb').ObjectID;
 
 Promise.longStackTraces();
 
-
-var clearDB = function (db) {
-    return Promise.all([
-        db.collection('posts').deleteManyAsync({}),
-        db.collection('feeds').deleteManyAsync({})
-    ]);
+var clearDB = function (done) {
+    Promise.all([
+        db.posts.call('deleteManyAsync', {}),
+        db.feeds.call('deleteManyAsync', {})
+    ])
+    .done(done);
 };
     
 describe('mongoFeedStore', function () {
-    var mongodb,
-        sampledata1 = {
+    var sampledata1 = {
             meta: {_id: new ObjectID('000000000000000000000001'), link: 'url', feedurl: 'feedurl', title: 'blog'},
             items: [{feedurl: 'feedurl', guid: '1', title: 'T1', }, {feedurl: 'feedurl', guid: '2', title: 'T2'}]
         };
-    
-    beforeAll(function (done) {
-        mongoConn.connection
-        .then(function(db) {
-            mongodb = db;
-            return db;
-        })
-        .then(clearDB)
-        .done(done);
-    });
-    
+
+    beforeAll(clearDB);
+
     describe('updateMongoFeedData', function () {
-        afterEach(function (done) {
-            clearDB(mongodb).done(done);
-        });
+        afterEach(clearDB);
+
         it('should put the feed data in the DB', function (done){
             mongoFeedStore.updateMongoFeedData(sampledata1, 'FOO_UID')
             .then(function (insert_res) {
                 return Promise.all([
-                    mongodb.collection('feeds').find({}).toArrayAsync(),
-                    mongodb.collection('posts').find({}).toArrayAsync()
+                    db.feeds.find({}).toArrayAsync(),
+                    db.posts.find({}).toArrayAsync()
                 ]);
             }).then(function (db_data) {
                 expect(db_data[0].length).toEqual(1);
@@ -67,16 +57,16 @@ describe('mongoFeedStore', function () {
             sampledata1.meta.user_id = 'FOO_UID';
 
             Promise.all([
-                mongodb.collection('feeds').insertOneAsync(sampledata1.meta),
-                mongodb.collection('posts').insertManyAsync(sampledata1.items)
+                db.feeds.call('insertOneAsync', sampledata1.meta),
+                db.posts.call('insertManyAsync', sampledata1.items)
             ])
             .then(function (insert_res) {
                 return mongoFeedStore.updateMongoFeedData(sampledata2, 'FOO_UID');
             })
             .then(function (insert_res) {
                 return Promise.all([
-                    mongodb.collection('feeds').find({}).toArrayAsync(),
-                    mongodb.collection('posts').find({}).toArrayAsync()
+                    db.feeds.find({}).toArrayAsync(),
+                    db.posts.find({}).toArrayAsync()
                 ]);
             }).then(function (db_data) {
                 expect(db_data[0].length).toEqual(1);
