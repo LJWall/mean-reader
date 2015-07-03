@@ -17,6 +17,7 @@ angular.module('reader.feeds')
                 .then(function () {
                     newMsg.text = 'Added ' + url;
                     newMsg.class = 'alert alert-success';
+                    $scope.newFeedURL = undefined;
                 })
                 .catch(function () {
                     newMsg.text = 'Hmmm.  Theres seems to be a problem with ' + url +
