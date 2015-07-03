@@ -52,4 +52,8 @@ angular.module('reader.feeds')
     this.isUserAuthenticated = function () {
         return user.isAuthenticated();
     };
+
+    this.markAllAsRead = function () {
+        fs.markAllAsRead(selected);
+    };
 }]);

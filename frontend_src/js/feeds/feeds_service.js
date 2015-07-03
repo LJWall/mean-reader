@@ -58,6 +58,21 @@ angular.module('reader.feeds')
             item.read = read;
             $http.put(item.apiurl, {read: read});
         },
+        markAllAsRead: function (apiurl) {
+            if (apiurl) {
+                items.forEach(function (item) {
+                    if (item.meta_apiurl === apiurl) {
+                        item.read=true;
+                    }
+                });
+            } else {
+                items.forEach(function (item) {
+                    item.read=true;
+                });
+                apiurl = apiRoot;
+            }
+            $http.put(apiurl, {read: true});
+        },
         updateData: updateData,
         isMore: function () {
             return feedIsMore;

@@ -19,7 +19,7 @@
       <button class="btn disabled fa fa-trash pull-right"></button>-->
     </div>
     <div class="col-sm-9">
-      <button class="btn btn-primary">Mark all as read</button>
+      <button class="btn btn-primary" ng-click="ctrl.markAllAsRead()">Mark all as read</button>
       <button class="btn btn-primary" ng-click="ctrl.updateData()" ng-class="{'disabled': ctrl.updating}"><i class="fa fa-refresh" ng-class="{'fa-spin': ctrl.updating}"></i></button>
     </div>
   </div></div></div>
