@@ -40,8 +40,10 @@ function setupRoutes() {
     var newApp = express();
     newApp.param('ObjectID', processObjectID);
     newApp.get('/', views.getAll);
-    newApp.get('/feeds/:ObjectID', views.getFeed);
+    newApp.put('/', views.putAll);
     newApp.post('/feeds', views.postAdd);
+    newApp.get('/feeds/:ObjectID', views.getFeed);
+    newApp.put('/feeds/:ObjectID', views.putFeed);
     newApp.put('/posts/:ObjectID', views.putPost);
     newApp.use(views['404']);
     return newApp;

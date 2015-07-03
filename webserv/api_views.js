@@ -116,8 +116,19 @@ module.exports = function (url_for) {
         },
         putFeed: function (req, res) {
             if (req.body.read === true)  {
-                var q = {meta_id: req.params.ObjectID, user_id: req.user._id};
-                db.posts.call('updateManyAsync', q, {$set: {read: true}})
+                var q = {meta_id: req.params.ObjectID, user_id: req.user._id, read: {$ne: true}};
+                db.posts.call('updateManyAsync', q, {$set: {read: true},  $currentDate: {last_update: true}})
+                .then(function () {
+                    res.status(200).end();
+                });
+            } else {
+                res.status(200).end();
+            }
+        },
+        putAll: function (req, res) {
+            if (req.body.read === true)  {
+                var q = {user_id: req.user._id, read: {$ne: true}};
+                db.posts.call('updateManyAsync', q, {$set: {read: true},  $currentDate: {last_update: true}})
                 .then(function () {
                     res.status(200).end();
                 });

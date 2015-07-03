@@ -14,7 +14,9 @@ var mockExpress = function () {
 
 var views_obj = {
         getAll: function () {},
+        putAll: function () {},
         getFeed: function () {},
+        putFeed: function () {},
         postAdd: function () {},
         '404': function () {},
         putPost: function () {}
@@ -41,11 +43,17 @@ describe('api_routes', function () {
     it('should route GET / to views.getAll', function () {
         expect(mockApp.get).toHaveBeenCalledWith('/', views_obj.getAll);
     });
+    it('should route PUT / to views.putAll', function () {
+        expect(mockApp.put).toHaveBeenCalledWith('/', views_obj.putAll);
+    });
     it('should route POST to /feeds to views.postAdd', function () {
         expect(mockApp.post).toHaveBeenCalledWith('/feeds', views_obj.postAdd);
     });
     it('should route GET /feeds/:ObjectID to views.getFeed', function () {
         expect(mockApp.get).toHaveBeenCalledWith('/feeds/:ObjectID', views_obj.getFeed);
+    });
+    it('should route PUT /feeds/:ObjectID to views.putFeed', function () {
+        expect(mockApp.put).toHaveBeenCalledWith('/feeds/:ObjectID', views_obj.putFeed);
     });
     it('should route PUT to /posts/:ObjectID to views.putPost', function () {
         expect(mockApp.put).toHaveBeenCalledWith('/posts/:ObjectID', views_obj.putPost);
