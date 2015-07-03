@@ -113,6 +113,17 @@ module.exports = function (url_for) {
                 return db.posts.call('updateOneAsync', q, {$set: {read: item.read},  $currentDate: {last_update: true}});
             })
             .done();
+        },
+        putFeed: function (req, res) {
+            if (req.body.read === true)  {
+                var q = {meta_id: req.params.ObjectID, user_id: req.user._id};
+                db.posts.call('updateManyAsync', q, {$set: {read: true}})
+                .then(function () {
+                    res.status(200).end();
+                });
+            } else {
+                res.status(200).end();
+            }
         }
     };
     

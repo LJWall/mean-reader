@@ -284,6 +284,38 @@ describe('api_views object', function () {
         });
     });
 
+    describe('putFeed method', function () {
+        beforeEach(deleteTestData);
+        beforeEach(insertTestData);
+        afterEach(resetSpies);
+        afterEach(clearListner);
+        afterAll(deleteTestData);
+        it('with body={read:true} should set all the items from a feed to read=true', function (done) {
+            spyRes.events.once('responseComplete', function () {
+                expect(spyRes.status.calls.allArgs()).toEqual([[200]]);
+                expect(spyRes.end).toHaveBeenCalled();
+                mongoConn.posts.findOneAsync({meta_id: test_data.meta[0]._id})
+                .then(function (item) {
+                    expect(item.read).toBe(true);
+                })
+                .done(done);
+            });
+            api_views.putFeed({user: {_id: 'FOO_UID'}, body: {read: true}, params: {ObjectID: test_data.meta[0]._id}}, spyRes);
+        });
+        it('should do nothing if {read=true} not in the body', function (done) {
+            spyRes.events.once('responseComplete', function () {
+                expect(spyRes.status.calls.allArgs()).toEqual([[200]]);
+                expect(spyRes.end).toHaveBeenCalled();
+                mongoConn.posts.findOneAsync({meta_id: test_data.meta[0]._id})
+                .then(function (item) {
+                    expect(item.read).toBeUndefined();
+                })
+                .done(done);
+            });
+            api_views.putFeed({user: {_id: 'FOO_UID'}, body: {}, params: {ObjectID: test_data.meta[0]._id}}, spyRes);
+        });
+    });
+
     describe('postAdd method (with good request)', function () {
         beforeAll(deleteTestData);
         afterAll(deleteTestData);
