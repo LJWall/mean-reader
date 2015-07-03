@@ -56,4 +56,23 @@ angular.module('reader.feeds')
     this.markAllAsRead = function () {
         fs.markAllAsRead(selected);
     };
+
+    this.anyChecked = function () {
+        var i,
+            items = fs.getFeedItems();
+        for (i=0; i < items.length; i++) {
+            if (items[i].checked) {
+                return true;
+            }
+        }
+        return false;
+    };
+    this.markAsUnread = function () {
+        fs.getFeedItems().forEach(function (item) {
+            if (item.checked) {
+                item.checked = false
+                fs.markAsRead(item, false)
+            }
+        });
+    };
 }]);

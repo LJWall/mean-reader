@@ -11,6 +11,9 @@ angular.module('reader.feeds')
         },
         restrict: 'AE',
         link: function ($scope) {
+            $scope.checkItem = function (item) {
+                item.checked = !item.checked;
+            };
             $scope.await=false;
             $scope.infScrollGetMore = function () {
                 $scope.await = true;
