@@ -37,7 +37,7 @@ module.exports = function (url, user_id) {
                     return mongoFeedStore.updateMongoFeedData({
                         meta: initData.meta,
                         items: nextData.items
-                    }, user_id);
+                    }, user_id, true);
                 })
                 .catch(function (e) {
                     console.error('Error getting', next['@'].href);
