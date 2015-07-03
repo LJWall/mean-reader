@@ -10,7 +10,7 @@ module.exports = function () {
             promise;
         saxParser = sax.createStream(false, {lowercase: true});
         saxParser.on('opentag', function (node) {
-            if (node.name==='link' && node.attributes.rel==='alternate' &&
+            if (node.name==='link' && (node.attributes.rel==='alternate' || node.attributes.rel==='alternative') &&
                     /(atom|rss|xml)/i.test(node.attributes.type)) {
                 alternates.push(node.attributes.href);
             }
