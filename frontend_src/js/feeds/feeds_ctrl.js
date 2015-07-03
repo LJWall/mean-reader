@@ -18,7 +18,13 @@ angular.module('reader.feeds')
     };
 
     this.viewFeed = function (feedObj) {
-        this.itemFilter.meta_apiurl = selected = feedObj.apiurl;
+        if (selected === feedObj.apiurl) {
+            selected = undefined;
+            this.itemFilter = {};
+        }
+        else {
+            this.itemFilter.meta_apiurl = selected = feedObj.apiurl;
+        }
     };
 
     this.viewItem = function (itemObj) {
@@ -70,8 +76,8 @@ angular.module('reader.feeds')
     this.markAsUnread = function () {
         fs.getFeedItems().forEach(function (item) {
             if (item.checked) {
-                item.checked = false
-                fs.markAsRead(item, false)
+                item.checked = false;
+                fs.markAsRead(item, false);
             }
         });
     };
