@@ -18,6 +18,7 @@ if (process.env.MEAN_ENV === 'test') {
 }
 
 exports.addFeedFollowNext = true;
+exports.addFeedFollowNextMax = 10;
 
 exports.session_secret = process.env.SESSION_SECRET || 'monkey business';
 

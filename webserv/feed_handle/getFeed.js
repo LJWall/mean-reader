@@ -5,7 +5,8 @@ var getFeedFromURL = require('./utils/getFeedFromURL.js'),
 
 module.exports = function (url, user_id) {
     var initData,
-        initGet;
+        initGet,
+        depth=0;
 
     initGet = getFeedFromURL(url, true).tap(function (data) {
         initData = data;
@@ -27,6 +28,10 @@ module.exports = function (url, user_id) {
     });
 
     function recurse (lastData) {
+        depth++;
+        if (depth===config.addFeedFollowNextMax) {
+            return;
+        }
         if (lastData && lastData.fullMeta && lastData.fullMeta['atom:link'] && lastData.fullMeta['atom:link'].length) {
             var next = lastData.fullMeta['atom:link'].find(function (ele) {
                 return (ele['@'] && ele['@'].rel === 'next');
