@@ -3,6 +3,7 @@ var FeedParser = require('feedparser'),
     Promise = require('bluebird'),
     sax = require('sax'),
     findAlternates = require('./findAlternates.js'),
+    url = require('url'),
     makeRequest,
     parseFeed,
     get, first;
@@ -31,7 +32,7 @@ module.exports = get = function (feedurl, followAlternates) {
         if (results[0].isFulfilled()) {
             return results[0].value();
         } else if (results[1].isFulfilled() && followAlternates && results[1].value().length>0) {
-            return first(results[1].value(), get);
+            return first(results[1].value().map(url.resolve.bind(url, req.uri.href)), get);
         } else {
             throw results[0].reason();
         }
