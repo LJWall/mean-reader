@@ -81,4 +81,12 @@ angular.module('reader.feeds')
             }
         });
     };
+
+    this.addFeed = function(url) {
+        var self=this;
+        return fs.addNew(url).then(function(feedData) {
+            self.viewFeed(feedData);
+            return feedData;
+        });
+    };
 }]);

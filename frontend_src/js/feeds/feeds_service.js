@@ -52,6 +52,7 @@ angular.module('reader.feeds')
             .then(function (res) {
                 cleanReturnData(res.data);
                 workInNewData(res.data);
+                return res.data.meta[0];
             });
         },
         markAsRead: function (item, read) {

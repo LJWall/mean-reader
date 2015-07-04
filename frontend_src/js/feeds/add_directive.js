@@ -1,9 +1,11 @@
 angular.module('reader.feeds')
-.directive('readerAddFeedForm', ['feedService', function (feedService) {
+.directive('readerAddFeedForm', [function (feedService) {
     return {
         templateUrl: 'js/add.html',
         restrict: 'AE',
-        scope: {},
+        scope: {
+            'add': '&'
+        },
         link: function ($scope) {
             $scope.messages = [];
             $scope.addNew = function (url) {
@@ -13,9 +15,9 @@ angular.module('reader.feeds')
                 };
                 $scope.messages.push(newMsg);
                 console.log($scope.messages);
-                feedService.addNew(url)
-                .then(function () {
-                    newMsg.text = 'Added ' + url;
+                $scope.add({url: url})
+                .then(function (feedData) {
+                    newMsg.text = 'Added ' + feedData.title;
                     newMsg.class = 'alert alert-success';
                     $scope.newFeedURL = undefined;
                 })
