@@ -73,11 +73,12 @@ angular.module('reader.feeds')
         }
         return false;
     };
-    this.markAsUnread = function () {
+
+    this.markAsRead = function (read) {
         fs.getFeedItems().forEach(function (item) {
             if (item.checked) {
                 item.checked = false;
-                fs.markAsRead(item, false);
+                fs.markAsRead(item, read);
             }
         });
     };
@@ -87,6 +88,12 @@ angular.module('reader.feeds')
         return fs.addNew(url).then(function(feedData) {
             self.viewFeed(feedData);
             return feedData;
+        });
+    };
+
+    this.uncheckAll = function () {
+        fs.getFeedItems().forEach(function (item) {
+            item.checked = false;
         });
     };
 }]);

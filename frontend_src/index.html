@@ -14,14 +14,17 @@
     <span class="pull-right" reader-login></span>
   </div>
   <div ng-class="{hidden: !ctrl.isUserAuthenticated()}" class="reader-navbar-two"><div class="container-fluid"><div class="row">
-    <div class="col-sm-3 hidden-xs">
-      <!-- <button class="btn"><i class="fa fa-plus"></i> Add feeds</button> 
-      <button class="btn disabled fa fa-trash pull-right"></button>-->
-    </div>
+    <div class="col-sm-3 hidden-xs"></div>
     <div class="col-sm-9">
-      <button class="btn btn-primary" ng-click="ctrl.markAllAsRead()">Mark all as read</button>
-      <button class="btn btn-primary" ng-class="{disabled: !ctrl.anyChecked()}" ng-click="ctrl.markAsUnread()">Mark as unread</button>
-      <button class="btn btn-primary" ng-click="ctrl.updateData()" ng-class="{'disabled': ctrl.updating}"><i class="fa fa-refresh" ng-class="{'fa-spin': ctrl.updating}"></i></button>
+      <span ng-class="{hidden: ctrl.anyChecked()}" class="td-side-pad">
+        <button class="btn btn-primary" ng-click="ctrl.markAllAsRead()">Mark all as read</button>
+        <button class="btn btn-primary" ng-click="ctrl.updateData()" ng-class="{'disabled': ctrl.updating}"><i class="fa fa-refresh" ng-class="{'fa-spin': ctrl.updating}"></i></button>
+      </span>
+      <span ng-class="{hidden: !ctrl.anyChecked()}" class="td-side-pad">
+        <i class="fa fa-fw fa-check-square" ng-click="ctrl.uncheckAll()"></i>
+        <button class="btn btn-primary" ng-click="ctrl.markAsRead(true)">Mark as read</button>
+        <button class="btn btn-primary" ng-click="ctrl.markAsRead(false)">Mark as unread</button>
+      </span>
     </div>
   </div></div></div>
   <div ng-class="{hidden: !ctrl.isUserAuthenticated()}" class="container-fluid">
