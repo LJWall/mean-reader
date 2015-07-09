@@ -5,6 +5,7 @@ var mockApp = {
     get: jasmine.createSpy('app.get'),
     post: jasmine.createSpy('app.post'),
     put: jasmine.createSpy('app.put'),
+    'delete': jasmine.createSpy('app.delete'),
     param: jasmine.createSpy('app.param'),
     use:jasmine.createSpy('app.use')
 };
@@ -17,6 +18,7 @@ var views_obj = {
         putAll: function () {},
         getFeed: function () {},
         putFeed: function () {},
+        deleteFeed: function () {},
         postAdd: function () {},
         '404': function () {},
         putPost: function () {}
@@ -54,6 +56,9 @@ describe('api_routes', function () {
     });
     it('should route PUT /feeds/:ObjectID to views.putFeed', function () {
         expect(mockApp.put).toHaveBeenCalledWith('/feeds/:ObjectID', views_obj.putFeed);
+    });
+    it('should route DELETE /feeds/:ObjectID to views.deleteFeed', function () {
+        expect(mockApp.delete).toHaveBeenCalledWith('/feeds/:ObjectID', views_obj.deleteFeed);
     });
     it('should route PUT to /posts/:ObjectID to views.putPost', function () {
         expect(mockApp.put).toHaveBeenCalledWith('/posts/:ObjectID', views_obj.putPost);

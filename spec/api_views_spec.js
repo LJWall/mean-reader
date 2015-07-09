@@ -404,6 +404,36 @@ describe('api_views object', function () {
         });
     });
 
+    describe('deleteFeed method', function () {
+        beforeEach(deleteTestData);
+        beforeEach(insertTestData);
+        afterEach(resetSpies);
+        afterEach(clearListner);
+        afterAll(deleteTestData);
+        it('should delete items and feed data', function (done) {
+            spyRes.events.once('responseComplete', function () {
+                Promise.join(
+                    mongoConn.posts.findOneAsync({meta_id: test_data.meta[0]._id}),
+                    mongoConn.feeds.findOneAsync({_id: test_data.meta[0]._id}),
+                    function (item, feedData) {
+                        expect(item).toBeNull();
+                        expect(feedData).toBeNull();
+                    }
+                )
+                .done(done);
+            });
+            api_views.deleteFeed({user: {_id: 'FOO_UID'}, params: {ObjectID: test_data.meta[0]._id}}, spyRes);
+        });
+        it('should set an XXX response code', function () {
+            pending('check what response code should be..');
+            spyRes.events.once('responseComplete', function () {
+                expect(spyRes.status.calls.allArgs()).toEqual([[200]]);
+                done();
+            });
+            api_views.deleteFeed({user: {_id: 'FOO_UID'}, params: {ObjectID: test_data.meta[0]._id}}, spyRes);
+        });
+    });
+
     describe('404 method', function () {
         beforeAll(function (done) {
             spyRes.events.once('responseComplete', done);   
