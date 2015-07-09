@@ -44,6 +44,7 @@ function setupRoutes() {
     newApp.post('/feeds', views.postAdd);
     newApp.get('/feeds/:ObjectID', views.getFeed);
     newApp.put('/feeds/:ObjectID', views.putFeed);
+    newApp.delete('/feeds/:ObjectID', views.deleteFeed);
     newApp.put('/posts/:ObjectID', views.putPost);
     newApp.use(views['404']);
     return newApp;
