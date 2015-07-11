@@ -55,6 +55,15 @@ angular.module('reader.feeds')
                 return res.data.meta[0];
             });
         },
+        deleteFeed: function (feedData) {
+            meta_data = meta_data.filter(function (feed) {
+                return feed.apiurl !== feedData.apiurl;
+            });
+            items = items.filter(function (item) {
+                return item.meta_apiurl !== feedData.apiurl;
+            });
+            return $http.delete(feedData.apiurl);
+        },
         markAsRead: function (item, read) {
             if (Boolean(item.read) !== read) {
                 if (read) {

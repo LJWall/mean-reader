@@ -6,5 +6,6 @@
         <span class="badge" ng-bind="(meta.unread >0 ? meta.unread : undefined)"></span>
       </div>
     </a>
+    <div class="feeds-cb-holder"><a href ng-click="deleteFeed({feedObj: meta})"><i class="fa fa-trash"></i></a></div>
   </li>
 </ul>

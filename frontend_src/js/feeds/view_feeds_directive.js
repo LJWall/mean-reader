@@ -5,6 +5,7 @@ angular.module('reader.feeds')
         scope: {
             feedList: '=',
             highlightFeed: '=',
+            deleteFeed: '&',
             viewFeed: '&'
         },
         restrict: 'AE'

@@ -27,6 +27,8 @@ angular.module('reader.feeds')
         }
     };
 
+    this.deleteFeed = fs.deleteFeed;
+
     this.viewItem = function (itemObj) {
         fs.markAsRead(itemObj, true);
         $window.open(itemObj.link, '_blank');
