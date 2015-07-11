@@ -62,6 +62,8 @@ angular.module('reader.feeds')
             items = items.filter(function (item) {
                 return item.meta_apiurl !== feedData.apiurl;
             });
+            meta_data_map = buildMap(meta_data);
+            item_map = buildMap(items);
             return $http.delete(feedData.apiurl);
         },
         markAsRead: function (item, read) {
