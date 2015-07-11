@@ -14,7 +14,6 @@ angular.module('reader.feeds')
                     'class': 'alert alert-info'
                 };
                 $scope.messages.push(newMsg);
-                console.log($scope.messages);
                 $scope.add({url: url})
                 .then(function (feedData) {
                     newMsg.text = 'Added ' + feedData.title;
