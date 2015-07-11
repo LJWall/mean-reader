@@ -1,5 +1,5 @@
-<ul class="nav nav-sidebar" ng-repeat="meta in feedList">
-  <li ng-class="{active: (meta.apiurl===highlightFeed)}">
+<ul class="nav nav-sidebar">
+  <li ng-repeat="meta in feedList track by meta.apiurl" ng-class="{active: (meta.apiurl===highlightFeed)}">
     <a href ng-click="viewFeed({feedObj: meta})">
       <div class="feeds-list-text">
         <i ng-class="{fa: true, 'fa-folder': !(meta.apiurl===hightlightFeed),  'fa-folder-open': (meta.apiurl===highlightFeed)}"></i> {{meta.title}}
