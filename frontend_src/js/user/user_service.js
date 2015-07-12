@@ -6,7 +6,7 @@ angular.module('reader.user')
 .service('currentUserService', ['$http', function ($http) {
     var userData, signOutCallbacks = [];
 
-    activate();
+    updateUser();
 
     return {
         data: function () { return userData; },
@@ -16,10 +16,6 @@ angular.module('reader.user')
         logout: logout,
         onSignOut: onSignOut
     };
-
-    function activate() {
-        updateUser();
-    }
 
     function updateUser() {
         $http.get(ME_URL)
