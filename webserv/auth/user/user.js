@@ -1,6 +1,7 @@
 var express = require('express'),
     passport = require('passport'),
     GoogleStrategy = require('passport-google-oauth').OAuth2Strategy,
+    DemoStrategy = require('./demoaccount.js'),
     mongoConnect = require('../../mongoConnect.js'),
     config = require('../../config.js'),
     ObjectID = require('mongodb').ObjectID,
@@ -42,13 +43,20 @@ module.exports = function (xsrf_checker) {
                 });
             }
         ));
+        passport.use(new DemoStrategy());
         router.use(passport.initialize());
         router.use(passport.session());
         router.get('/auth/google',
             passport.authenticate('google', { scope: ['profile'] }));
-        router.get('/auth/google/callback', 
+        router.get('/auth/google/callback',
             passport.authenticate('google', { failureRedirect: '/reader' }),
             function(req, res) {
+                res.redirect('/reader');
+            }
+        );
+        router.get('/auth/demoaccount',
+            passport.authenticate('DemoAccount'),
+            function (req, res) {
                 res.redirect('/reader');
             }
         );
@@ -94,5 +102,5 @@ function createUser (profile) {
     .then(function (result) {
         return result.ops[0];
     });
-    
+
 }
