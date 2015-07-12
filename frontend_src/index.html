@@ -21,7 +21,7 @@
         <button class="btn btn-primary" ng-click="ctrl.updateData()" ng-class="{'disabled': ctrl.updating}"><i class="fa fa-refresh" ng-class="{'fa-spin': ctrl.updating}"></i></button>
       </span>
       <span ng-class="{hidden: !ctrl.anyChecked()}" class="td-side-pad">
-        <i class="fa fa-fw fa-check-square" ng-click="ctrl.uncheckAll()"></i>
+        <a href ng-click="ctrl.uncheckAll()"><i class="fa fa-fw fa-check-square"></i></a>
         <button class="btn btn-primary" ng-click="ctrl.markAsRead(true)">Mark as read</button>
         <button class="btn btn-primary" ng-click="ctrl.markAsRead(false)">Mark as unread</button>
       </span>
