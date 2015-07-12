@@ -1,9 +1,10 @@
-<button class="signin-btn" ng-show="isAuthenticated()" ng-click="logout()">
-  <span class="signin-btn-icon fa fa-google fa-lg"></span>
+<button class="signin-btn" ng-show="isAuthenticated()" ng-click="logout()"
+  ng-class="{google: data().provider === 'google', demo: data().provider === 'DemoAccount'}">
+  <span class="signin-btn-icon fa fa-lg"
+    ng-class="{'fa-google': data().provider === 'google', 'fa-book': data().provider === 'DemoAccount'}"></span>
   <span class="signin-btn-text">Sign out {{data().displayName}}</span>
 </button>
-<a class="signin-btn" href="/reader/auth/google" ng-show="!isAuthenticated()">
+<a class="signin-btn google" href="/reader/auth/google" ng-show="!isAuthenticated()">
   <span class="signin-btn-icon fa fa-google fa-lg"></span>
   <span class="signin-btn-text">Sign in</span>
 </a>
-

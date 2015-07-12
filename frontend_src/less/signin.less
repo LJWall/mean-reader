@@ -1,0 +1,48 @@
+.signin-btn {
+    .reader-navbar-button-vpadding(@navbar-height);
+    font-size: 14px;
+    padding: 0px;
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+
+    border-radius: 5px;
+    color: white;
+    border-style: none;
+    line-height: 14px;
+    border-color: white;
+    &:hover {
+        text-decoration: none;
+        color: white;
+    }
+    .signin-btn-icon {
+        display: inline-block;
+        background-color: transparent;
+        margin: 0px;
+        padding: 6px 8px;
+        border-width: 0px 2px 0px 0px;
+        border-style: none solid none none;
+    }
+    .signin-btn-text {
+        display: inline-block;
+        background-color: transparent;
+        margin: 0px 0px 0px -3px;
+        padding: 6px 1em;
+        border-width: 0px;
+    }
+
+    &.google {
+        background-color: @google-color;
+        &:hover {
+            background-color: darken(@google-color, 5%);
+        }
+    }
+
+    &.demo {
+        background-color: @demo-login-color;
+        &:hover {
+            background-color: darken(@demo-login-color, 5%);
+        }
+    }
+}
