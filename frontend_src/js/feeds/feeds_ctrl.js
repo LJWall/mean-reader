@@ -23,7 +23,8 @@ angular.module('reader.feeds')
             this.itemFilter = {};
         }
         else {
-            this.itemFilter.meta_apiurl = selected = feedObj.apiurl;
+            this.itemFilter.meta = feedObj;
+            selected = feedObj.apiurl;
         }
     };
 

@@ -21,6 +21,7 @@ angular.module('reader.feeds')
             feedIsMore[feedData.apiurl] = true;
         });
         items.forEach(function (item, i) {
+            item.meta = meta_data[meta_data_map[item.meta_apiurl]];
             if (!feedOldestItem[item.meta_apiurl] || feedOldestItem[item.meta_apiurl].getTime() > item.pubdate.getTime()) {
                 feedOldestItem[item.meta_apiurl] = item.pubdate;
             }
@@ -156,6 +157,7 @@ angular.module('reader.feeds')
             }
         });
         data.items.forEach(function (itemObj) {
+            itemObj.meta = meta_data[meta_data_map[itemObj.meta_apiurl]];
             if (angular.isDefined(item_map[itemObj.apiurl])) {
                 items[item_map[itemObj.apiurl]] = itemObj;
             } else {
