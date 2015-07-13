@@ -143,11 +143,11 @@ module.exports = function (url_for) {
                     db.posts.call('updateManyAsync', q, {$set: {read: true},  $currentDate: {last_update: true}}),
                     db.feeds.call('updateOneAsync', {_id: req.params.ObjectID, user_id: req.user._id}, {$currentDate: {last_update: true}}),
                     function () {
-                        res.status(200).end();
+                        res.status(204).end();
                     }
                 );
             } else {
-                res.status(200).end();
+                res.status(400).end();
             }
         },
         deleteFeed: function (req, res) {
@@ -155,7 +155,7 @@ module.exports = function (url_for) {
                 db.posts.call('deleteManyAsync', {meta_id: req.params.ObjectID, user_id: req.user._id}),
                 db.feeds.call('deleteOneAsync', {_id: req.params.ObjectID, user_id: req.user._id}),
                 function () {
-                    res.status(200).end();
+                    res.status(204).end();
                 }
             );
         },
@@ -166,15 +166,15 @@ module.exports = function (url_for) {
                     db.posts.call('updateManyAsync', q, {$set: {read: true},  $currentDate: {last_update: true}}),
                     db.feeds.call('updateManyAsync', {user_id: req.user._id}, {$currentDate: {last_update: true}}),
                     function () {
-                        res.status(200).end();
+                        res.status(204).end();
                     }
                 );
             } else {
-                res.status(200).end();
+                res.status(400).end();
             }
         }
     };
-    
+
     function reducer(cleaner, total, item) {
         try {
             total.push(cleaner(item));
@@ -187,7 +187,7 @@ module.exports = function (url_for) {
         }
         return total;
     }
-    
+
     function cleanItem (item_data) {
         var obj = {};
         obj.apiurl = url_for.item(item_data._id.toString());
@@ -198,7 +198,7 @@ module.exports = function (url_for) {
         obj.read = item_data.read || false;
         return obj;
     }
-    
+
     function cleanMeta (meta) {
         var obj = {};
         obj.apiurl = url_for.feed(meta._id.toString());
@@ -208,5 +208,4 @@ module.exports = function (url_for) {
         if (meta.description) { obj.description = meta.description; }
         return obj;
     }
-}; 
-
+};

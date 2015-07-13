@@ -287,6 +287,7 @@ describe('api_views object', function () {
     });
 
     describe('putFeed method', function () {
+        beforeAll(resetSpies);
         beforeEach(deleteTestData);
         beforeEach(insertTestData);
         afterEach(resetSpies);
@@ -294,7 +295,7 @@ describe('api_views object', function () {
         afterAll(deleteTestData);
         it('with body={read:true} should set all the items from a feed to read=true', function (done) {
             spyRes.events.once('responseComplete', function () {
-                expect(spyRes.status.calls.allArgs()).toEqual([[200]]);
+                expect(spyRes.status.calls.allArgs()).toEqual([[204]]);
                 expect(spyRes.end).toHaveBeenCalled();
                 mongoConn.posts.findOneAsync({meta_id: test_data.meta[0]._id})
                 .then(function (item) {
@@ -306,7 +307,7 @@ describe('api_views object', function () {
         });
         it('should do nothing if {read=true} not in the body', function (done) {
             spyRes.events.once('responseComplete', function () {
-                expect(spyRes.status.calls.allArgs()).toEqual([[200]]);
+                expect(spyRes.status.calls.allArgs()).toEqual([[400]]);
                 expect(spyRes.end).toHaveBeenCalled();
                 mongoConn.posts.findOneAsync({meta_id: test_data.meta[0]._id})
                 .then(function (item) {
@@ -326,7 +327,7 @@ describe('api_views object', function () {
         afterAll(deleteTestData);
         it('with body={read:true} should set all the items for a user to read=true', function (done) {
             spyRes.events.once('responseComplete', function () {
-                expect(spyRes.status.calls.allArgs()).toEqual([[200]]);
+                expect(spyRes.status.calls.allArgs()).toEqual([[204]]);
                 expect(spyRes.end).toHaveBeenCalled();
                 mongoConn.posts.find({user_id: 'IMPOSTER'}).toArrayAsync()
                 .then(function (items) {
@@ -340,7 +341,7 @@ describe('api_views object', function () {
         });
         it('should do nothing if {read=true} not in the body', function (done) {
             spyRes.events.once('responseComplete', function () {
-                expect(spyRes.status.calls.allArgs()).toEqual([[200]]);
+                expect(spyRes.status.calls.allArgs()).toEqual([[400]]);
                 expect(spyRes.end).toHaveBeenCalled();
                 mongoConn.posts.find({user_id: 'IMPOSTER'}).toArrayAsync()
                 .then(function (items) {
@@ -380,7 +381,7 @@ describe('api_views object', function () {
 
     describe('postAdd method (with bad request)', function () {
         beforeAll(function (done) {
-            spyRes.events.once('responseComplete', done);   
+            spyRes.events.once('responseComplete', done);
             api_views.postAdd({user: {_id: 'FOOBAR'}, body: {bad: 'data'}}, spyRes);
         });
         afterAll(resetSpies);
@@ -424,10 +425,10 @@ describe('api_views object', function () {
             });
             api_views.deleteFeed({user: {_id: 'FOO_UID'}, params: {ObjectID: test_data.meta[0]._id}}, spyRes);
         });
-        it('should set an XXX response code', function () {
-            pending('check what response code should be..');
+        it('should set an 204 response code', function () {
             spyRes.events.once('responseComplete', function () {
-                expect(spyRes.status.calls.allArgs()).toEqual([[200]]);
+                expect(spyRes.status.calls.allArgs()).toEqual([[204]]);
+                expect(spyRes.end.calls.allArgs()).toEqual([[]]);
                 done();
             });
             api_views.deleteFeed({user: {_id: 'FOO_UID'}, params: {ObjectID: test_data.meta[0]._id}}, spyRes);
@@ -436,7 +437,7 @@ describe('api_views object', function () {
 
     describe('404 method', function () {
         beforeAll(function (done) {
-            spyRes.events.once('responseComplete', done);   
+            spyRes.events.once('responseComplete', done);
             api_views['404']({}, spyRes);
         });
         afterAll(resetSpies);
@@ -446,4 +447,3 @@ describe('api_views object', function () {
         });
     });
 });
-
