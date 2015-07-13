@@ -436,6 +436,7 @@ describe('api_views object', function () {
     });
 
     describe('404 method', function () {
+        beforeAll(resetSpies);
         beforeAll(function (done) {
             spyRes.events.once('responseComplete', done);
             api_views['404']({}, spyRes);
