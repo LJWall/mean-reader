@@ -72,6 +72,7 @@ makeRequest = function (feed_url) {
         followRedirect: true,
         pool: false,
         gzip: true,
+        jar: request.jar(),
         headers: {
             'user-agent': 'Node/' + process.versions.node,
         }
@@ -112,5 +113,3 @@ parseFeed = function () {
 
     return {stream: fp, result: promise};
 };
-
-
