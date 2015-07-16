@@ -18,6 +18,9 @@
 
 .reader-item {
     background-color: lighten(@gray-light,50%);
+    border-bottom: 1px dotted lighten(@gray-light,25%);
+    padding-top: 2px;
+    padding-bottom: 2px;
 }
 
 .reader-item.reader-unread {
@@ -26,6 +29,12 @@
 
 .reader-item.reader-chk-item {
     background-color: @state-info-bg;
+}
+
+.text-right-not-xs {
+  @media (min-width: @grid-float-breakpoint) {
+    .text-right();
+  }
 }
 
 .inline-clip {
