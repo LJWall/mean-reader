@@ -16,11 +16,11 @@
   <div ng-class="{hidden: !ctrl.isUserAuthenticated()}" class="reader-navbar-two"><div class="container-fluid"><div class="row">
     <div class="col-sm-3 hidden-xs"></div>
     <div class="col-sm-9">
-      <span ng-class="{hidden: ctrl.anyChecked()}" class="td-side-pad">
+      <span ng-class="{hidden: ctrl.anyChecked()}">
         <button class="btn btn-primary" ng-click="ctrl.markAllAsRead()">Mark all as read</button>
         <button class="btn btn-primary" ng-click="ctrl.updateData()" ng-class="{'disabled': ctrl.updating}"><i class="fa fa-refresh" ng-class="{'fa-spin': ctrl.updating}"></i></button>
       </span>
-      <span ng-class="{hidden: !ctrl.anyChecked()}" class="td-side-pad">
+      <span ng-class="{hidden: !ctrl.anyChecked()}">
         <a href ng-click="ctrl.uncheckAll()"><i class="fa fa-fw fa-check-square"></i></a>
         <button class="btn btn-primary" ng-click="ctrl.markAsRead(true)">Mark as read</button>
         <button class="btn btn-primary" ng-click="ctrl.markAsRead(false)">Mark as unread</button>
