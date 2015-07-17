@@ -2,17 +2,16 @@
   infinite-scroll-distance="0.5"
   infinite-scroll-disabled="await || !isMore"
   infinite-scroll-listen-for-event="itemFilterChange" >
-  <div ng-repeat="item in itemList | filter:itemFilter | orderBy:'-pubdate'" class="row reader-item" ng-class="{'reader-unread': !item.read, 'reader-chk-item': item.checked}">
-    <div class="col-sm-10 col-xs-6">
-      <div style="margin-left: -8px;">
+  <div ng-repeat="item in itemList | filter:itemFilter | orderBy:'-pubdate'"
+      class="reader-item"
+      ng-class="{'reader-unread': !item.read, 'reader-chk-item': item.checked, 'feed-filter': itemFilter.meta_apiurl}">
+    <div class="item-left-matter">
         <i class="fa fa-fw reader-chk" ng-class="{'fa-square-o': !item.checked, 'fa-check-square': item.checked}" ng-click="checkItem(item)"></i>
         <!-- <a href><i class="fa fa-external-link"></i></a> -->
-        <span ng-class="{'visible-xs-inline': itemFilter.meta_apiurl}">[<span class="inline-clip" ng-bind="item.meta.title"></span>]</span>
-        <a href class="hidden-xs" ng-click="viewItem({itemObj: item})" ng-bind="item.title || '(link)'"></a>
-      </div>
+        <span class="item-feed-name">[<span class="inline-clip" ng-bind="item.meta.title"></span>]</span>
     </div>
-    <div class="col-sm-2 col-xs-6 text-right">{{item.pubdate | date: 'dd/MMM/yyyy' }}</div>
-    <div class="col-xs-12 visible-xs-block"><a href ng-click="viewItem({itemObj: item})" ng-bind="item.title || '(link)'"></a></div>
+    <div class="item-view"><a href ng-click="viewItem({itemObj: item})" ng-bind="item.title || '(link)'"></a></div>
+    <div class="item-date">{{item.pubdate | date: 'dd/MMM/yyyy' }}</div>
   </div>
   <div class="row" ng-show="await"><div class="col-xs-12"><i class="fa fa-circle-o-notch fa-spin"></i> loading more...</div></div>
   <div class="row" ng-show="!isMore"><div class="col-xs-12 text-muted">[No more items]</div></div>

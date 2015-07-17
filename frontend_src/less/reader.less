@@ -11,30 +11,84 @@
     padding: 0px @table-cell-padding 0px @table-cell-padding;
 }
 
-.reader-unread  a {
-    color: black;
-    font-weight: bold;
-}
-
 .reader-item {
+    .make-row(@grid-gutter-width);
     background-color: lighten(@gray-light,50%);
     border-bottom: 1px dotted lighten(@gray-light,25%);
     padding-top: 2px;
     padding-bottom: 2px;
-}
 
-.reader-item.reader-unread {
-    background-color: white;
-}
+    .item-date {
+        color: @gray-light;
+    }
 
-.reader-item.reader-chk-item {
-    background-color: @state-info-bg;
-}
+    &.reader-unread {
+        background-color: white;
+        a {
+            color: black;
+            font-weight: bold;
+        }
+    }
 
-.text-right-not-xs {
-  @media (min-width: @grid-float-breakpoint) {
-    .text-right();
-  }
+    &.reader-chk-item {
+        background-color: @state-info-bg;
+    }
+
+    @media (max-width: @screen-sm-min) {
+        .item-left-matter {
+            .make-xs-column(6);
+        }
+        .item-view {
+            .make-xs-column(12);
+            left: 0%;
+        }
+        .item-date {
+            .text-right();
+            padding-right: (@grid-gutter-width / 2);
+        }
+    }
+
+    @media (min-width: @screen-sm-min) {
+        .item-left-matter {
+            .make-xs-column(2);
+            width: 12em;
+        }
+
+        .item-view {
+            position: relative;
+            padding-left: (@grid-gutter-width / 2);
+            padding-right: (@grid-gutter-width / 2);
+            float: left;
+            width: -moz-calc(~"100% - 20em");
+            width: -webkit-calc(~"100% - 20em");
+            width: calc(~"100% - 20em");
+        }
+
+        .item-date {
+            position: relative;
+            padding-left: (@grid-gutter-width / 2);
+            padding-right: (@grid-gutter-width / 2);
+            float: right;
+            width: 8em;
+            .text-right();
+        }
+
+        &.feed-filter {
+            .item-left-matter {
+                width: 1em;
+            }
+            .item-feed-name {
+                display: none !important;
+            }
+            .item-view {
+                width: -moz-calc(~"100% - 11em");
+                width: -webkit-calc(~"100% - 11em");
+                width: calc(~"100% - 11em");
+            }
+        }
+
+    }
+
 }
 
 .inline-clip {
