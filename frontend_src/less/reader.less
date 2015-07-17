@@ -32,11 +32,13 @@
 
     &.reader-chk-item {
         background-color: @state-info-bg;
+        border-left: 7px solid darken(@state-info-bg, 50%);
+        margin-left: -(@grid-gutter-width / 2)-7px;
     }
 
     @media (max-width: @screen-sm-min) {
         .item-left-matter {
-            .make-xs-column(6);
+            .make-xs-column(8);
         }
         .item-view {
             .make-xs-column(12);
@@ -51,7 +53,7 @@
     @media (min-width: @screen-sm-min) {
         .item-left-matter {
             .make-xs-column(2);
-            width: 12em;
+            width: 15em;
         }
 
         .item-view {
@@ -59,9 +61,9 @@
             padding-left: (@grid-gutter-width / 2);
             padding-right: (@grid-gutter-width / 2);
             float: left;
-            width: -moz-calc(~"100% - 20em");
-            width: -webkit-calc(~"100% - 20em");
-            width: calc(~"100% - 20em");
+            width: -moz-calc(~"100% - 23em");
+            width: -webkit-calc(~"100% - 23em");
+            width: calc(~"100% - 23em");
         }
 
         .item-date {
