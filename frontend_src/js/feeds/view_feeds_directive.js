@@ -1,5 +1,5 @@
 angular.module('reader.feeds')
-.directive('readerViewFeeds', ['feedService', function (fs) {
+.directive('readerViewFeeds', [function (fs) {
     return {
         templateUrl: 'js/viewFeeds.html',
         scope: {
