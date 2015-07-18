@@ -1,0 +1,15 @@
+<div class="reader-item"
+      ng-class="{'reader-unread': !item.read, 'reader-chk-item': item.checked, 'feed-filter': itemFilter.meta_apiurl, 'item-show': show_content}">
+    <div class="item-left-matter">
+        <i class="fa fa-fw reader-chk" ng-class="{'fa-square-o': !item.checked, 'fa-check-square': item.checked}" ng-click="checkItem(item)"></i>
+        <span class="item-feed-name">[<span class="inline-clip" ng-bind="item.meta.title"></span>]</span>
+    </div>
+    <div class="item-title">
+      <a href class="item-title-main" ng-click="show()" ng-bind="item.title || '(view)'"></a>
+      <a href ng-click="linkOut()"><i class="fa fa-external-link"></i></a>
+    </div>
+    <div class="item-date">{{item.pubdate | date: 'dd/MMM/yyyy' }}</div>
+</div>
+<div class="item-content-row" ng-show="show_content">
+  <div class="col-xs-12" ng-bind-html="content"></div>
+</div>

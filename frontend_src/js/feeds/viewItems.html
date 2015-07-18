@@ -1,18 +1,11 @@
 <div infinite-scroll="infScrollGetMore()"
   infinite-scroll-distance="0.5"
   infinite-scroll-disabled="await || !isMore"
-  infinite-scroll-listen-for-event="itemFilterChange" >
-  <div ng-repeat="item in itemList | filter:itemFilter | orderBy:'-pubdate'"
-      class="reader-item"
-      ng-class="{'reader-unread': !item.read, 'reader-chk-item': item.checked, 'feed-filter': itemFilter.meta_apiurl}">
-    <div class="item-left-matter">
-        <i class="fa fa-fw reader-chk" ng-class="{'fa-square-o': !item.checked, 'fa-check-square': item.checked}" ng-click="checkItem(item)"></i>
-        <!-- <a href><i class="fa fa-external-link"></i></a> -->
-        <span class="item-feed-name">[<span class="inline-clip" ng-bind="item.meta.title"></span>]</span>
-    </div>
-    <div class="item-view"><a href ng-click="viewItem({itemObj: item})" ng-bind="item.title || '(link)'"></a></div>
-    <div class="item-date">{{item.pubdate | date: 'dd/MMM/yyyy' }}</div>
+  infinite-scroll-listen-for-event="itemFilterChange">
+  <div class="reader-item-container" ng-repeat="item in itemList | filter:itemFilter | orderBy:'-pubdate'">
+  <reader-item item="item"></reader-item>
   </div>
-  <div class="row" ng-show="await"><div class="col-xs-12"><i class="fa fa-circle-o-notch fa-spin"></i> loading more...</div></div>
-  <div class="row" ng-show="!isMore"><div class="col-xs-12 text-muted">[No more items]</div></div>
+  <div class="row" ng-show="!await && isMore"><div class="col-xs-12 text-center"><a href ng-click="infScrollGetMore()">Load more</a></div></div>
+  <div class="row" ng-show="await"><div class="col-xs-12 text-center"><i class="fa fa-circle-o-notch fa-spin"></i> loading more...</div></div>
+  <div class="row" ng-show="!isMore"><div class="col-xs-12 text-muted text-center">[No more items]</div></div>
 </div>

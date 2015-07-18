@@ -1,5 +1,5 @@
 angular.module('reader.feeds')
-.controller('ReaderCtrl', ['currentUserService', 'feedService', '$window', 'apiRoot', function (user, fs, $window, apiRoot) {
+.controller('ReaderCtrl', ['currentUserService', 'feedService', 'apiRoot', function (user, fs, apiRoot) {
     var selected;
 
     this.itemFilter = {};
@@ -29,11 +29,6 @@ angular.module('reader.feeds')
     };
 
     this.deleteFeed = fs.deleteFeed;
-
-    this.viewItem = function (itemObj) {
-        fs.markAsRead(itemObj, true);
-        $window.open(itemObj.link, '_blank');
-    };
 
     var self=this;
     this.updateData = function () {
@@ -81,7 +76,7 @@ angular.module('reader.feeds')
         fs.getFeedItems().forEach(function (item) {
             if (item.checked) {
                 item.checked = false;
-                fs.markAsRead(item, read);
+                item.markAsRead(read);
             }
         });
     };

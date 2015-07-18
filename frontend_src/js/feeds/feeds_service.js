@@ -1,12 +1,13 @@
 angular.module('reader.feeds')
-.factory('feedService', ['$http', 'currentUserService', 'apiRoot', 'getMoreNumber', function ($http, userService, apiRoot, getMoreNumber) {
+.factory('feedService', ['$http', '$q', 'currentUserService', 'apiRoot', 'getMoreNumber', function ($http, $q, userService, apiRoot, getMoreNumber) {
     var meta_data = [],
         items = [],
         last_modified,
         meta_data_map,
         item_map,
         feedOldestItem = {},
-        feedIsMore = {};
+        feedIsMore = {},
+        content = {};
 
     // Load some data initally
     $http.get(apiRoot, {params: {N: getMoreNumber}}).then(function (res) {
@@ -30,6 +31,8 @@ angular.module('reader.feeds')
             } else {
                 feedOldestItem[apiRoot] = item.pubdate;
             }
+            item.getContent = getContent;
+            item.markAsRead = markItemAsRead.bind(null, item);
         });
     });
 
@@ -67,17 +70,7 @@ angular.module('reader.feeds')
             item_map = buildMap(items);
             return $http.delete(feedData.apiurl);
         },
-        markAsRead: function (item, read) {
-            if (Boolean(item.read) !== read) {
-                if (read) {
-                    meta_data[meta_data_map[item.meta_apiurl]].unread--;
-                } else {
-                    meta_data[meta_data_map[item.meta_apiurl]].unread++;
-                }
-            }
-            item.read = read;
-            $http.put(item.apiurl, {read: read});
-        },
+        markAsRead: markItemAsRead,
         markAllAsRead: function (apiurl) {
             if (apiurl) {
                 items.forEach(function (item) {
@@ -158,6 +151,8 @@ angular.module('reader.feeds')
         });
         data.items.forEach(function (itemObj) {
             itemObj.meta = meta_data[meta_data_map[itemObj.meta_apiurl]];
+            itemObj.getContent = getContent;
+            itemObj.markAsRead = markItemAsRead.bind(null, itemObj);
             if (angular.isDefined(item_map[itemObj.apiurl])) {
                 items[item_map[itemObj.apiurl]] = itemObj;
             } else {
@@ -181,5 +176,39 @@ angular.module('reader.feeds')
             prev[cur.apiurl] = i;
             return prev;
         }, {});
+    }
+
+    function getContent() {
+        var self=this;
+
+        if (!self.content_apiurl) {
+            return $q(function (resolve, reject) {
+                reject(new Error('No content'));
+            });
+        }
+
+        if (content[self.content_apiurl]) {
+            return $q(function (resolve) {
+                resolve(content[self.content_apiurl]);
+            });
+        }
+
+        return $http.get(self.content_apiurl)
+        .then(function (res) {
+            content[self.content_apiurl] = res.data;
+            return content[self.content_apiurl];
+        });
+    }
+
+    function markItemAsRead (item, read) {
+        if (Boolean(item.read) !== read) {
+            if (read) {
+                meta_data[meta_data_map[item.meta_apiurl]].unread--;
+            } else {
+                meta_data[meta_data_map[item.meta_apiurl]].unread++;
+            }
+        }
+        item.read = read;
+        $http.put(item.apiurl, {read: read});
     }
 }]);
