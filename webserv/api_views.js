@@ -172,6 +172,17 @@ module.exports = function (url_for) {
             } else {
                 res.status(400).end();
             }
+        },
+        getContent: function (req, res) {
+            var q = {_id: req.params.ObjectID};
+            db.content.findOneAsync(q)
+            .then(function (item) {
+                if (item) {
+                    res.status(200).send(item.content);
+                } else {
+                    res.status(404).end();
+                }
+            });
         }
     };
 
@@ -196,6 +207,9 @@ module.exports = function (url_for) {
         obj.title = item_data.title;
         obj.pubdate = item_data.pubdate;
         obj.read = item_data.read || false;
+        if (item_data.content_id) {
+            obj.content_apiurl = url_for.content(item_data.content_id);
+        }
         return obj;
     }
 

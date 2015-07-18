@@ -46,7 +46,14 @@ function updateFeeds () {
         .then(function (feed_data) {
             /* Write over the returned feed URL, incase it's been replaced with a differnt
                cannonical URL */
-            feed_data.meta.feedurl = feed._id.feedurl; 
+            feed_data.meta.feedurl = feed._id.feedurl;
+
+            return mongoFeedStore.saveFeedItemContent(feed_data)
+            .then(function () {
+                return  feed_data;
+            });
+        })
+        .then(function (feed_data) {
             return Promise.each(feed.user_ids, function (uid) {
                 return mongoFeedStore.updateMongoFeedData(feed_data, uid);
             });

@@ -30,16 +30,23 @@ function insertTestData (done) {
         return conn.call('collection', 'posts').call('insertManyAsync', test_data.item);
     });
 
-    Promise.each(p2.get('ops'), function (item, i) {
+    var p3 = mongoConn.content.call('insertOneAsync', test_data.content)
+    .then(function (insert_res) {
+        test_data.content._id = insert_res.ops[0]._id;
+    });
+
+    var p4 = Promise.each(p2.get('ops'), function (item, i) {
         test_data.item[i]._id = item._id;
-    })
-    .done(done);
+    });
+
+    Promise.join(p3, p4, done);
 }
 function deleteTestData (done) {
     var conn = mongoConn.connection;
     Promise.join(
         conn.call('collection', 'feeds').call('deleteManyAsync', {}),
-        conn.call('collection', 'posts').call('deleteManyAsync', {})
+        conn.call('collection', 'posts').call('deleteManyAsync', {}),
+        conn.call('collection', 'content').call('deleteManyAsync', {})
     )
     .done(done);
 }
@@ -65,6 +72,8 @@ describe('api_views object', function () {
         spyRes.json.calls.reset();
         spyRes.status.calls.reset();
         spyRes.set.calls.reset();
+        spyRes.end.calls.reset();
+        spyRes.send.calls.reset();
     }
 
     function clearListner() {
@@ -75,18 +84,20 @@ describe('api_views object', function () {
         mockUrlFor = {
             feed: function (id) {return '/feeds/'+id;},
             item: function (id) {return '/items/'+id;},
+            content: function (id) {return '/content/'+id;},
             apiroot: function () {return '/';}
         };
 
         api_views = api_views_maker(mockUrlFor);
 
-        spyRes = jasmine.createSpyObj('res', ['json', 'status', 'end', 'set', 'redirect']);
+        spyRes = jasmine.createSpyObj('res', ['json', 'status', 'end', 'set', 'redirect', 'send']);
         spyRes.status.and.returnValue(spyRes);
         spyRes.set.and.returnValue(spyRes);
         spyRes.events = new events.EventEmitter();
         spyRes.json.and.callFake(emitResponseComplete);
         spyRes.end.and.callFake(emitResponseComplete);
         spyRes.redirect.and.callFake(emitResponseComplete);
+        spyRes.send.and.callFake(emitResponseComplete);
 
         function emitResponseComplete () {
             setTimeout(spyRes.events.emit.bind(spyRes.events, 'responseComplete'), 0);
@@ -163,38 +174,54 @@ describe('api_views object', function () {
     describe('getFeed method', function () {
         beforeAll(insertTestData);
         afterAll(deleteTestData);
-        beforeAll(function (done) {
-            spyRes.events.once('responseComplete', done);
-            api_views.getFeed({user: {_id: 'IMPOSTER'}, query: {}, params: {ObjectID: test_data.meta[1]._id}}, spyRes);
-        });
+        beforeEach(resetSpies);
         afterAll(resetSpies);
         afterAll(clearListner);
-        it('should return a 200 code', function () {
-            expect(spyRes.status.calls.allArgs()).toEqual([[200]]);
+        it('should return a 200 code', function (done) {
+          spyRes.events.once('responseComplete', function () {
+              expect(spyRes.status.calls.allArgs()).toEqual([[200]]);
+              done();
+          });
+          api_views.getFeed({user: {_id: 'IMPOSTER'}, query: {}, params: {ObjectID: test_data.meta[1]._id}}, spyRes);
         });
-        it('should return data using res.json()', function () {
-            expect(spyRes.json.calls.count()).toEqual(1);
-            var data = spyRes.json.calls.argsFor(0)[0];
-            expect(data.meta.length).toEqual(1);
-            expect(data.meta[0]).toEqual({
-                feedurl: test_data.meta[1].feedurl,
-                title: test_data.meta[1].title,
-                link: test_data.meta[1].link,
-                apiurl: mockUrlFor.feed(test_data.meta[1]._id),
-                unread: 1
+        it('should return data using res.json()', function (done) {
+            spyRes.events.once('responseComplete', function () {
+                expect(spyRes.json.calls.count()).toEqual(1);
+                var data = spyRes.json.calls.argsFor(0)[0];
+                expect(data.meta.length).toEqual(1);
+                expect(data.meta[0]).toEqual({
+                    feedurl: test_data.meta[1].feedurl,
+                    title: test_data.meta[1].title,
+                    link: test_data.meta[1].link,
+                    apiurl: mockUrlFor.feed(test_data.meta[1]._id),
+                    unread: 1
+                });
+                expect(data.items.length).toEqual(1);
+                expect(data.items[0]).toEqual({
+                    apiurl: mockUrlFor.item(test_data.item[1]._id),
+                    meta_apiurl:  mockUrlFor.feed(test_data.item[1].meta_id),
+                    link: test_data.item[1].link,
+                    title: test_data.item[1].title,
+                    pubdate: test_data.item[1].pubdate,
+                    read: false
+                });
+                done();
             });
-            expect(data.items.length).toEqual(1);
-            expect(data.items[0]).toEqual({
-                apiurl: mockUrlFor.item(test_data.item[1]._id),
-                meta_apiurl:  mockUrlFor.feed(test_data.item[1].meta_id),
-                link: test_data.item[1].link,
-                title: test_data.item[1].title,
-                pubdate: test_data.item[1].pubdate,
-                read: false
-            });
+            api_views.getFeed({user: {_id: 'IMPOSTER'}, query: {}, params: {ObjectID: test_data.meta[1]._id}}, spyRes);
         });
-        it('should set a cache control header', function () {
-            expect(spyRes.set.calls.allArgs()).toContain(['cache-control', 'private, max-age=0, no-cache']);
+        it('should set a cache control header', function (done) {
+            spyRes.events.once('responseComplete', function () {
+                expect(spyRes.set.calls.allArgs()).toContain(['cache-control', 'private, max-age=0, no-cache']);
+                done();
+            });
+            api_views.getFeed({user: {_id: 'IMPOSTER'}, query: {}, params: {ObjectID: test_data.meta[1]._id}}, spyRes);
+        });
+        it('should set a content url if there is one', function (done) {
+            spyRes.events.once('responseComplete', function () {
+                expect(spyRes.json.calls.argsFor(0)[0].items[0].content_apiurl).toEqual('/content/foo');
+                done();
+            });
+            api_views.getFeed({user: {_id: 'IMPOSTER'}, query: {}, params: {ObjectID: test_data.meta[2]._id}}, spyRes);
         });
     });
 
@@ -408,7 +435,8 @@ describe('api_views object', function () {
     describe('deleteFeed method', function () {
         beforeEach(deleteTestData);
         beforeEach(insertTestData);
-        afterEach(resetSpies);
+        beforeEach(resetSpies);
+        afterAll(resetSpies);
         afterEach(clearListner);
         afterAll(deleteTestData);
         it('should delete items and feed data', function (done) {
@@ -432,6 +460,31 @@ describe('api_views object', function () {
                 done();
             });
             api_views.deleteFeed({user: {_id: 'FOO_UID'}, params: {ObjectID: test_data.meta[0]._id}}, spyRes);
+        });
+    });
+
+    describe('getContent method', function () {
+        beforeEach(deleteTestData);
+        beforeEach(insertTestData);
+        beforeEach(resetSpies);
+        afterAll(resetSpies);
+        afterEach(clearListner);
+        afterAll(deleteTestData);
+        it('should return data and 200 code on good request', function (done) {
+            spyRes.events.once('responseComplete', function () {
+                expect(spyRes.status.calls.allArgs()).toEqual([[200]]);
+                expect(spyRes.send.calls.allArgs()).toEqual([[test_data.content.content]]);
+                done();
+            });
+            api_views.getContent({params: {ObjectID: test_data.content._id}}, spyRes);
+        });
+        it('shoudl return 404 and no content on bad ObjectID', function (done) {
+            spyRes.events.once('responseComplete', function () {
+                expect(spyRes.status.calls.allArgs()).toEqual([[404]]);
+                expect(spyRes.end.calls.allArgs()).toEqual([[]]);
+                done();
+            });
+            api_views.getContent({params: {ObjectID: 'foo'}}, spyRes);
         });
     });
 

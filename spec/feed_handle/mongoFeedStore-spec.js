@@ -12,7 +12,7 @@ var clearDB = function (done) {
     ])
     .done(done);
 };
-    
+
 describe('mongoFeedStore', function () {
     var sampledata1 = {
             meta: {_id: new ObjectID('000000000000000000000001'), link: 'url', feedurl: 'feedurl', title: 'blog'},
@@ -20,6 +20,11 @@ describe('mongoFeedStore', function () {
         };
 
     beforeAll(clearDB);
+
+    describe('saveFeedItemContent', function () {
+        it('should save item content');
+        it('should not double-insert content');
+    });
 
     describe('updateMongoFeedData', function () {
         afterEach(clearDB);
@@ -44,7 +49,7 @@ describe('mongoFeedStore', function () {
             })
             .done(done);
         });
-        
+
         it('should not double insert exiting data', function (done){
             var sampledata2 = {
                 meta: {link: 'url', feedurl: 'feedurl', title: 'New title'},

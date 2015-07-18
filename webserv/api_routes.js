@@ -5,7 +5,7 @@ var express = require('express'),
     path,
     url_for,
     ObjectID = require('mongodb').ObjectID;
-    
+
 module.exports = function (mount_path) {
     path = mount_path;
     views = views || mod_views(url_for);
@@ -20,6 +20,9 @@ url_for = {
     },
     item: function (id) {
         return path + '/posts/' + id.toString();
+    },
+    content: function(id) {
+        return path + '/content/' + id.toString();
     },
     apiroot: function () {
         return path;
@@ -46,7 +49,7 @@ function setupRoutes() {
     newApp.put('/feeds/:ObjectID', views.putFeed);
     newApp.delete('/feeds/:ObjectID', views.deleteFeed);
     newApp.put('/posts/:ObjectID', views.putPost);
+    newApp.get('/content/:ObjectID', views.getContent);
     newApp.use(views['404']);
     return newApp;
 }
-    

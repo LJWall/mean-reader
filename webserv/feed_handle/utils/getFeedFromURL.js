@@ -101,7 +101,9 @@ parseFeed = function () {
                 title: post.title,
                 link: post.link,
                 pubdate: post.pubdate,
-                guid: post.guid
+                guid: post.guid,
+                description: post.description,
+                summary: post.summary
             });
         });
 

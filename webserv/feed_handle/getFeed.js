@@ -21,7 +21,10 @@ module.exports = function (url, user_id) {
     }
 
     return initGet.then(function (data) {
-        return mongoFeedStore.updateMongoFeedData(data, user_id);
+        return mongoFeedStore.saveFeedItemContent(data)
+        .then(function () {
+            return mongoFeedStore.updateMongoFeedData(data, user_id);
+        });
     })
     .then(function () {
         return db.feeds.findOneAsync({'feedurl': initData.meta.feedurl, user_id: user_id});
@@ -39,10 +42,13 @@ module.exports = function (url, user_id) {
             if (next) {
                 getFeedFromURL(next['@'].href, false)
                 .tap(function (nextData) {
-                    return mongoFeedStore.updateMongoFeedData({
-                        meta: initData.meta,
-                        items: nextData.items
-                    }, user_id, true);
+                    return mongoFeedStore.saveFeedItemContent(nextData)
+                    .then(function () {
+                        return mongoFeedStore.updateMongoFeedData({
+                            meta: initData.meta,
+                            items: nextData.items
+                        }, user_id, true);
+                    });
                 })
                 .catch(function (e) {
                     console.error('Error getting', next['@'].href);

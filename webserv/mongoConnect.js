@@ -11,7 +11,7 @@ Promise.promisifyAll(mongodb.Cursor.prototype);
 module.exports.connection = db_promise = MongoClient.connectAsync(config.mongo_uri);
 
 // For convenience, export collection promises with some utilities ready defined
-['users', 'feeds', 'posts'].forEach(function (coll_name) {
+['users', 'feeds', 'posts', 'content'].forEach(function (coll_name) {
     module.exports[coll_name] = db_promise.call('collection', coll_name);
     module.exports[coll_name].find = find;
     module.exports[coll_name].findOneAsync = findOneAsync;
@@ -47,4 +47,3 @@ function decorate_cursor (cursor) {
     cursor.toArrayAsync = toArrayAsync;
     return cursor;
 }
-

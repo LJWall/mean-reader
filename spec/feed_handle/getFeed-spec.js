@@ -13,6 +13,7 @@ describe('getFeed', function () {
             getFeed.__set__('getFeedFromURL', this.getFeedFromURLSpy);
             spyOn(db.feeds, 'findOneAsync');
             spyOn(mongoFeedStore, 'updateMongoFeedData');
+            spyOn(mongoFeedStore, 'saveFeedItemContent').and.returnValue(Promise.resolve('foo'));
         });
         beforeEach(function () {
             this.getFeedFromURLSpy.calls.reset();
@@ -30,6 +31,8 @@ describe('getFeed', function () {
                 expect(self.getFeedFromURLSpy.calls.allArgs()).toEqual([['eggs', true]]);
                 expect(mongoFeedStore.updateMongoFeedData.calls.count()).toEqual(1);
                 expect(mongoFeedStore.updateMongoFeedData).toHaveBeenCalledWith(self.fakeFeedData, 'FOOBAR');
+                expect(mongoFeedStore.saveFeedItemContent.calls.count()).toEqual(1);
+                expect(mongoFeedStore.saveFeedItemContent).toHaveBeenCalledWith(self.fakeFeedData);
                 expect(db.feeds.findOneAsync.calls.count()).toEqual(1);
                 expect(db.feeds.findOneAsync.calls.argsFor(0)).toEqual([{'feedurl': 'http://cannonical', user_id: 'FOOBAR'}]);
             })

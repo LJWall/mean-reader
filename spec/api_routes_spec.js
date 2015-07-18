@@ -21,7 +21,8 @@ var views_obj = {
         deleteFeed: function () {},
         postAdd: function () {},
         '404': function () {},
-        putPost: function () {}
+        putPost: function () {},
+        getContent: function () {}
 };
 
 var mockModViews = jasmine.createSpy('mod_views').and.callFake(function () {
@@ -36,12 +37,12 @@ describe('api_routes', function () {
         mod_api_routes.__set__('mod_views', mockModViews);
         mod_api_routes('/root');
     });
-    
+
     it('should call api_views with url_for object', function () {
         expect(mockModViews.calls.count()).toEqual(1);
         expect(mockModViews).toHaveBeenCalledWith(mod_api_routes.__get__('url_for'));
     });
-    
+
     it('should route GET / to views.getAll', function () {
         expect(mockApp.get).toHaveBeenCalledWith('/', views_obj.getAll);
     });
@@ -60,26 +61,29 @@ describe('api_routes', function () {
     it('should route DELETE /feeds/:ObjectID to views.deleteFeed', function () {
         expect(mockApp.delete).toHaveBeenCalledWith('/feeds/:ObjectID', views_obj.deleteFeed);
     });
-    it('should route PUT to /posts/:ObjectID to views.putPost', function () {
+    it('should route PUT /posts/:ObjectID to views.putPost', function () {
         expect(mockApp.put).toHaveBeenCalledWith('/posts/:ObjectID', views_obj.putPost);
+    });
+    it('should route GET /content/:ObjectID to views.getContent', function () {
+        expect(mockApp.get).toHaveBeenCalledWith('/content/:ObjectID', views_obj.getContent);
     });
     it('should make handle 404', function () {
         expect(mockApp.use).toHaveBeenCalledWith(views_obj['404']);
     });
-    
+
     describe('url_for [internal function]', function () {
-        it('should return /root/feeds/[id] for a feed api url', function () {
+        it('should return [mount point]/feeds/[id] for a feed api url', function () {
             expect(mod_api_routes.__get__('url_for').feed(1))
             .toEqual('/root/feeds/1');
         });
-        it('should return /root/posts/[id] for a post api url', function () {
+        it('should return [mount point]/posts/[id] for a post api url', function () {
             expect(mod_api_routes.__get__('url_for').item(7))
             .toEqual('/root/posts/7');
         });
+        it('should return [mount point]/content/[id] for a content api url', function () {
+            expect(mod_api_routes.__get__('url_for').content(7))
+            .toEqual('/root/content/7');
+        });
     });
-    
+
 });
-
-
-
-
