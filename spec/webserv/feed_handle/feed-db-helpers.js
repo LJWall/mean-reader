@@ -1,9 +1,9 @@
 var Promise = require('bluebird'),
-    mongoConn = require('../../webserv/mongoConnect.js'),
+    mongoConn = require('../../../webserv/mongoConnect.js'),
     ObjectID = require('mongodb').ObjectID,
     mongodb;
-    
-    
+
+
 // sample data
 module.exports.sampledata = [];
 module.exports.sampledata.push({
@@ -40,7 +40,7 @@ module.exports.closeTestDb = function () {
     if (mongodb) {
         mongodb.close();
     }
-    
+
 };
 
 module.exports.insertSample = function (i) {
@@ -49,5 +49,3 @@ module.exports.insertSample = function (i) {
         mongodb.collection('posts').insertManyAsync(module.exports.sampledata[i].items)
     ]);
 };
-
-

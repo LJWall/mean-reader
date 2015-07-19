@@ -1,9 +1,9 @@
 var rewire = require('rewire'),
-    api_views_maker = rewire('../webserv/api_views'),
+    api_views_maker = rewire('../../webserv/api_views'),
     Promise = require('bluebird'),
     events = require('events'),
     test_data = require('./api_views_test_data.json'),
-    mongoConn = require('../webserv/mongoConnect.js'),
+    mongoConn = require('../../webserv/mongoConnect.js'),
     feed_server = require('./feed_handle/test_atomserv/feed_server'),
     i, mockUrlFor;
 

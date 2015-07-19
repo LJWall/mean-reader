@@ -1,9 +1,9 @@
 var rewire = require('rewire'),
-    mongoFeedStore = require('../../webserv/feed_handle/utils/mongoFeedStore.js'),
-    getFeedFromURL = require('../../webserv/feed_handle/utils/getFeedFromURL.js'),
-    getFeed = rewire('../../webserv/feed_handle/getFeed.js'),
+    mongoFeedStore = require('../../../webserv/feed_handle/utils/mongoFeedStore.js'),
+    getFeedFromURL = require('../../../webserv/feed_handle/utils/getFeedFromURL.js'),
+    getFeed = rewire('../../../webserv/feed_handle/getFeed.js'),
     Promise = require('bluebird'),
-    db = require('../../webserv/mongoConnect.js');
+    db = require('../../../webserv/mongoConnect.js');
 
 describe('getFeed', function () {
     describe('[basic process]', function () {

@@ -1,9 +1,9 @@
 var feed_server = require('./test_atomserv/feed_server'),
-    findAlternates = require('../../webserv/feed_handle/utils/findAlternates.js'),
+    findAlternates = require('../../../webserv/feed_handle/utils/findAlternates.js'),
     Promise = require('bluebird'),
     request = require('request');
 
-    
+
 describe('getFeedFromURL', function () {
     beforeAll(function () {
         feed_server.startServer();
@@ -24,8 +24,7 @@ describe('getFeedFromURL', function () {
                 'http://127.0.0.1:1337/surf.atom'
             ]);
         })
-        .done(done);  
+        .done(done);
     });
 
 });
-

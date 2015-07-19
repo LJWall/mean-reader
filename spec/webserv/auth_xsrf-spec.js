@@ -1,6 +1,6 @@
 var rewire = require('rewire'),
     Promise = require('bluebird'),
-    xsrf = rewire('../webserv/auth/xsrf/xsrf'),
+    xsrf = rewire('../../webserv/auth/xsrf/xsrf'),
     uid_safeSpy =  jasmine.createSpy();
 
 xsrf.__set__('uid_safe', uid_safeSpy);
@@ -11,11 +11,11 @@ describe('module: xsrf', function () {
         expect(typeof xsrf.get_xsrf_token).toEqual('function');
         expect(xsrf.get_xsrf_token.length).toEqual(2);
     });
-    
+
     it('should expose a function check_xsrf_header of length 3', function () {
         expect(typeof xsrf.check_xsrf_header).toEqual('function');
         expect(xsrf.check_xsrf_header.length).toEqual(3);
-    
+
     });
     describe('get_xsrf_token() [happy case]', function () {
         beforeAll(function (done) {

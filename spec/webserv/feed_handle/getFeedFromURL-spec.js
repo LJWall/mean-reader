@@ -1,8 +1,8 @@
 var feed_server = require('./test_atomserv/feed_server'),
-    getFeedFromURL = require('../../webserv/feed_handle/utils/getFeedFromURL.js'),
+    getFeedFromURL = require('../../../webserv/feed_handle/utils/getFeedFromURL.js'),
     Promise = require('bluebird');
 
-    
+
 describe('getFeedFromURL', function () {
     beforeAll(feed_server.startServer);
     afterAll(feed_server.stopServer);
@@ -33,7 +33,7 @@ describe('getFeedFromURL', function () {
             expect(results[0].isRejected()).toBe(true);
             expect(results[0].reason().message).toEqual('Not a feed');
         })
-        .done(done);  
+        .done(done);
     });
 
    it('should reject promise if url returns 404', function (done) {
@@ -70,4 +70,3 @@ describe('getFeedFromURL', function () {
         .done(done);
     });
 });
-

@@ -1,5 +1,5 @@
 var rewire = require('rewire'),
-    mod_api_routes = rewire('../webserv/api_routes');
+    mod_api_routes = rewire('../../webserv/api_routes');
 
 var mockApp = {
     get: jasmine.createSpy('app.get'),
