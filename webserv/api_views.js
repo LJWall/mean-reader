@@ -176,7 +176,7 @@ module.exports = function (url_for) {
             db.content.findOneAsync(q)
             .then(function (item) {
                 if (item) {
-                    res.status(200).type('html').send(item.content);
+                    res.status(200).type('html').set('cache-control', 'public, max-age=604800').send(item.content);
                 } else {
                     res.status(404).end();
                 }

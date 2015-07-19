@@ -466,6 +466,7 @@ describe('api_views object', function () {
             spyRes.events.once('responseComplete', function () {
                 expect(spyRes.status.calls.allArgs()).toEqual([[200]]);
                 expect(spyRes.type.calls.allArgs()).toEqual([['html']]);
+                expect(spyRes.set.calls.allArgs()).toContain(['cache-control', 'public, max-age=604800']);
                 expect(spyRes.send.calls.allArgs()).toEqual([[test_data.content.content]]);
                 done();
             });
