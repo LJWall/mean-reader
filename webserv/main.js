@@ -27,6 +27,10 @@ app.use(session({
 
 app.use('/reader', express.static('frontend_build'));
 
+app.use(function (req, res, next) {
+    res.set('cache-control', 'private, max-age=0, no-cache');
+    next();
+});
 
 app.get('/reader/xsrf/get_token', xsrf.get_xsrf_token);
 app.use('/reader', user(xsrf.check_xsrf_header));
@@ -39,5 +43,3 @@ app.use('/reader/api',
 
 app.listen(5667);
 console.log('Listening on port 5667');
-
-
