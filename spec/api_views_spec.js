@@ -147,9 +147,6 @@ describe('api_views object', function () {
         it('should set a last-modified header', function () {
             expect(spyRes.set.calls.allArgs()).toContain(['last-modified', new Date('2000-01-01 13:00')]);
         });
-        it('should set a cache control header', function () {
-            expect(spyRes.set.calls.allArgs()).toContain(['cache-control', 'private, max-age=0, no-cache']);
-        });
     });
 
     describe('getAll method with updated_since query paramter', function () {
@@ -207,13 +204,6 @@ describe('api_views object', function () {
                     pubdate: test_data.item[1].pubdate,
                     read: false
                 });
-                done();
-            });
-            api_views.getFeed({user: {_id: 'IMPOSTER'}, query: {}, params: {ObjectID: test_data.meta[1]._id}}, spyRes);
-        });
-        it('should set a cache control header', function (done) {
-            spyRes.events.once('responseComplete', function () {
-                expect(spyRes.set.calls.allArgs()).toContain(['cache-control', 'private, max-age=0, no-cache']);
                 done();
             });
             api_views.getFeed({user: {_id: 'IMPOSTER'}, query: {}, params: {ObjectID: test_data.meta[1]._id}}, spyRes);

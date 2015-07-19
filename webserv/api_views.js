@@ -56,7 +56,6 @@ module.exports = function (url_for) {
                 });
                 res.status(200)
                 .set('last-modified', last_update.dt)
-                .set('cache-control', 'private, max-age=0, no-cache')
                 .json({meta: meta, items: items});
             });
         },
@@ -91,7 +90,6 @@ module.exports = function (url_for) {
                 function (meta, items, n_unread) {
                     if (n_unread[0]) meta.unread = n_unread[0].unread;
                     res.status(200)
-                    .set('cache-control', 'private, max-age=0, no-cache')
                     .json({meta: [meta], items: items});
                 }
             );
