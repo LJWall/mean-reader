@@ -1,4 +1,4 @@
-angular.module('reader.feeds')
+angular.module('reader.feeds.service', ['reader.user', 'reader.feeds.constants'])
 .factory('feedService', ['$http', '$q', 'currentUserService', 'apiRoot', 'getMoreNumber', function ($http, $q, userService, apiRoot, getMoreNumber) {
     var meta_data = [],
         items = [],
