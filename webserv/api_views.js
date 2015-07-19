@@ -178,7 +178,7 @@ module.exports = function (url_for) {
             db.content.findOneAsync(q)
             .then(function (item) {
                 if (item) {
-                    res.status(200).send(item.content);
+                    res.status(200).type('html').send(item.content);
                 } else {
                     res.status(404).end();
                 }

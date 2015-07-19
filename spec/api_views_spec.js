@@ -74,6 +74,7 @@ describe('api_views object', function () {
         spyRes.set.calls.reset();
         spyRes.end.calls.reset();
         spyRes.send.calls.reset();
+        spyRes.type.calls.reset();
     }
 
     function clearListner() {
@@ -90,9 +91,10 @@ describe('api_views object', function () {
 
         api_views = api_views_maker(mockUrlFor);
 
-        spyRes = jasmine.createSpyObj('res', ['json', 'status', 'end', 'set', 'redirect', 'send']);
+        spyRes = jasmine.createSpyObj('res', ['json', 'status', 'end', 'set', 'redirect', 'send', 'type']);
         spyRes.status.and.returnValue(spyRes);
         spyRes.set.and.returnValue(spyRes);
+        spyRes.type.and.returnValue(spyRes);
         spyRes.events = new events.EventEmitter();
         spyRes.json.and.callFake(emitResponseComplete);
         spyRes.end.and.callFake(emitResponseComplete);
@@ -473,6 +475,7 @@ describe('api_views object', function () {
         it('should return data and 200 code on good request', function (done) {
             spyRes.events.once('responseComplete', function () {
                 expect(spyRes.status.calls.allArgs()).toEqual([[200]]);
+                expect(spyRes.type.calls.allArgs()).toEqual([['html']]);
                 expect(spyRes.send.calls.allArgs()).toEqual([[test_data.content.content]]);
                 done();
             });
