@@ -39,6 +39,7 @@
     "grunt-contrib-less": "^1.0.1",
     "grunt-contrib-watch": "^0.6.1",
     "grunt-express-server": "^0.5.1",
+    "grunt-karma": "^0.12.0",
     "jasmine": "2.2.1",
     "karma": "^0.13.2",
     "rewire": "^2.3.3"

@@ -1,13 +1,13 @@
 module.exports = function(grunt) {
-    
+
     var config = {};
 
-    // Load grunt packages and create blank section of the config object.  
-    grunt.loadNpmTasks('grunt-contrib-copy'); 
+    // Load grunt packages and create blank section of the config object.
+    grunt.loadNpmTasks('grunt-contrib-copy');
     config.copy = {};
-    grunt.loadNpmTasks('grunt-express-server'); 
+    grunt.loadNpmTasks('grunt-express-server');
     config.express = {};
-    grunt.loadNpmTasks('grunt-contrib-watch'); 
+    grunt.loadNpmTasks('grunt-contrib-watch');
     config.watch = {};
     grunt.loadNpmTasks('grunt-closure-compiler');
     config['closure-compiler'] = {};
@@ -17,6 +17,8 @@ module.exports = function(grunt) {
     config.less= {};
     grunt.loadNpmTasks('grunt-contrib-concat');
     config.concat = {};
+    grunt.loadNpmTasks('grunt-karma');
+    config.karma = {};
 
     // (some) Bower dependencies
     config.copy.bower = { files: [
@@ -31,7 +33,7 @@ module.exports = function(grunt) {
     config['closure-compiler'].all = {
         js: 'frontend_src/js/**/*.js',
         jsOutputFile: 'frontend_build/js/frontend.min.js',
-        reportFile: 'closure-compiler.report.txt', 
+        reportFile: 'closure-compiler.report.txt',
         options: {compilation_level: 'SIMPLE', language_in: 'ECMASCRIPT5_STRICT'}
     };
 
@@ -66,20 +68,26 @@ module.exports = function(grunt) {
     // jshint
     config.jshint.all = ['Gruntfile.js', 'frontend_src/**/*.js', 'spec/**/*.js', 'webserv/**/*.js'];
 
+    // karma
+    config.karma.all = {
+        configFile: 'karma.conf.js',
+        port: 9999,
+        singleRun: true
+    };
 
     grunt.initConfig(config);
 
     grunt.registerTask('build', ['less', 'copy', 'closure-compiler', 'concat']);
     grunt.registerTask('default',['build']);
     grunt.registerTask('run', ['build', 'express:dev', 'watch']);
-    
+
     grunt.registerTask("testnode",
         "Run server specs in Node.js",
         function() {
             var done = this.async(),
                 Jasmine = require('jasmine'),
                 jasmine = new Jasmine(),
-                pass = true; 
+                pass = true;
 
             jasmine.loadConfigFile('./spec/support/jasmine.json');
             jasmine.env.addReporter({
@@ -97,6 +105,6 @@ module.exports = function(grunt) {
             jasmine.execute();
         }
     );
-    grunt.registerTask('test', ['jshint', 'testnode']);
+    grunt.registerTask('test', ['jshint', 'karma', 'testnode']);
 
 };
