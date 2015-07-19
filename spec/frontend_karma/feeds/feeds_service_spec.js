@@ -28,7 +28,7 @@ describe('feeds_service', function () {
 
         it('should make feed meta data available', inject(function (feedService, $httpBackend) {
             $httpBackend.flush();
-            var metadata = feedService.getFeedMetaList()
+            var metadata = feedService.getFeedMetaList();
             expect(metadata.length).toEqual(1);
             expect(metadata[0].title).toEqual(this.initData.meta[0].title);
             expect(metadata[0].apiurl).toEqual(this.initData.meta[0].apiurl);
