@@ -1,4 +1,4 @@
-angular.module('reader.feeds')
+angular.module('readerApp')
 .controller('ReaderCtrl', ['currentUserService', 'feedService', 'apiRoot', function (user, fs, apiRoot) {
     var selected;
 
