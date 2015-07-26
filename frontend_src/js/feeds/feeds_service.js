@@ -1,3 +1,11 @@
+(function () {
+
+function min (arr) {
+    return arr.reduce(function (prev, cur) {
+        return (prev < cur ? prev : cur);
+    });
+}
+
 angular.module('reader.feeds.service')
 .factory('feedService', ['$http', '$q', 'currentUserService', 'apiRoot', 'getMoreNumber', function ($http, $q, userService, apiRoot, getMoreNumber) {
     var meta_data = [],
@@ -7,13 +15,79 @@ angular.module('reader.feeds.service')
         item_map,
         feedOldestItem = {},
         feedIsMore = {},
-        content = {};
+        content = {},
+        feedTree;
+
+    var foo_meta = {},
+        foo_items = {};
+
+    function treeNode (data, parent, isLeaf) {
+        var unread = data.unread;
+        return {
+            title: data.title,
+            apiurl: data.apiurl,
+            branches: [],
+            items: [],
+            parent: parent,
+            getMore: function () {
+                var self = this;
+                getMore(this.apiurl)
+                .then(function (res) {
+                    res.data.items.forEach(function (item) {
+                        var newItem;
+                        if (foo_items[item.apiurl]) {
+                            foo_items[item.apiurl].update(item);
+                        } else {
+                            newItem = new Item(item);
+                            foo_items[item.apiurl] = newItem;
+                            addToTree(newItem, foo_meta[item.meta_apiurl]);
+                        }
+                    });
+                });
+                function addToTree (item, node) {
+                    node.items.push(item);
+                    node.oldest = (node.oldest ? min([node.oldest, item.pubdate.getTime()]) : item.pubdate.getTime());
+                    if (node !== self && node.parent) {
+                        addToTree(item, node.parent);
+                    }
+                }
+            },
+            markAllAsRead: function () {},
+            unread: function () {
+                if (isLeaf) {
+                    return unread;
+                } else {
+                    return this.branches.reduce(function (prev, cur) {
+                        return prev + cur.unread();
+                    }, 0);
+                }
+            }
+        };
+    };
+
+    function Item (data) {
+        this.update(data);
+    };
+    Item.prototype.update = function (data) {
+      this.title = data.title;
+      this.apiurl = data.apiurl;
+      this.meta_apiurl = data.meta_apiurl;
+      this.read = data.read;
+      this.pubdate = new Date(data.pubdate);
+      this.content_apiurl = data.content_apiurl;
+    };
+    Item.prototype.getContent = getContent;
+    Item.prototype.markAsRead = function (read) {
+        markItemAsRead(this, read);
+    };
 
     // Load some data initally
     $http.get(apiRoot, {params: {N: getMoreNumber}}).then(function (res) {
         cleanReturnData(res.data);
         meta_data = res.data.meta;
-        items = res.data.items;
+        items = res.data.items.map(function (item) {
+            return new Item(item);
+        });
         meta_data_map = buildMap(meta_data);
         item_map = buildMap(items);
         last_modified = res.headers('last-modified');
@@ -31,9 +105,25 @@ angular.module('reader.feeds.service')
             } else {
                 feedOldestItem[apiRoot] = item.pubdate;
             }
-            item.getContent = getContent;
-            item.markAsRead = markItemAsRead.bind(null, item);
         });
+
+        /********** NEW ************/
+        feedTree = treeNode({apiurl: apiRoot, title: 'All'});
+        meta_data.forEach(function (feedData) {
+            var newOb = treeNode(feedData, feedTree);
+            feedTree.branches.push(newOb);
+            foo_meta[feedData.apiurl] = newOb;
+        });
+        items.forEach(function (item) {
+            item = new Item(item);
+            var itemPubTime = item.pubdate.getTime();
+            feedTree.items.push(item);
+            feedTree.oldest = (feedTree.oldest ? min([feedTree.oldest, itemPubTime]) : itemPubTime);
+            foo_items[item.apiurl] = item;
+            foo_meta[item.meta_apiurl].items.push(item);
+            foo_meta[item.meta_apiurl].oldest = (foo_meta[item.meta_apiurl].oldest ? min([itemPubTime, foo_meta[item.meta_apiurl].oldest]) : itemPubTime);
+        });
+        /********** /NEW ************/
     });
 
     userService.onSignOut(function () {
@@ -70,7 +160,6 @@ angular.module('reader.feeds.service')
             item_map = buildMap(items);
             return $http.delete(feedData.apiurl);
         },
-        markAsRead: markItemAsRead,
         markAllAsRead: function (apiurl) {
             if (apiurl) {
                 items.forEach(function (item) {
@@ -97,13 +186,16 @@ angular.module('reader.feeds.service')
         oldestItem: function () {
             return feedOldestItem;
         },
-        getMore: getMore
+        getMore: getMore,
+        feedTree: function () {
+            return feedTree;
+        }
     };
 
     function getMore(apiurl) {
         var config = {params: {N: getMoreNumber}};
         if (feedOldestItem[apiurl]) {
-            config.params.older_than = feedOldestItem[apiurl].toString();
+            config.params.older_than = feedOldestItem[apiurl];
         }
         return $http.get(apiurl, config)
         .then(function (res) {
@@ -124,6 +216,7 @@ angular.module('reader.feeds.service')
                     }
                 });
             }
+            return res;
         });
     }
 
@@ -150,12 +243,11 @@ angular.module('reader.feeds.service')
             }
         });
         data.items.forEach(function (itemObj) {
-            itemObj.meta = meta_data[meta_data_map[itemObj.meta_apiurl]];
-            itemObj.getContent = getContent;
-            itemObj.markAsRead = markItemAsRead.bind(null, itemObj);
             if (angular.isDefined(item_map[itemObj.apiurl])) {
-                items[item_map[itemObj.apiurl]] = itemObj;
+                items[item_map[itemObj.apiurl]].update(itemObj);
             } else {
+                itemObj = new Item(itemObj);
+                itemObj.meta = meta_data[meta_data_map[itemObj.meta_apiurl]];
                 items.push(itemObj);
                 item_map[itemObj.apiurl] = items.length - 1;
             }
@@ -212,3 +304,5 @@ angular.module('reader.feeds.service')
         $http.put(item.apiurl, {read: read});
     }
 }]);
+
+})();
