@@ -61,6 +61,10 @@ angular.module('reader.feeds.service')
                         return prev + cur.unread();
                     }, 0);
                 }
+            },
+            update: function (data) {
+                this.title = data.title;
+                unread = data.unread;
             }
         };
     };
@@ -183,6 +187,9 @@ angular.module('reader.feeds.service')
         refresh: function () {
             return updateData()
             .then(function (res) {
+                res.data.meta.forEach(function (meta) {
+                    foo_meta[meta.apiurl].update(meta);
+                });
                 res.data.items.forEach(function (item) {
                     if (foo_items[item.apiurl]) {
                         foo_items[item.apiurl].update(item);

@@ -119,7 +119,9 @@ describe('feeds_service', function () {
             $httpBackend.flush();
             $httpBackend.expectGET(apiRoot + '?' + $httpParamSerializer({'updated_since': '2015-01-01T17:00:00Z'}))
               .respond({
-                  meta: [],
+                  meta: [
+                      {title: 'Feed (rename)', apiurl: 'http://apiurl', unread: 1}
+                  ],
                   items: [
                       {title: 'Howdy', apiurl: 'http://howdy/', meta_apiurl: 'http://apiurl', pubdate: '2015-01-01T18:00:00Z'},
                       {title: 'Big cheese (rename)', apiurl: 'http://bigcheese/', meta_apiurl: 'http://apiurl', pubdate: '2015-01-01T12:00:00Z', read: true}
@@ -137,6 +139,16 @@ describe('feeds_service', function () {
             expect(this.tree.items.length).toEqual(3); // increased by one
             expect(this.tree.branches[0].items.length).toEqual(2); //increased by one
             expect(this.tree.branches[1].items.length).toEqual(1); //i.e. is unchnaged
+            expect(this.tree.items[2].title).toEqual('Howdy');
         });
+        it('should redo unread numbers correctly', function () {
+            expect(this.tree.unread()).toEqual(4);
+            expect(this.tree.branches[0].unread()).toEqual(1);
+            expect(this.tree.branches[1].unread()).toEqual(3);
+        });
+        it('should feed info correctly', function () {
+            expect(this.tree.branches[0].title).toEqual('Feed (rename)');
+        });
+        it('should add new feed correctly');
     });
 });
