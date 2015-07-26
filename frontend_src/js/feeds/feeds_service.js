@@ -67,11 +67,11 @@ angular.module('reader.feeds.service')
                 unread = data.unread;
             }
         };
-    };
+    }
 
     function Item (data) {
         this.update(data);
-    };
+    }
     Item.prototype.update = function (data) {
       this.title = data.title;
       this.apiurl = data.apiurl;
