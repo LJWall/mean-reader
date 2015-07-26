@@ -8,15 +8,15 @@ describe('feeds_service', function () {
     beforeEach(inject(function ($httpBackend, $httpParamSerializer, apiRoot, getMoreNumber) {
         this.initData = {
             meta: [
-                {title: 'Feed', apiurl: 'http://apiurl'},
-                {title: 'Feed2', apiurl: 'http://apiurl2'}
+                {title: 'Feed', apiurl: 'http://apiurl', unread: 2},
+                {title: 'Feed2', apiurl: 'http://apiurl2', unread: 3}
             ],
             items: [
                 {title: 'Big cheese', apiurl: 'http://bigcheese/', meta_apiurl: 'http://apiurl', pubdate: '2015-01-01T12:00:00Z'},
                 {title: 'Big cheese2', apiurl: 'http://bigcheese2/', meta_apiurl: 'http://apiurl2', pubdate: '2015-01-01T11:00:00Z', read: true}
             ]
         };
-        $httpBackend.expectGET(apiRoot + '?' + $httpParamSerializer({'N': getMoreNumber})).respond(this.initData);
+        $httpBackend.expectGET(apiRoot + '?' + $httpParamSerializer({'N': getMoreNumber})).respond(200, this.initData, {'last-modified': '2015-01-01T17:00:00Z'});
     }));
 
     afterEach(inject(function ($httpBackend) {
@@ -34,14 +34,14 @@ describe('feeds_service', function () {
         expect(tree.branches[0]).toEqual(jasmine.objectContaining({title: 'Feed', apiurl: 'http://apiurl'}));
         expect(tree.branches[1]).toEqual(jasmine.objectContaining({title: 'Feed2', apiurl: 'http://apiurl2'}));
     }));
-    it('should add items to root tree node', inject(function (apiRoot, feedService, $httpBackend) {
+    it('should add items to root tree node', inject(function (feedService, $httpBackend) {
         $httpBackend.flush();
         var tree = feedService.feedTree();
         expect(tree.items.length).toEqual(2);
         expect(tree.items[0]).toEqual(jasmine.objectContaining({title: 'Big cheese', apiurl: 'http://bigcheese/', meta_apiurl: 'http://apiurl'}));
         expect(tree.items[1]).toEqual(jasmine.objectContaining({title: 'Big cheese2', apiurl: 'http://bigcheese2/', meta_apiurl: 'http://apiurl2'}));
     }));
-    it('should add items to tree branch nodes', inject(function (apiRoot, feedService, $httpBackend) {
+    it('should add items to tree branch nodes', inject(function (feedService, $httpBackend) {
         $httpBackend.flush();
         var tree = feedService.feedTree();
         expect(tree.branches[0].items.length).toEqual(1);
@@ -49,12 +49,19 @@ describe('feeds_service', function () {
         expect(tree.branches[1].items.length).toEqual(1);
         expect(tree.branches[1].items[0]).toEqual(jasmine.objectContaining({title: 'Big cheese2', apiurl: 'http://bigcheese2/', meta_apiurl: 'http://apiurl2'}));
     }));
-    it('should calc oldest at each nodes', inject(function (apiRoot, feedService, $httpBackend) {
+    it('should calc oldest at each nodes', inject(function (feedService, $httpBackend) {
         $httpBackend.flush();
         var tree = feedService.feedTree();
         expect(tree.oldest).toEqual((new Date('2015-01-01T11:00:00Z')).getTime());
         expect(tree.branches[0].oldest).toEqual((new Date('2015-01-01T12:00:00Z')).getTime());
         expect(tree.branches[1].oldest).toEqual((new Date('2015-01-01T11:00:00Z')).getTime());
+    }));
+    it('should indentify correctly number unread at each node', inject(function (feedService, $httpBackend) {
+        $httpBackend.flush();
+        var tree = feedService.feedTree();
+        expect(tree.unread()).toEqual(5);
+        expect(tree.branches[0].unread()).toEqual(2);
+        expect(tree.branches[1].unread()).toEqual(3);
     }));
 
     describe('getMore() on individual feed', function () {
@@ -107,5 +114,29 @@ describe('feeds_service', function () {
             expect(this.tree.branches[1].oldest).toEqual((new Date('2015-01-01T08:00:00Z').getTime()));
         });
     });
-
+    describe('refresh()', function () {
+        beforeEach(inject(function (feedService, $httpBackend, $httpParamSerializer, apiRoot) {
+            $httpBackend.flush();
+            $httpBackend.expectGET(apiRoot + '?' + $httpParamSerializer({'updated_since': '2015-01-01T17:00:00Z'}))
+              .respond({
+                  meta: [],
+                  items: [
+                      {title: 'Howdy', apiurl: 'http://howdy/', meta_apiurl: 'http://apiurl', pubdate: '2015-01-01T18:00:00Z'},
+                      {title: 'Big cheese (rename)', apiurl: 'http://bigcheese/', meta_apiurl: 'http://apiurl', pubdate: '2015-01-01T12:00:00Z', read: true}
+                  ]
+              });
+            feedService.refresh();
+            $httpBackend.flush();
+            this.tree = feedService.feedTree();
+        }));
+        it('should update exiting entries', function () {
+            expect(this.tree.items[0].title).toEqual('Big cheese (rename)');
+            expect(this.tree.items[0].read).toBe(true);
+        });
+        it('should add any new items', function () {
+            expect(this.tree.items.length).toEqual(3); // increased by one
+            expect(this.tree.branches[0].items.length).toEqual(2); //increased by one
+            expect(this.tree.branches[1].items.length).toEqual(1); //i.e. is unchnaged
+        });
+    });
 });

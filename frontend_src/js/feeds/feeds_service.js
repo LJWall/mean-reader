@@ -110,7 +110,7 @@ angular.module('reader.feeds.service')
         /********** NEW ************/
         feedTree = treeNode({apiurl: apiRoot, title: 'All'});
         meta_data.forEach(function (feedData) {
-            var newOb = treeNode(feedData, feedTree);
+            var newOb = treeNode(feedData, feedTree, true);
             feedTree.branches.push(newOb);
             foo_meta[feedData.apiurl] = newOb;
         });
@@ -180,6 +180,24 @@ angular.module('reader.feeds.service')
             $http.put(apiurl, {read: true});
         },
         updateData: updateData,
+        refresh: function () {
+            return updateData()
+            .then(function (res) {
+                res.data.items.forEach(function (item) {
+                    if (foo_items[item.apiurl]) {
+                        foo_items[item.apiurl].update(item);
+                    } else {
+                        var node = foo_meta[item.meta_apiurl],
+                            newItem = new Item(item);
+                        foo_items[item.apiurl] = newItem;
+                        while (node) {
+                            node.items.push(newItem);
+                            node = node.parent;
+                        }
+                    }
+                });
+            });
+        },
         isMore: function () {
             return feedIsMore;
         },
@@ -225,11 +243,12 @@ angular.module('reader.feeds.service')
         if (last_modified) {
             config = {params: {updated_since: last_modified}};
         }
-        return $http.get('api', config)
+        return $http.get(apiRoot, config)
         .then(function (res) {
             last_modified = res.headers('last-modified');
             cleanReturnData(res.data);
             workInNewData(res.data);
+            return res;
         });
     }
 
