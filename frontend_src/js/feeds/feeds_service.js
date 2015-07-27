@@ -188,7 +188,12 @@ angular.module('reader.feeds.service')
             return updateData()
             .then(function (res) {
                 res.data.meta.forEach(function (meta) {
-                    foo_meta[meta.apiurl].update(meta);
+                    if (foo_meta[meta.apiurl]) {
+                        foo_meta[meta.apiurl].update(meta);
+                    } else {
+                        foo_meta[meta.apiurl] = treeNode(meta);
+                        feedTree.branches.push(foo_meta[meta.apiurl]);
+                    }
                 });
                 res.data.items.forEach(function (item) {
                     if (foo_items[item.apiurl]) {

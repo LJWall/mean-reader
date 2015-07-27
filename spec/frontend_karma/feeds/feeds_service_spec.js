@@ -120,7 +120,8 @@ describe('feeds_service', function () {
             $httpBackend.expectGET(apiRoot + '?' + $httpParamSerializer({'updated_since': '2015-01-01T17:00:00Z'}))
               .respond({
                   meta: [
-                      {title: 'Feed (rename)', apiurl: 'http://apiurl', unread: 1}
+                      {title: 'Feed (rename)', apiurl: 'http://apiurl', unread: 1},
+                      {title: 'New feed', apiurl: 'http://new'}
                   ],
                   items: [
                       {title: 'Howdy', apiurl: 'http://howdy/', meta_apiurl: 'http://apiurl', pubdate: '2015-01-01T18:00:00Z'},
@@ -149,6 +150,9 @@ describe('feeds_service', function () {
         it('should feed info correctly', function () {
             expect(this.tree.branches[0].title).toEqual('Feed (rename)');
         });
-        it('should add new feed correctly');
+        it('should add new feed correctly', function () {
+            expect(this.tree.branches.length).toEqual(3);
+            expect(this.tree.branches[2].title).toEqual('New feed');
+        });
     });
 });
