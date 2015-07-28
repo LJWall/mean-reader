@@ -1,16 +1,16 @@
 angular.module('readerApp')
 .controller('ReaderCtrl', ['currentUserService', 'feedService', 'apiRoot', function (user, fs, apiRoot) {
-    var selected;
+    var selected = fs.feedTree();
 
     this.itemFilter = {};
     this.updating = false;
 
     this.feedList = function () {
-        return fs.getFeedMetaList();
+        return fs.feedTree().branches;
     };
 
     this.displayedFeed = function () {
-        return selected;
+        return selected.apiurl;
     };
 
     this.itemsList = function () {
@@ -18,13 +18,13 @@ angular.module('readerApp')
     };
 
     this.viewFeed = function (feedObj) {
-        if (selected === feedObj.apiurl) {
-            selected = undefined;
+        if (selected === feedObj) {
+            selected = fs.feedTree();
             this.itemFilter = {};
         }
         else {
             this.itemFilter.meta_apiurl = feedObj.apiurl;
-            selected = feedObj.apiurl;
+            selected = feedObj;
         }
     };
 
@@ -39,18 +39,11 @@ angular.module('readerApp')
     };
 
     this.isMore = function () {
-        if (selected) {
-            return !!fs.isMore()[selected];
-        } else {
-            return !!fs.isMore()[apiRoot];
-        }
+        return !!fs.isMore()[selected.apiurl];
     };
 
     this.getMore = function () {
-        if (selected) {
-            return fs.getMore(selected);
-        }
-        return fs.getMore(apiRoot);
+        return selected.getMore();
     };
 
     this.isUserAuthenticated = function () {
@@ -58,7 +51,7 @@ angular.module('readerApp')
     };
 
     this.markAllAsRead = function () {
-        fs.markAllAsRead(selected);
+        fs.markAllAsRead(selected.apiurl);
     };
 
     this.anyChecked = function () {

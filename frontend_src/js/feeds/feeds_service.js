@@ -16,7 +16,7 @@ angular.module('reader.feeds.service')
         feedOldestItem = {},
         feedIsMore = {},
         content = {},
-        feedTree;
+        feedTree = treeNode({apiurl: apiRoot, title: 'All'});
 
     var foo_meta = {},
         foo_items = {};
@@ -31,7 +31,7 @@ angular.module('reader.feeds.service')
             parent: parent,
             getMore: function () {
                 var self = this;
-                getMore(this.apiurl)
+                return getMore(this.apiurl)
                 .then(function (res) {
                     res.data.items.forEach(function (item) {
                         var newItem;
@@ -112,7 +112,6 @@ angular.module('reader.feeds.service')
         });
 
         /********** NEW ************/
-        feedTree = treeNode({apiurl: apiRoot, title: 'All'});
         meta_data.forEach(function (feedData) {
             var newOb = treeNode(feedData, feedTree, true);
             feedTree.branches.push(newOb);
