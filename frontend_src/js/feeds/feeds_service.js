@@ -21,7 +21,7 @@ angular.module('reader.feeds.service')
     var foo_meta = {},
         foo_items = {};
 
-    function treeNode (data, parent, isLeaf) {
+    function treeNode (data, parent) {
         var unread = data.unread;
         return {
             title: data.title,
@@ -52,21 +52,34 @@ angular.module('reader.feeds.service')
                     }
                 }
             },
-            markAllAsRead: function () {},
+            markAllAsRead: function () {
+                $http.put(this.apiurl, {read: true});
+                recursiveMarkAsRead(this);
+                function recursiveMarkAsRead (node) {
+                    if (node.branches.length) {
+                        node.branches.forEach(recursiveMarkAsRead);
+                    } else {
+                        node.update({unread: 0});
+                        node.items.forEach(function (item) {
+                            item.read = true;
+                        });
+                    }
+                }
+            },
             unread: function () {
-                if (isLeaf) {
-                    return unread;
-                } else {
+                if (this.branches.length) {
                     return this.branches.reduce(function (prev, cur) {
                         return prev + cur.unread();
                     }, 0);
+                } else {
+                    return unread;
                 }
             },
             update: function (data) {
-                this.title = data.title;
-                unread = data.unread;
+                this.title = data.title || this.title;
+                unread = (angular.isDefined(data.unread) ? data.unread : unread);
             }
-        };
+        }
     }
 
     function Item (data) {
@@ -76,13 +89,27 @@ angular.module('reader.feeds.service')
       this.title = data.title;
       this.apiurl = data.apiurl;
       this.meta_apiurl = data.meta_apiurl;
-      this.read = data.read;
+      this.read = Boolean(data.read);
       this.pubdate = new Date(data.pubdate);
       this.content_apiurl = data.content_apiurl;
     };
     Item.prototype.getContent = getContent;
     Item.prototype.markAsRead = function (read) {
-        markItemAsRead(this, read);
+        read = Boolean(read);
+        if (this.read !== read) {
+            var unread = this.meta().unread();
+            if (read) {
+                unread--;
+            } else  {
+                unread++;
+            }
+            this.meta().update({unread: unread});
+            this.read = read;
+        }
+        $http.put(this.apiurl, {read: read});
+    };
+    Item.prototype.meta = function () {
+        return foo_meta[this.meta_apiurl];
     };
 
     // Load some data initally
@@ -162,25 +189,6 @@ angular.module('reader.feeds.service')
             meta_data_map = buildMap(meta_data);
             item_map = buildMap(items);
             return $http.delete(feedData.apiurl);
-        },
-        markAllAsRead: function (apiurl) {
-            if (apiurl) {
-                items.forEach(function (item) {
-                    if (item.meta_apiurl === apiurl) {
-                        item.read=true;
-                    }
-                });
-                meta_data[meta_data_map[apiurl]].unread = 0;
-            } else {
-                items.forEach(function (item) {
-                    item.read=true;
-                });
-                meta_data.forEach(function (m) {
-                    m.unread = 0;
-                });
-                apiurl = apiRoot;
-            }
-            $http.put(apiurl, {read: true});
         },
         updateData: updateData,
         refresh: function () {
@@ -320,18 +328,6 @@ angular.module('reader.feeds.service')
             content[self.content_apiurl] = res.data;
             return content[self.content_apiurl];
         });
-    }
-
-    function markItemAsRead (item, read) {
-        if (Boolean(item.read) !== read) {
-            if (read) {
-                meta_data[meta_data_map[item.meta_apiurl]].unread--;
-            } else {
-                meta_data[meta_data_map[item.meta_apiurl]].unread++;
-            }
-        }
-        item.read = read;
-        $http.put(item.apiurl, {read: read});
     }
 }]);
 

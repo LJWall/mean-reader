@@ -1,8 +1,8 @@
 <div infinite-scroll="infScrollGetMore()"
   infinite-scroll-distance="0.5"
   infinite-scroll-disabled="await || !isMore"
-  infinite-scroll-listen-for-event="itemFilterChange">
-  <div class="reader-item-container" ng-repeat="item in itemList | filter:itemFilter | orderBy:'-pubdate'">
+  infinite-scroll-listen-for-event="itemListChange">
+  <div class="reader-item-container" ng-repeat="item in itemList | orderBy:'-pubdate'">
   <reader-item item="item"></reader-item>
   </div>
   <div class="row" ng-show="!await && isMore"><div class="col-xs-12 text-center"><a href ng-click="infScrollGetMore()">Load more</a></div></div>

@@ -14,16 +14,14 @@ angular.module('readerApp')
     };
 
     this.itemsList = function () {
-        return fs.getFeedItems();
+        return selected.items;
     };
 
     this.viewFeed = function (feedObj) {
         if (selected === feedObj) {
             selected = fs.feedTree();
-            this.itemFilter = {};
         }
         else {
-            this.itemFilter.meta_apiurl = feedObj.apiurl;
             selected = feedObj;
         }
     };
@@ -51,14 +49,13 @@ angular.module('readerApp')
     };
 
     this.markAllAsRead = function () {
-        fs.markAllAsRead(selected.apiurl);
+        selected.markAllAsRead();
     };
 
     this.anyChecked = function () {
-        var i,
-            items = fs.getFeedItems();
-        for (i=0; i < items.length; i++) {
-            if (items[i].checked) {
+        var i;
+        for (i=0; i < selected.items.length; i++) {
+            if (selected.items[i].checked) {
                 return true;
             }
         }
@@ -66,7 +63,7 @@ angular.module('readerApp')
     };
 
     this.markAsRead = function (read) {
-        fs.getFeedItems().forEach(function (item) {
+        selected.items.forEach(function (item) {
             if (item.checked) {
                 item.checked = false;
                 item.markAsRead(read);
