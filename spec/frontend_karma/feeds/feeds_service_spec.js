@@ -147,12 +147,44 @@ describe('feeds_service', function () {
             expect(this.tree.branches[0].unread()).toEqual(1);
             expect(this.tree.branches[1].unread()).toEqual(3);
         });
-        it('should feed info correctly', function () {
+        it('should update feed info correctly', function () {
             expect(this.tree.branches[0].title).toEqual('Feed (rename)');
         });
         it('should add new feed correctly', function () {
             expect(this.tree.branches.length).toEqual(3);
             expect(this.tree.branches[2].title).toEqual('New feed');
         });
+    });
+    describe('Item.markAsRead()', function () {
+        beforeEach(inject(function ($httpBackend, feedService) {
+            $httpBackend.flush();
+            this.tree = feedService.feedTree();
+        }));
+        it('should mark as read and re-calculate', inject(function ($httpBackend) {
+            $httpBackend.expectPUT(this.tree.items[0].apiurl, {read: true}).respond({});
+            this.tree.items[0].markAsRead(true);
+            $httpBackend.flush();
+            expect(this.tree.branches[0].unread()).toEqual(1);
+            expect(this.tree.branches[1].unread()).toEqual(3);
+            expect(this.tree.unread()).toEqual(4);
+            expect(this.tree.items[0].read).toBe(true);
+        }));
+        it('should not change unread count if item already read', inject(function ($httpBackend) {
+            $httpBackend.expectPUT(this.tree.items[1].apiurl, {read: true}).respond({});
+            this.tree.items[1].markAsRead(true);
+            $httpBackend.flush();
+            expect(this.tree.branches[0].unread()).toEqual(2);
+            expect(this.tree.branches[1].unread()).toEqual(3);
+            expect(this.tree.unread()).toEqual(5);
+        }));
+        it('should mar as unread if passed false', inject(function ($httpBackend) {
+            $httpBackend.expectPUT(this.tree.items[1].apiurl, {read: false}).respond({});
+            this.tree.items[1].markAsRead(false);
+            $httpBackend.flush();
+            expect(this.tree.branches[0].unread()).toEqual(2);
+            expect(this.tree.branches[1].unread()).toEqual(4);
+            expect(this.tree.unread()).toEqual(6);
+            expect(this.tree.items[1].read).toBe(false);
+        }));
     });
 });
