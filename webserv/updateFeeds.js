@@ -36,7 +36,7 @@ function updateFeeds () {
             } catch (e) {
                 return;
             }
-            if (feed.last_update > last_mod) {
+            if (feed.last_update.getTime() > last_mod.getTime()) {
                 // Not sure it's idiomatic to use errors for control flow
                 // in JS, but hey ho...
                 throw new Error('No recent modifications');
