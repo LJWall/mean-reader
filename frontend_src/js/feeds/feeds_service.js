@@ -83,8 +83,18 @@ angular.module('reader.feeds.service')
                 unread = (angular.isDefined(data.unread) ? data.unread : unread);
             },
             delete: function () {
+                var self=this;
                 if (this.branches.length > 0) {
                     throw(new Error('Not empty'));
+                }
+                foo_meta[this.apiurl] = undefined;
+                this.parent.branches = this.parent.branches.filter(function (node) {
+                    return node !== self;
+                });
+                var node = this.parent;
+                while (node) {
+                    node.clearItems();
+                    node = node.parent;
                 }
                 return $http.delete(this.apiurl)
             }
@@ -130,16 +140,17 @@ angular.module('reader.feeds.service')
             });
         last_modified = res.headers('last-modified');
         meta_data.forEach(function (feedData) {
-            var newOb = treeNode(feedData, feedTree, true);
+            var newOb = treeNode(feedData, feedTree);
             feedTree.branches.push(newOb);
             foo_meta[feedData.apiurl] = newOb;
         });
     });
 
     userService.onSignOut(function () {
-        throw(new Error('Implement me..'));
-        //meta_data = [];
-        //items = [];
+        foo_meta = {};
+        foo_items = {};
+        feedTree = treeNode({apiurl: apiRoot, title: 'All'});
+        content = {};
     });
 
     return {
@@ -147,21 +158,16 @@ angular.module('reader.feeds.service')
             var newNode;
             return $http.post(apiRoot + '/feeds', {feedurl: url})
             .then(function (res) {
-                newNode = treeNode({apiurl: res.headers('Location')});
+                newNode = treeNode({apiurl: res.headers('Location')}, feedTree);
                 foo_meta[newNode.apiurl] = newNode;
                 return newNode.getMore();
             })
             .then(function (data) {
-                newNode.parent = feedTree;
                 newNode.update(data.meta[0]);
                 feedTree.branches.push(newNode);
                 feedTree.clearItems();
                 return newNode;
             });
-        },
-        deleteFeed: function (feedData) {
-            throw(new Error('depricated'));
-            //return $http.delete(feedData.apiurl);
         },
         refresh: function () {
             return updateData()
@@ -170,22 +176,24 @@ angular.module('reader.feeds.service')
                     if (foo_meta[meta.apiurl]) {
                         foo_meta[meta.apiurl].update(meta);
                     } else {
-                        foo_meta[meta.apiurl] = treeNode(meta);
+                        foo_meta[meta.apiurl] = treeNode(meta, feedTree);
                         feedTree.branches.push(foo_meta[meta.apiurl]);
                         feedTree.clearItems();
                     }
                 });
                 res.data.items.forEach(function (item) {
+                    var newItem;
                     if (foo_items[item.apiurl]) {
                         foo_items[item.apiurl].update(item);
+                        newItem = foo_items[item.apiurl]
                     } else {
-                        var node = foo_meta[item.meta_apiurl],
-                            newItem = new Item(item);
+                        newItem = new Item(item);
                         foo_items[item.apiurl] = newItem;
-                        while (node) {
-                            node.addItem(newItem);
-                            node = node.parent;
-                        }
+                    }
+                    var node = foo_meta[newItem.meta_apiurl];
+                    while (node) {
+                        node.addItem(newItem);
+                        node = node.parent;
                     }
                 });
             });

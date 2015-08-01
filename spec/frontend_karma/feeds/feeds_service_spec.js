@@ -144,7 +144,7 @@ describe('feeds_service', function () {
         });
         it('should add any new items', function () {
             expect(this.tree.items().length).toEqual(3); // increased by one
-            expect(this.tree.branches[0].items().length).toEqual(1); // add the new one here..
+            expect(this.tree.branches[0].items().length).toEqual(2); // add the new one here..
             expect(this.tree.branches[1].items().length).toEqual(0);
             expect(this.tree.items()[2].title).toEqual('Howdy');
         });

@@ -26,7 +26,12 @@ angular.module('readerApp')
         }
     };
 
-    this.deleteFeed = fs.deleteFeed;
+    this.deleteFeed = function (feedObj) {
+        if (feedObj === selected) {
+            selected = fs.feedTree();
+        }
+        feedObj.delete();
+    };
 
     var self=this;
     this.updateData = function () {
