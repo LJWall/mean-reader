@@ -3,9 +3,9 @@
     <a href ng-click="viewFeed({feedObj: meta})">
       <div class="feeds-list-text">
         <i ng-class="{fa: true, 'fa-folder': !(meta.apiurl===hightlightFeed),  'fa-folder-open': (meta.apiurl===highlightFeed)}"></i> {{meta.title}}
-        <span class="badge" ng-bind="(meta.unread >0 ? meta.unread : undefined)"></span>
+        <span class="badge" ng-bind="(meta.unread() >0 ? meta.unread() : undefined)"></span>
       </div>
     </a>
-    <div class="feeds-cb-holder"><a href ng-click="deleteFeed({feedObj: meta})"><i class="fa fa-trash"></i></a></div>
+    <div class="feeds-cb-holder"><a href ng-click="deleteFeed({'feedObj': meta})"><i class="fa fa-trash"></i></a></div>
   </li>
 </ul>

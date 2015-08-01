@@ -40,16 +40,19 @@ module.exports = function (url_for) {
                 }
                 catch (e) {}
             }
-            if (req.query.older_than) {
-                try {
-                    var dtOlderThan = new Date(req.query.older_than);
-                    query.pubdate = {$lt: dtOlderThan};
+            if (num>0) {
+                if (req.query.older_than) {
+                    try {
+                        var dtOlderThan = new Date(req.query.older_than);
+                        query.pubdate = {$lt: dtOlderThan};
+                    }
+                    catch (e) {}
                 }
-                catch (e) {}
+                items_promise = db.posts.find(query).sort({pubdate: -1}).limit(num).toArrayAsync()
+                    .reduce(reducer.bind(last_update, cleanItem), []);
+            } else {
+                items_promise = Promise.resolve([]);
             }
-            items_promise = db.posts.find(query).sort({pubdate: -1}).limit(num).toArrayAsync()
-                .reduce(reducer.bind(last_update, cleanItem), []);
-
             Promise.join(meta_promise, items_promise, n_unread_promise, function (meta, items, n_unread) {
                 meta.forEach(function (m) {
                     m.unread = n_unread[m.apiurl];
@@ -62,7 +65,7 @@ module.exports = function (url_for) {
         getFeed: function (req, res) {
             var query_meta = {user_id: req.user._id, _id: req.params.ObjectID},
                 query_items = {user_id: req.user._id, meta_id: req.params.ObjectID},
-                num = 10, n_unread_promise;
+                num = 10, n_unread_promise, posts_promise;
 
             n_unread_promise = db.posts.call('aggregateAsync', [
                 {$match: {user_id: req.user._id, meta_id: req.params.ObjectID, read: {$ne: true}}},
@@ -83,9 +86,15 @@ module.exports = function (url_for) {
                 }
                 catch (e) {}
             }
+             if (num>0) {
+                posts_promise = db.posts.find(query_items).sort({pubdate: -1}).limit(num).toArrayAsync().reduce(reducer.bind(null, cleanItem), [])
+             } else {
+                posts_promise = Promise.resolve([]);
+             }
+
             Promise.join(
                 db.feeds.findOneAsync(query_meta).then(cleanMeta),
-                db.posts.find(query_items).sort({pubdate: -1}).limit(num).toArrayAsync().reduce(reducer.bind(null, cleanItem), []),
+                posts_promise,
                 n_unread_promise,
                 function (meta, items, n_unread) {
                     if (n_unread[0]) meta.unread = n_unread[0].unread;

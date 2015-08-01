@@ -1,130 +1,216 @@
 angular.module('reader.feeds.service')
 .factory('feedService', ['$http', '$q', 'currentUserService', 'apiRoot', 'getMoreNumber', function ($http, $q, userService, apiRoot, getMoreNumber) {
-    var meta_data = [],
-        items = [],
-        last_modified,
-        meta_data_map,
-        item_map,
-        feedOldestItem = {},
-        feedIsMore = {},
-        content = {};
+    var last_modified,
+        content = {},
+        feedTree = treeNode({apiurl: apiRoot, title: 'All'}),
+        foo_meta = {},
+        foo_items = {};
+
+    function treeNode (data, parent) {
+        var unread = data.unread || 0,
+            isMore = true,
+            items = [],
+            node_item_map = {};
+
+        return {
+            title: data.title,
+            apiurl: data.apiurl,
+            branches: [],
+            items: function () {return items;},
+            addItem: function (item) {
+                if (!node_item_map[item.apiurl]) {
+                    node_item_map[item.apiurl] = item;
+                    items.push(item);
+                }
+            },
+            clearItems: function () {
+                items = [];
+                node_item_map = {};
+                this.oldest = undefined;
+            },
+            parent: parent,
+            isMore: function () {
+                return isMore;
+            },
+            getMore: function () {
+                var self = this;
+                return getMore(this)
+                .then(function (res) {
+                    if (res.data.items.length === 0) {
+                        isMore = false;
+                        return;
+                    }
+                    res.data.items.forEach(function (item) {
+                        var newItem;
+                        if (foo_items[item.apiurl]) {
+                            foo_items[item.apiurl].update(item);
+                            newItem = foo_items[item.apiurl];
+                        } else {
+                            newItem = new Item(item);
+                            foo_items[item.apiurl] = newItem;
+                        }
+                        self.addItem(newItem)
+                        self.oldest = (self.oldest ? min([self.oldest, newItem.pubdate.getTime()]) : newItem.pubdate.getTime());
+                    });
+                    return res.data;
+                });
+            },
+            markAllAsRead: function () {
+                $http.put(this.apiurl, {read: true});
+                recursiveMarkAsRead(this);
+                function recursiveMarkAsRead (node) {
+                    if (node.branches.length) {
+                        node.branches.forEach(recursiveMarkAsRead);
+                    } else {
+                        node.update({unread: 0});
+                    }
+                    node.items().forEach(function (item) {
+                        item.read = true;
+                    });
+                }
+            },
+            unread: function () {
+                if (this.branches.length) {
+                    return this.branches.reduce(function (prev, cur) {
+                        return prev + cur.unread();
+                    }, 0);
+                } else {
+                    return unread;
+                }
+            },
+            update: function (data) {
+                this.title = data.title || this.title;
+                unread = (angular.isDefined(data.unread) ? data.unread : unread);
+            },
+            delete: function () {
+                var self=this;
+                if (this.branches.length > 0) {
+                    throw(new Error('Not empty'));
+                }
+                foo_meta[this.apiurl] = undefined;
+                this.parent.branches = this.parent.branches.filter(function (node) {
+                    return node !== self;
+                });
+                var node = this.parent;
+                while (node) {
+                    node.clearItems();
+                    node = node.parent;
+                }
+                return $http.delete(this.apiurl)
+            }
+        }
+    }
+
+    function Item (data) {
+        this.update(data);
+    }
+    Item.prototype.update = function (data) {
+      this.title = data.title;
+      this.apiurl = data.apiurl;
+      this.meta_apiurl = data.meta_apiurl;
+      this.read = Boolean(data.read);
+      this.pubdate = new Date(data.pubdate);
+      this.content_apiurl = data.content_apiurl;
+      this.link = data.link;
+    };
+    Item.prototype.getContent = getContent;
+    Item.prototype.markAsRead = function (read) {
+        read = Boolean(read);
+        if (this.read !== read) {
+            var unread = this.meta().unread();
+            if (read) {
+                unread--;
+            } else  {
+                unread++;
+            }
+            this.meta().update({unread: unread});
+            this.read = read;
+        }
+        $http.put(this.apiurl, {read: read});
+    };
+    Item.prototype.meta = function () {
+        return foo_meta[this.meta_apiurl];
+    };
 
     // Load some data initally
-    $http.get(apiRoot, {params: {N: getMoreNumber}}).then(function (res) {
-        cleanReturnData(res.data);
-        meta_data = res.data.meta;
-        items = res.data.items;
-        meta_data_map = buildMap(meta_data);
-        item_map = buildMap(items);
+    $http.get(apiRoot, {params: {N: 0}}).then(function (res) {
+        var meta_data = res.data.meta,
+            items = res.data.items.map(function (item) {
+                return new Item(item);
+            });
         last_modified = res.headers('last-modified');
-        feedIsMore[apiRoot] = true;
         meta_data.forEach(function (feedData) {
-            feedIsMore[feedData.apiurl] = true;
-        });
-        items.forEach(function (item, i) {
-            item.meta = meta_data[meta_data_map[item.meta_apiurl]];
-            if (!feedOldestItem[item.meta_apiurl] || feedOldestItem[item.meta_apiurl].getTime() > item.pubdate.getTime()) {
-                feedOldestItem[item.meta_apiurl] = item.pubdate;
-            }
-            if (i) {
-                feedOldestItem[apiRoot] = (item.pubdate.getTime() < feedOldestItem[apiRoot].getTime() ? item.pubdate : feedOldestItem[apiRoot]);
-            } else {
-                feedOldestItem[apiRoot] = item.pubdate;
-            }
-            item.getContent = getContent;
-            item.markAsRead = markItemAsRead.bind(null, item);
+            var newOb = treeNode(feedData, feedTree);
+            feedTree.branches.push(newOb);
+            foo_meta[feedData.apiurl] = newOb;
         });
     });
 
     userService.onSignOut(function () {
-        meta_data = [];
-        items = [];
+        foo_meta = {};
+        foo_items = {};
+        feedTree = treeNode({apiurl: apiRoot, title: 'All'});
+        content = {};
     });
 
     return {
-        getFeedMetaList: function () {
-            return meta_data;
-        },
-        getFeedItems: function () {
-            return items;
-        },
         addNew: function (url) {
-            return $http.post('api/feeds', {feedurl: url})
+            var newNode;
+            return $http.post(apiRoot + '/feeds', {feedurl: url})
             .then(function (res) {
-                return $http.get(res.headers('Location'));
+                newNode = treeNode({apiurl: res.headers('Location')}, feedTree);
+                foo_meta[newNode.apiurl] = newNode;
+                return newNode.getMore();
             })
+            .then(function (data) {
+                newNode.update(data.meta[0]);
+                feedTree.branches.push(newNode);
+                feedTree.clearItems();
+                return newNode;
+            });
+        },
+        refresh: function () {
+            return updateData()
             .then(function (res) {
-                cleanReturnData(res.data);
-                workInNewData(res.data);
-                return res.data.meta[0];
-            });
-        },
-        deleteFeed: function (feedData) {
-            meta_data = meta_data.filter(function (feed) {
-                return feed.apiurl !== feedData.apiurl;
-            });
-            items = items.filter(function (item) {
-                return item.meta_apiurl !== feedData.apiurl;
-            });
-            meta_data_map = buildMap(meta_data);
-            item_map = buildMap(items);
-            return $http.delete(feedData.apiurl);
-        },
-        markAsRead: markItemAsRead,
-        markAllAsRead: function (apiurl) {
-            if (apiurl) {
-                items.forEach(function (item) {
-                    if (item.meta_apiurl === apiurl) {
-                        item.read=true;
+                res.data.meta.forEach(function (meta) {
+                    if (foo_meta[meta.apiurl]) {
+                        foo_meta[meta.apiurl].update(meta);
+                    } else {
+                        foo_meta[meta.apiurl] = treeNode(meta, feedTree);
+                        feedTree.branches.push(foo_meta[meta.apiurl]);
+                        feedTree.clearItems();
                     }
                 });
-                meta_data[meta_data_map[apiurl]].unread = 0;
-            } else {
-                items.forEach(function (item) {
-                    item.read=true;
+                res.data.items.forEach(function (item) {
+                    var newItem;
+                    if (foo_items[item.apiurl]) {
+                        foo_items[item.apiurl].update(item);
+                        newItem = foo_items[item.apiurl]
+                    } else {
+                        newItem = new Item(item);
+                        foo_items[item.apiurl] = newItem;
+                    }
+                    var node = foo_meta[newItem.meta_apiurl];
+                    while (node) {
+                        node.addItem(newItem);
+                        node = node.parent;
+                    }
                 });
-                meta_data.forEach(function (m) {
-                    m.unread = 0;
-                });
-                apiurl = apiRoot;
-            }
-            $http.put(apiurl, {read: true});
+            });
         },
-        updateData: updateData,
-        isMore: function () {
-            return feedIsMore;
-        },
-        oldestItem: function () {
-            return feedOldestItem;
-        },
-        getMore: getMore
+        feedTree: function () {
+            return feedTree;
+        }
     };
 
-    function getMore(apiurl) {
+    function getMore(node) {
         var config = {params: {N: getMoreNumber}};
-        if (feedOldestItem[apiurl]) {
-            config.params.older_than = feedOldestItem[apiurl].toString();
+        if (node.oldest) {
+            var old = new Date();
+            old.setTime(node.oldest);
+            config.params.older_than = old;
         }
-        return $http.get(apiurl, config)
-        .then(function (res) {
-            cleanReturnData(res.data);
-            workInNewData(res.data);
-            if (res.data.items.length < getMoreNumber) {
-                feedIsMore[apiurl]=false;
-            }
-            res.data.items.forEach(function (item) {
-                if (!feedOldestItem[apiurl] || feedOldestItem[apiurl].getTime() > item.pubdate.getTime()) {
-                    feedOldestItem[apiurl] = item.pubdate;
-                }
-            });
-            if (apiurl === apiRoot) {
-                res.data.items.forEach(function (item) {
-                    if (!feedOldestItem[item.meta_apiurl] || feedOldestItem[item.meta_apiurl].getTime() > item.pubdate.getTime()) {
-                        feedOldestItem[item.meta_apiurl] = item.pubdate;
-                    }
-                });
-            }
-        });
+        return $http.get(node.apiurl, config);
     }
 
     function updateData () {
@@ -132,50 +218,11 @@ angular.module('reader.feeds.service')
         if (last_modified) {
             config = {params: {updated_since: last_modified}};
         }
-        return $http.get('api', config)
+        return $http.get(apiRoot, config)
         .then(function (res) {
             last_modified = res.headers('last-modified');
-            cleanReturnData(res.data);
-            workInNewData(res.data);
+            return res;
         });
-    }
-
-    function workInNewData(data) {
-        data.meta.forEach(function (metaObj) {
-            if (angular.isDefined(meta_data_map[metaObj.apiurl])) {
-                meta_data[meta_data_map[metaObj.apiurl]] = metaObj;
-            } else {
-                meta_data.push(metaObj);
-                meta_data_map[metaObj.apiurl] = meta_data.length - 1;
-            }
-        });
-        data.items.forEach(function (itemObj) {
-            itemObj.meta = meta_data[meta_data_map[itemObj.meta_apiurl]];
-            itemObj.getContent = getContent;
-            itemObj.markAsRead = markItemAsRead.bind(null, itemObj);
-            if (angular.isDefined(item_map[itemObj.apiurl])) {
-                items[item_map[itemObj.apiurl]] = itemObj;
-            } else {
-                items.push(itemObj);
-                item_map[itemObj.apiurl] = items.length - 1;
-            }
-        });
-    }
-
-    function cleanReturnData (data) {
-        data.items.forEach(function (item) {
-            item.pubdate = new Date(item.pubdate);
-        });
-        data.meta.forEach(function (m) {
-            if (!m.unread) m.unread = 0;
-        });
-    }
-
-    function buildMap (list) {
-        return list.reduce(function (prev, cur, i) {
-            prev[cur.apiurl] = i;
-            return prev;
-        }, {});
     }
 
     function getContent() {
@@ -200,15 +247,10 @@ angular.module('reader.feeds.service')
         });
     }
 
-    function markItemAsRead (item, read) {
-        if (Boolean(item.read) !== read) {
-            if (read) {
-                meta_data[meta_data_map[item.meta_apiurl]].unread--;
-            } else {
-                meta_data[meta_data_map[item.meta_apiurl]].unread++;
-            }
-        }
-        item.read = read;
-        $http.put(item.apiurl, {read: read});
+    function min (arr) {
+        return arr.reduce(function (prev, cur) {
+            return (prev < cur ? prev : cur);
+        });
     }
+
 }]);

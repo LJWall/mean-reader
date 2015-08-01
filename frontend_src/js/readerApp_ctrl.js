@@ -1,56 +1,52 @@
 angular.module('readerApp')
 .controller('ReaderCtrl', ['currentUserService', 'feedService', 'apiRoot', function (user, fs, apiRoot) {
-    var selected;
+    var selected = fs.feedTree();
 
     this.itemFilter = {};
     this.updating = false;
 
     this.feedList = function () {
-        return fs.getFeedMetaList();
+        return fs.feedTree().branches;
     };
 
     this.displayedFeed = function () {
-        return selected;
+        return selected.apiurl;
     };
 
     this.itemsList = function () {
-        return fs.getFeedItems();
+        return selected.items();
     };
 
     this.viewFeed = function (feedObj) {
-        if (selected === feedObj.apiurl) {
-            selected = undefined;
-            this.itemFilter = {};
+        if (selected === feedObj) {
+            selected = fs.feedTree();
         }
         else {
-            this.itemFilter.meta_apiurl = feedObj.apiurl;
-            selected = feedObj.apiurl;
+            selected = feedObj;
         }
     };
 
-    this.deleteFeed = fs.deleteFeed;
+    this.deleteFeed = function (feedObj) {
+        if (feedObj === selected) {
+            selected = fs.feedTree();
+        }
+        feedObj.delete();
+    };
 
     var self=this;
     this.updateData = function () {
         this.updating = true;
-        fs.updateData()
+        fs.refresh()
         .then(done, done);
         function done () {self.updating = false;}
     };
 
     this.isMore = function () {
-        if (selected) {
-            return !!fs.isMore()[selected];
-        } else {
-            return !!fs.isMore()[apiRoot];
-        }
+        return selected.isMore();
     };
 
     this.getMore = function () {
-        if (selected) {
-            return fs.getMore(selected);
-        }
-        return fs.getMore(apiRoot);
+        return selected.getMore();
     };
 
     this.isUserAuthenticated = function () {
@@ -58,14 +54,13 @@ angular.module('readerApp')
     };
 
     this.markAllAsRead = function () {
-        fs.markAllAsRead(selected);
+        selected.markAllAsRead();
     };
 
     this.anyChecked = function () {
-        var i,
-            items = fs.getFeedItems();
-        for (i=0; i < items.length; i++) {
-            if (items[i].checked) {
+        var i;
+        for (i=0; i < selected.items().length; i++) {
+            if (selected.items()[i].checked) {
                 return true;
             }
         }
@@ -73,7 +68,7 @@ angular.module('readerApp')
     };
 
     this.markAsRead = function (read) {
-        fs.getFeedItems().forEach(function (item) {
+        selected.items().forEach(function (item) {
             if (item.checked) {
                 item.checked = false;
                 item.markAsRead(read);
@@ -90,7 +85,7 @@ angular.module('readerApp')
     };
 
     this.uncheckAll = function () {
-        fs.getFeedItems().forEach(function (item) {
+        selected.items().forEach(function (item) {
             item.checked = false;
         });
     };
