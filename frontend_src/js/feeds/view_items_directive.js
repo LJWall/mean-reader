@@ -11,11 +11,13 @@ angular.module('reader.feeds')
         link: function ($scope) {
             $scope.await=false;
             $scope.infScrollGetMore = function () {
-                $scope.await = true;
-                $scope.getMore()
-                .then(function () {
-                    $scope.await = false;
-                });
+                if (!$scope.await) {
+                    $scope.await = true;
+                    $scope.getMore()
+                    .then(function () {
+                        $scope.await = false;
+                    });
+                }
             };
             $scope.$watch('itemList', function (after, before) {
                 $scope.$emit('itemListChange');

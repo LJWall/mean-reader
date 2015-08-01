@@ -14,7 +14,7 @@ angular.module('readerApp')
     };
 
     this.itemsList = function () {
-        return selected.items;
+        return selected.items();
     };
 
     this.viewFeed = function (feedObj) {
@@ -31,13 +31,13 @@ angular.module('readerApp')
     var self=this;
     this.updateData = function () {
         this.updating = true;
-        fs.updateData()
+        fs.refresh()
         .then(done, done);
         function done () {self.updating = false;}
     };
 
     this.isMore = function () {
-        return !!fs.isMore()[selected.apiurl];
+        return selected.isMore();
     };
 
     this.getMore = function () {
@@ -54,8 +54,8 @@ angular.module('readerApp')
 
     this.anyChecked = function () {
         var i;
-        for (i=0; i < selected.items.length; i++) {
-            if (selected.items[i].checked) {
+        for (i=0; i < selected.items().length; i++) {
+            if (selected.items()[i].checked) {
                 return true;
             }
         }
@@ -63,7 +63,7 @@ angular.module('readerApp')
     };
 
     this.markAsRead = function (read) {
-        selected.items.forEach(function (item) {
+        selected.items().forEach(function (item) {
             if (item.checked) {
                 item.checked = false;
                 item.markAsRead(read);
@@ -80,7 +80,7 @@ angular.module('readerApp')
     };
 
     this.uncheckAll = function () {
-        fs.getFeedItems().forEach(function (item) {
+        selected.items().forEach(function (item) {
             item.checked = false;
         });
     };
