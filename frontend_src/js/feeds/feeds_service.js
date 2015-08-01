@@ -49,7 +49,7 @@ angular.module('reader.feeds.service')
                             newItem = new Item(item);
                             foo_items[item.apiurl] = newItem;
                         }
-                        self.addItem(newItem)
+                        self.addItem(newItem);
                         self.oldest = (self.oldest ? min([self.oldest, newItem.pubdate.getTime()]) : newItem.pubdate.getTime());
                     });
                     return res.data;
@@ -96,9 +96,9 @@ angular.module('reader.feeds.service')
                     node.clearItems();
                     node = node.parent;
                 }
-                return $http.delete(this.apiurl)
+                return $http.delete(this.apiurl);
             }
-        }
+        };
     }
 
     function Item (data) {
@@ -185,7 +185,7 @@ angular.module('reader.feeds.service')
                     var newItem;
                     if (foo_items[item.apiurl]) {
                         foo_items[item.apiurl].update(item);
-                        newItem = foo_items[item.apiurl]
+                        newItem = foo_items[item.apiurl];
                     } else {
                         newItem = new Item(item);
                         foo_items[item.apiurl] = newItem;

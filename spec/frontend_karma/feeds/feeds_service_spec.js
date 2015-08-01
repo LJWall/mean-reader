@@ -85,7 +85,7 @@ describe('feeds_service', function () {
     describe('addNew()', function () {
         beforeEach(inject(function (feedService, $httpBackend, apiRoot, $httpParamSerializer, getMoreNumber) {
             this.tree = feedService.feedTree();
-            this.tree.addItem({title: 'Mystery item', apiurl: 'foo'})
+            this.tree.addItem({title: 'Mystery item', apiurl: 'foo'});
             this.tree.oldest = 99;
             $httpBackend.expectPOST(apiRoot + '/feeds', {feedurl: 'http://newfeed'})
             .respond(201, null, {'Location': 'http://apiurl/new'});

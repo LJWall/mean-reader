@@ -87,7 +87,7 @@ module.exports = function (url_for) {
                 catch (e) {}
             }
              if (num>0) {
-                posts_promise = db.posts.find(query_items).sort({pubdate: -1}).limit(num).toArrayAsync().reduce(reducer.bind(null, cleanItem), [])
+                posts_promise = db.posts.find(query_items).sort({pubdate: -1}).limit(num).toArrayAsync().reduce(reducer.bind(null, cleanItem), []);
              } else {
                 posts_promise = Promise.resolve([]);
              }
