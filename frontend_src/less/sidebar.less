@@ -1,23 +1,37 @@
 
-.nav-sidebar {
-  //margin-right: -21px;
+
+
+ul.feed-tree {
   margin-left: -20px;
-}
-.nav-sidebar > li > a {
-  padding-right: 20px;
-  padding-left: 20px;
-}
-.nav-sidebar > .active > a,
-.nav-sidebar > .active > a:hover,
-.nav-sidebar > .active > a:focus {
-  color: #fff;
-  background-color: #428bca;
+  list-style: none;
+  padding-left: 0px;
+  color: @gray-light;
+  li {
+    position: relative;
+    padding: 10px;
+    &:hover {
+      background-color: #eee;
+      .feeds-cb-holder {
+          visibility: visible;
+      }
+    }
+    &.active,
+    &.active:hover,
+    &.active:focus {
+      color: #fff;
+      a {
+        color: #fff;
+      }
+      background-color: #428bca;
+    }
+  }
+  & > ul {
+    display: block;
+    position: relative;
+    padding-left: 10px;
+  }
 }
 
-.feeds-list-text {
-    display: inline-block;
-    margin-right: 0.5em;
-}
 
 .feeds-cb-holder {
     visibility: hidden;
@@ -25,8 +39,4 @@
     right: @padding-base-horizontal;
     top: extract(@nav-link-padding, 1);
     color: @gray;
-}
-
-.nav-sidebar  li:hover .feeds-cb-holder {
-    visibility: visible;
 }

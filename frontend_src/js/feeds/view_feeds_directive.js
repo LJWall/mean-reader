@@ -3,7 +3,7 @@ angular.module('reader.feeds')
     return {
         templateUrl: 'js/viewFeeds.html',
         scope: {
-            feedList: '=',
+            feedTree: '=',
             highlightFeed: '=',
             deleteFeed: '&',
             viewFeed: '&'

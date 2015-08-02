@@ -5,8 +5,8 @@ angular.module('readerApp')
     this.itemFilter = {};
     this.updating = false;
 
-    this.feedList = function () {
-        return fs.feedTree().branches;
+    this.feedTree = function () {
+        return fs.feedTree();
     };
 
     this.displayedFeed = function () {
@@ -18,12 +18,7 @@ angular.module('readerApp')
     };
 
     this.viewFeed = function (feedObj) {
-        if (selected === feedObj) {
-            selected = fs.feedTree();
-        }
-        else {
-            selected = feedObj;
-        }
+        selected = feedObj;
     };
 
     this.deleteFeed = function (feedObj) {
