@@ -4,7 +4,7 @@
     ng-class="{'fa-google': data().provider === 'google', 'fa-book': data().provider === 'DemoAccount'}"></span>
   <span class="signin-btn-text">Sign out {{data().displayName}}</span>
 </button>
-<a class="signin-btn google" href="/reader/auth/google" ng-show="!isAuthenticated()">
+<a class="signin-btn google" href="/reader/auth/google" ng-show="!isAuthenticated()" target="_self">
   <span class="signin-btn-icon fa fa-google fa-lg"></span>
   <span class="signin-btn-text">Sign in</span>
 </a>
