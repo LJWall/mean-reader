@@ -8,6 +8,9 @@ angular.module('reader.feeds')
             deleteFeed: '&',
             viewFeed: '&'
         },
-        restrict: 'AE'
+        restrict: 'AE',
+        link: function ($scope) {
+            $scope.feedTree.showBranches = true;
+        }
     };
 }]);
