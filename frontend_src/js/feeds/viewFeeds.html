@@ -1,7 +1,7 @@
 <ul class="feed-tree">
   <li class="tree-item" ng-class="{active: (feedTree.apiurl===highlightFeed)}">
     <i class="fa fa-fw pointy" ng-class="{'fa-caret-down': feedTree.showBranches, 'fa-caret-right': !feedTree.showBranches}" ng-click="feedTree.showBranches=!feedTree.showBranches"></i>
-    <a href ng-click="viewFeed({feedObj: feedTree})">
+    <a href class="active-contrast" ng-click="viewFeed({feedObj: feedTree})">
         Everything
         <span class="badge" ng-bind="(feedTree.unread() >0 ? feedTree.unread() : undefined)"></span>
     </a>
@@ -11,14 +11,14 @@
       <li class="tree-item" ng-repeat="meta in feedTree.branches track by meta.apiurl" ng-class="{active: (meta.apiurl===highlightFeed)}">
         <span class="feeds-text">
           <i class="fa fa-fw fa-list"></i>
-          <a href ng-click="viewFeed({feedObj: meta})">
+          <a href class="active-contrast" ng-click="viewFeed({feedObj: meta})">
               {{meta.title}}
               <span class="badge" ng-bind="(meta.unread() >0 ? meta.unread() : undefined)"></span>
           </a>
         </span>
         <div class="feeds-cb-holder">
           <span dropdown>
-            <a href dropdown-toggle><i class="fa fa-fw fa-cog"></i></a>
+            <a href dropdown-toggle class="active-contrast"><i class="fa fa-fw fa-cog"></i></a>
             <ul class="dropdown-menu">
               <li><a href><i class="fa fa-fw fa-i-cursor"></i>Rename</a></li>
               <li><a href ng-click="deleteFeed({'feedObj': meta})"><i class="fa fa-fw fa-trash"></i>Delete</a></li>
