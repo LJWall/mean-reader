@@ -26,6 +26,7 @@ module.exports = function(grunt) {
         {expand: true, flatten: true, src: 'bower_components/jquery/dist/jquery.*', dest: 'frontend_build/js'},
         {expand: true, flatten: true, src: 'bower_components/ngInfiniteScroll/build/ng-infinite-scroll.*', dest: 'frontend_build/js'},
         {expand: true, flatten: true, src: 'bower_components/font-awesome/css/font-awesome.*', dest: 'frontend_build/css'},
+        {expand: true, flatten: true, src: 'bower_components/angular-bootstrap/ui-bootstrap*', dest: 'frontend_build/js'},
         {expand: true, flatten: true, src: 'bower_components/font-awesome/fonts/*', dest: 'frontend_build/fonts'}
     ]};
 

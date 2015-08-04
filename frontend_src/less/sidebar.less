@@ -3,7 +3,7 @@ ul.feed-tree {
   list-style: none;
   padding-left: 0px;
   color: @gray-light;
-  li {
+  li.tree-item {
     position: relative;
     padding: 10px;
     &:hover {
@@ -22,10 +22,11 @@ ul.feed-tree {
       background-color: #428bca;
     }
   }
-  & > ul {
+  & > li > ul {
     display: block;
     position: relative;
     padding-left: 10px;
+    list-style: none;
   }
 }
 
@@ -35,7 +36,7 @@ ul.feed-tree {
 
 .feeds-text {
   display: inline-block;
-  margin-right: 48px;
+  margin-right: 28px;
 }
 
 .feeds-cb-holder {
