@@ -20,8 +20,10 @@
           <span dropdown>
             <a href dropdown-toggle class="active-contrast"><i class="fa fa-fw fa-cog"></i></a>
             <ul class="dropdown-menu">
-              <li><a href><i class="fa fa-fw fa-i-cursor"></i>Rename</a></li>
+              <li><a href ng-click="rename(meta)"><i class="fa fa-fw fa-i-cursor"></i>Rename</a></li>
+              <li class="divider"></li>
               <li><a href ng-click="deleteFeed({'feedObj': meta})"><i class="fa fa-fw fa-trash"></i>Delete</a></li>
+              <li class="divider"></li>
               <li class="dropdown-header">Move to folder</li>
               <li><a href><i class="fa fa-fw fa-folder"></i>Surf</a></li>
               <li><a href><i class="fa fa-fw fa-folder"></i>Coding</a></li>
