@@ -336,6 +336,18 @@ describe('api_views object', function () {
             });
             api_views.putFeed({user: {_id: 'FOO_UID'}, body: {}, params: {ObjectID: test_data.meta[0]._id}}, spyRes);
         });
+        it('should be able to set userTitle if posted', function (done) {
+            spyRes.events.once('responseComplete', function () {
+                expect(spyRes.status.calls.allArgs()).toEqual([[204]]);
+                expect(spyRes.end).toHaveBeenCalled();
+                mongoConn.feeds.findOneAsync({_id: test_data.meta[0]._id})
+                .then(function (feed) {
+                    expect(feed.userTitle).toEqual('FooFooFooFooFooFoo');
+                })
+                .done(done);
+            });
+            api_views.putFeed({user: {_id: 'FOO_UID'}, body: {userTitle: 'FooFooFooFooFooFoo'}, params: {ObjectID: test_data.meta[0]._id}}, spyRes);
+        });
     });
 
     describe('putAll method', function () {
