@@ -77,6 +77,23 @@ describe('feeds_service', function () {
         });
     });
 
+    describe('setUserTitle()', function () {
+        beforeEach(inject(function (feedService, $httpBackend, $httpParamSerializer, getMoreNumber, apiRoot) {
+            $httpBackend.expectGET(apiRoot + '?' + $httpParamSerializer({'N': getMoreNumber}))
+            .respond(200, this.initData, {'last-modified': '2015-01-01T17:00:00Z'});
+            feedService.feedTree().getMore();
+            $httpBackend.flush(1);
+            this.tree = feedService.feedTree();
+        }));
+        it('should set the userTitle and PUT the new title', inject(function ($httpBackend) {
+            $httpBackend.expectPUT(this.tree.branches[0].apiurl, {userTitle: 'FooBar'})
+            .respond(204);
+            this.tree.branches[0].setUserTitle('FooBar');
+            expect(this.tree.branches[0].userTitle).toEqual('FooBar');
+            $httpBackend.flush(1);
+        }));
+    });
+
     describe('isMore()', function () {
         it('should be implemented', function () {
             pending('implememnet me');

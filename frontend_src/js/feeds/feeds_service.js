@@ -56,6 +56,10 @@ angular.module('reader.feeds.service')
                     return res.data;
                 });
             },
+            setUserTitle: function (userTitle) {
+                this.userTitle = userTitle;
+                $http.put(this.apiurl, {userTitle: userTitle});
+            },
             markAllAsRead: function () {
                 $http.put(this.apiurl, {read: true});
                 recursiveMarkAsRead(this);
