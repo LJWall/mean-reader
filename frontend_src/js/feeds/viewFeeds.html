@@ -12,7 +12,7 @@
         <span class="feeds-text">
           <i class="fa fa-fw fa-list"></i>
           <a href class="active-contrast" ng-click="viewFeed({feedObj: meta})">
-              {{meta.title}}
+              {{meta.userTitle || meta.title}}
               <span class="badge" ng-bind="(meta.unread() >0 ? meta.unread() : undefined)"></span>
           </a>
         </span>

@@ -15,13 +15,13 @@ angular.module('reader.feeds')
                 readerPopup({
                     //title: 'Rename',
                     label: 'New name',
-                    initText: treeNode.title,
+                    initText: treeNode.userTitle || treeNode.title,
                     okText: 'Rename'
                 })
                 .then(function (result) {
-                    console.log(result);
-                }, function () {
-                    console.log('foo :-(');
+                    if (result) {
+                        treeNode.setUserTitle(result);
+                    }
                 });
             };
         }
