@@ -8,7 +8,7 @@ describe('feeds_service', function () {
     beforeEach(inject(function ($httpBackend, $httpParamSerializer, apiRoot, getMoreNumber, feedService) {
         this.initData = {
             meta: [
-                {title: 'Feed', apiurl: 'http://apiurl', unread: 2},
+                {title: 'Feed', apiurl: 'http://apiurl', unread: 2, userTitle: 'FooFooFooFooFoo'},
                 {title: 'Feed2', apiurl: 'http://apiurl2', unread: 3}
             ],
             items: [
@@ -32,7 +32,7 @@ describe('feeds_service', function () {
         expect(tree.apiurl).toEqual(apiRoot);
         expect(tree.title).toEqual('All');
         expect(tree.branches.length).toEqual(2);
-        expect(tree.branches[0]).toEqual(jasmine.objectContaining({title: 'Feed', apiurl: 'http://apiurl'}));
+        expect(tree.branches[0]).toEqual(jasmine.objectContaining({title: 'Feed', apiurl: 'http://apiurl', userTitle: 'FooFooFooFooFoo'}));
         expect(tree.branches[1]).toEqual(jasmine.objectContaining({title: 'Feed2', apiurl: 'http://apiurl2'}));
     }));
     it('should indentify correctly number unread at each node', inject(function (feedService) {

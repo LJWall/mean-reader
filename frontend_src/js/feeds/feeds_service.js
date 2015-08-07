@@ -14,6 +14,7 @@ angular.module('reader.feeds.service')
 
         return {
             title: data.title,
+            userTitle: data.userTitle,
             apiurl: data.apiurl,
             branches: [],
             items: function () {return items;},
@@ -80,6 +81,7 @@ angular.module('reader.feeds.service')
             },
             update: function (data) {
                 this.title = data.title || this.title;
+                this.userTitle = data.userTitle || this.userTitle;
                 unread = (angular.isDefined(data.unread) ? data.unread : unread);
             },
             delete: function () {
