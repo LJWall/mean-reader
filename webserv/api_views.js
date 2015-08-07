@@ -243,6 +243,7 @@ module.exports = function (url_for) {
         obj.feedurl =  meta.feedurl;
         if (meta.link) obj.link =  meta.link;
         obj.title = meta.title;
+        if (meta.userTitle) obj.userTitle = meta.userTitle;
         if (meta.description) { obj.description = meta.description; }
         return obj;
     }

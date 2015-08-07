@@ -130,6 +130,7 @@ describe('api_views object', function () {
             expect(data.meta[0]).toEqual({
                 feedurl: test_data.meta[0].feedurl,
                 title: test_data.meta[0].title,
+                userTitle: test_data.meta[0].userTitle,
                 description: test_data.meta[0].description,
                 apiurl: mockUrlFor.feed(test_data.meta[0]._id),
                 unread: 1
