@@ -125,7 +125,8 @@ module.exports = function (url_for) {
             res.status(404).end();
         },
         putPost: function (req, res) {
-            var q = {_id: req.params.ObjectID, user_id: req.user._id};
+            var q = {_id: req.params.ObjectID, user_id: req.user._id},
+                updatePromise;
             db.posts.findOneAsync(q)
             .then(function (item) {
                 if (!item) {
@@ -134,12 +135,13 @@ module.exports = function (url_for) {
                 }
                 if (typeof req.body.read === 'boolean') {
                     item.read = req.body.read;
+                    updatePromise = Promise.all([
+                        db.posts.call('updateOneAsync', q, {$set: {read: item.read},  $currentDate: {last_update: true}}),
+                        db.feeds.call('updateOneAsync', {_id: item.meta_id, user_id: req.user._id}, {$currentDate: {last_update: true}})
+                    ]);
                 }
                 res.status(200).json(cleanItem(item));
-                return Promise.all([
-                    db.posts.call('updateOneAsync', q, {$set: {read: item.read},  $currentDate: {last_update: true}}),
-                    db.feeds.call('updateOneAsync', {_id: item.meta_id, user_id: req.user._id}, {$currentDate: {last_update: true}})
-                ]);
+                return updatePromise;
             })
             .done();
         },
