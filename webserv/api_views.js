@@ -128,25 +128,27 @@ module.exports = function (url_for) {
             var q = {_id: req.params.ObjectID, user_id: req.user._id},
                 updatePromise;
             db.posts.findOneAsync(q)
-            .then(function (item) {
-                if (!item) {
-                    res.status(404).end();
-                    return;
-                }
-                if (typeof req.body.read === 'boolean') {
+            .tap(function (item) {
+                if (item && typeof req.body.read === 'boolean') {
                     item.read = req.body.read;
                     updatePromise = Promise.all([
                         db.posts.call('updateOneAsync', q, {$set: {read: item.read},  $currentDate: {last_update: true}}),
                         db.feeds.call('updateOneAsync', {_id: item.meta_id, user_id: req.user._id}, {$currentDate: {last_update: true}})
                     ]);
+                    return updatePromise;
                 }
-                res.status(200).json(cleanItem(item));
-                return updatePromise;
+            })
+            .then(function (item) {
+                if (item) {
+                    res.status(200).json(cleanItem(item));
+                } else {
+                    res.status(404).end();
+                }
             })
             .done();
         },
         putFeed: function (req, res) {
-            var q, readPromise, namePromise;
+            var q, readPromise, namePromise, folderPromise;
             if (req.body.read === true)  {
                 q = {meta_id: req.params.ObjectID, user_id: req.user._id, read: {$ne: true}};
                 readPromise = Promise.all([
@@ -165,8 +167,20 @@ module.exports = function (url_for) {
                   $currentDate: {'last_update': true}
                 });
             }
-            if (readPromise || namePromise) {
-                Promise.join(namePromise, readPromise,
+
+            if (typeof req.body.folder !== 'undefined') {
+                folderPromise = db.feeds.call('updateOneAsync', {
+                    _id: req.params.ObjectID,
+                    user_id: req.user._id
+                },
+                {
+                  $set: {'folder': req.body.folder},
+                  $currentDate: {'last_update': true}
+                });
+            }
+
+            if (readPromise || namePromise || folderPromise) {
+                Promise.join(namePromise, readPromise, folderPromise,
                     function () {
                         res.status(204).end();
                     }
@@ -246,6 +260,7 @@ module.exports = function (url_for) {
         if (meta.link) obj.link =  meta.link;
         obj.title = meta.title;
         if (meta.userTitle) obj.userTitle = meta.userTitle;
+        if (meta.folder) obj.folder = meta.folder;
         if (meta.description) { obj.description = meta.description; }
         return obj;
     }

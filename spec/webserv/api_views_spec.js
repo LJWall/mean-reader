@@ -133,7 +133,8 @@ describe('api_views object', function () {
                 userTitle: test_data.meta[0].userTitle,
                 description: test_data.meta[0].description,
                 apiurl: mockUrlFor.feed(test_data.meta[0]._id),
-                unread: 1
+                unread: 1,
+                folder: test_data.meta[0].folder
             });
             expect(data.items.length).toEqual(1);
             expect(data.items[0]).toEqual({
@@ -325,7 +326,7 @@ describe('api_views object', function () {
             });
             api_views.putFeed({user: {_id: 'FOO_UID'}, body: {read: true}, params: {ObjectID: test_data.meta[0]._id}}, spyRes);
         });
-        it('should do nothing if {read=true} not in the body', function (done) {
+        it('should not set read if {read=true} not in the body', function (done) {
             spyRes.events.once('responseComplete', function () {
                 expect(spyRes.status.calls.allArgs()).toEqual([[400]]);
                 expect(spyRes.end).toHaveBeenCalled();
@@ -348,6 +349,18 @@ describe('api_views object', function () {
                 .done(done);
             });
             api_views.putFeed({user: {_id: 'FOO_UID'}, body: {userTitle: 'FooFooFooFooFooFoo'}, params: {ObjectID: test_data.meta[0]._id}}, spyRes);
+        });
+        it('should be able to set folder if posted', function (done) {
+            spyRes.events.once('responseComplete', function () {
+                expect(spyRes.status.calls.allArgs()).toEqual([[204]]);
+                expect(spyRes.end).toHaveBeenCalled();
+                mongoConn.feeds.findOneAsync({_id: test_data.meta[0]._id})
+                .then(function (feed) {
+                    expect(feed.folder).toEqual('FooFooFooFooFooFoo');
+                })
+                .done(done);
+            });
+            api_views.putFeed({user: {_id: 'FOO_UID'}, body: {folder: 'FooFooFooFooFooFoo'}, params: {ObjectID: test_data.meta[0]._id}}, spyRes);
         });
     });
 
