@@ -38,6 +38,7 @@ describe('getFeed method', function () {
                 title: test_data.meta[1].title,
                 link: test_data.meta[1].link,
                 apiurl: url_for.feed(test_data.meta[1]._id),
+                labels: ['foo'],
                 unread: 1
             });
             expect(data.items.length).toEqual(1);
