@@ -1,35 +1,9 @@
 var express = require('express'),
-    app,
-    mod_views = require("./api_views"),
-    views,
-    path,
-    url_for,
-    ObjectID = require('mongodb').ObjectID;
+    url_for = require('./url_for'),
+    ObjectID = require('mongodb').ObjectID,
+    app = express();
 
-module.exports = function (mount_path) {
-    path = mount_path;
-    views = views || mod_views(url_for);
-    app = app || setupRoutes();
-    return app;
-};
-
-
-url_for = {
-    feed: function (id) {
-        return path + '/feeds/' + id.toString();
-    },
-    item: function (id) {
-        return path + '/posts/' + id.toString();
-    },
-    content: function(id) {
-        return path + '/content/' + id.toString();
-    },
-    apiroot: function () {
-        return path;
-    }
-};
-
-var processObjectID = function processObjectID (req, res, next, id) {
+app.param('ObjectID', function processObjectID (req, res, next, id) {
     try {
         req.params.ObjectID = ObjectID.createFromHexString(id);
     }
@@ -37,19 +11,15 @@ var processObjectID = function processObjectID (req, res, next, id) {
         return res.end(400);
     }
     next();
-};
+});
 
-function setupRoutes() {
-    var newApp = express();
-    newApp.param('ObjectID', processObjectID);
-    newApp.get('/', views.getAll);
-    newApp.put('/', views.putAll);
-    newApp.post('/feeds', views.postAdd);
-    newApp.get('/feeds/:ObjectID', views.getFeed);
-    newApp.put('/feeds/:ObjectID', views.putFeed);
-    newApp.delete('/feeds/:ObjectID', views.deleteFeed);
-    newApp.put('/posts/:ObjectID', views.putPost);
-    newApp.get('/content/:ObjectID', views.getContent);
-    newApp.use(views['404']);
-    return newApp;
-}
+app.get(url_for.apiroot(),            require('./views/get_all'));
+app.put(url_for.apiroot(),            require('./views/put_all'));
+app.post(url_for.feed(),              require('./views/post_feed'));
+app.get(url_for.feed(':ObjectID'),    require('./views/get_feed'));
+app.put(url_for.feed(':ObjectID'),    require('./views/put_feed'));
+app.delete(url_for.feed(':ObjectID'), require('./views/delete_feed'));
+app.put(url_for.item(':ObjectID'),    require('./views/put_item'));
+app.get(url_for.content(':ObjectID'), require('./views/get_content'));
+
+module.exports = app;

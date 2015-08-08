@@ -25,7 +25,9 @@ app.use(session({
     store: store
 }));
 
-app.use('/reader', express.static('frontend_build'));
+if (process.env.MEAN_ENV !== 'production') {
+    app.use('/reader', express.static('frontend_build'));
+}
 
 app.use(function (req, res, next) {
     res.set('cache-control', 'private, max-age=0, no-cache');
@@ -35,10 +37,11 @@ app.use(function (req, res, next) {
 app.get('/reader/xsrf/get_token', xsrf.get_xsrf_token);
 app.use('/reader', user(xsrf.check_xsrf_header));
 
-app.use('/reader/api',
+app.use(config.appMountPath,
     xsrf.check_xsrf_header,
-    user.check_authenticated,
-    api_routes('/reader/api'));
+    user.check_authenticated);
+
+app.use(api_routes);
 
 
 app.listen(5667);
