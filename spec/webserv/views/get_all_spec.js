@@ -3,19 +3,18 @@ var get_all = require('../../../webserv/views/get_all'),
     util = require('./setup_util'),
     test_data = require('../api_views_test_data.json');
 
-var mockFeedModel, saveSpy,
-    meta, item, meta_res, item_res;
-
-beforeAll(util.prepTestData);
 
 describe('getAll method', function () {
+    beforeAll(util.prepTestData);
     beforeAll(util.makeResSpy);
     beforeAll(util.insertTestData);
     afterAll(util.deleteTestData);
+
     beforeAll(function (done) {
         this.spyRes.events.once('responseComplete', done);
         get_all({user: {_id: 'FOO_UID'}, query: {}}, this.spyRes);
     });
+
     afterAll(util.resetSpies);
     afterAll(util.clearListner);
 
