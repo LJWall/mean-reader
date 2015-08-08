@@ -36,7 +36,7 @@ describe('getAll method', function () {
             description: test_data.meta[0].description,
             apiurl: url_for.feed(test_data.meta[0]._id),
             unread: 1,
-            folder: test_data.meta[0].folder
+            labels: test_data.meta[0].labels
         });
         expect(data.items.length).toEqual(1);
         expect(data.items[0]).toEqual({

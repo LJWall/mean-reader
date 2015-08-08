@@ -34,7 +34,7 @@ module.exports.cleanMeta = function  (meta) {
     if (meta.link) obj.link =  meta.link;
     obj.title = meta.title;
     if (meta.userTitle) obj.userTitle = meta.userTitle;
-    if (meta.folder) obj.folder = meta.folder;
+    if (meta.labels) obj.labels = meta.labels;
     if (meta.description) { obj.description = meta.description; }
     return obj;
 };

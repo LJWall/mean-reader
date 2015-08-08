@@ -55,16 +55,16 @@ describe('putFeed', function () {
         });
         put_feed({user: {_id: 'FOO_UID'}, body: {userTitle: 'FooFooFooFooFooFoo'}, params: {ObjectID: test_data.meta[0]._id}}, spyRes);
     });
-    it('should be able to set folder if posted', function (done) {
+    it('should be able to set labels if posted', function (done) {
         spyRes.events.once('responseComplete', function () {
             expect(spyRes.status.calls.allArgs()).toEqual([[204]]);
             expect(spyRes.end).toHaveBeenCalled();
             mongoConn.feeds.findOneAsync({_id: test_data.meta[0]._id})
             .then(function (feed) {
-                expect(feed.folder).toEqual('FooFooFooFooFooFoo');
+                expect(feed.labels).toEqual(['fun', 'spam']);
             })
             .done(done);
         });
-        put_feed({user: {_id: 'FOO_UID'}, body: {folder: 'FooFooFooFooFooFoo'}, params: {ObjectID: test_data.meta[0]._id}}, spyRes);
+        put_feed({user: {_id: 'FOO_UID'}, body: {labels: ['fun', 'spam']}, params: {ObjectID: test_data.meta[0]._id}}, spyRes);
     });
 });
