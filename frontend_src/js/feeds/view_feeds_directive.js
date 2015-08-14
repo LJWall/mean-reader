@@ -13,7 +13,6 @@ angular.module('reader.feeds')
             $scope.feedTree.showBranches = true;
             $scope.rename = function (treeNode) {
                 readerPopup({
-                    //title: 'Rename',
                     label: 'New name',
                     initText: treeNode.userTitle || treeNode.title,
                     okText: 'Rename'
@@ -22,6 +21,15 @@ angular.module('reader.feeds')
                     if (result) {
                         treeNode.setUserTitle(result);
                     }
+                });
+            };
+            $scope.moveToNewFolder = function (treeNode) {
+                readerPopup({
+                  label: 'New folder',
+                  okText: 'Create folder'
+                })
+                .then(function (result) {
+                    treeNode.moveFolder(result);
                 });
             };
         }

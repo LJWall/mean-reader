@@ -8,7 +8,16 @@
   </li>
   <li ng-show="feedTree.showBranches">
     <ul>
-      <li class="tree-item" ng-repeat="meta in feedTree.branches track by meta.apiurl" ng-class="{active: (meta.apiurl===highlightFeed)}">
+      <li class="tree-item" ng-repeat="meta in feedTree.branches | filter:{folder: true} track by meta.apiurl" ng-class="{active: (meta.apiurl===highlightFeed)}">
+        <span class="feeds-text">
+          <i class="fa fa-fw fa-folder"></i>
+          <a href class="active-contrast" ng-click="viewFeed({feedObj: meta})">
+              {{meta.title}}
+              <span class="badge" ng-bind="(meta.unread() >0 ? meta.unread() : undefined)"></span>
+          </a>
+        </span>
+      </li>
+      <li class="tree-item" ng-repeat="meta in feedTree.branches | filter:{folder: false} track by meta.apiurl" ng-class="{active: (meta.apiurl===highlightFeed)}">
         <span class="feeds-text">
           <i class="fa fa-fw fa-list"></i>
           <a href class="active-contrast" ng-click="viewFeed({feedObj: meta})">
@@ -25,9 +34,10 @@
               <li><a href ng-click="deleteFeed({'feedObj': meta})"><i class="fa fa-fw fa-trash"></i>Delete</a></li>
               <li class="divider"></li>
               <li class="dropdown-header">Move to folder</li>
-              <li><a href><i class="fa fa-fw fa-folder"></i>Surf</a></li>
-              <li><a href><i class="fa fa-fw fa-folder"></i>Coding</a></li>
-              <li><a href><i class="fa fa-fw fa-plus-square"></i>New folder...</a></li>
+              <li ng-repeat="folder_meta in feedTree.branches | filter:{folder: true} track by folder_meta.apiurl">
+                <a href ng-click="meta.moveFolder(folder_meta.title)"><i class="fa fa-fw fa-folder"></i>{{folder_meta.title}}</a>
+              </li>
+              <li><a href ng-click="moveToNewFolder(meta)"><i class="fa fa-fw fa-plus-square"></i>New folder</a></li>
             </ul>
           </span>
         </div>

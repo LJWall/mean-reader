@@ -9,7 +9,7 @@ describe('feeds_service', function () {
         this.initData = {
             meta: [
                 {title: 'Feed', apiurl: 'http://apiurl', unread: 2, userTitle: 'FooFooFooFooFoo'},
-                {title: 'Feed2', apiurl: 'http://apiurl2', unread: 3}
+                {title: 'Feed2', apiurl: 'http://apiurl2', unread: 3, labels: ['Fun Stuff']}
             ],
             items: [
                 {title: 'Big cheese', apiurl: 'http://bigcheese/', meta_apiurl: 'http://apiurl', pubdate: '2015-01-01T12:00:00Z'},
@@ -27,19 +27,22 @@ describe('feeds_service', function () {
         $httpBackend.resetExpectations();
     }));
 
-    it('should produce a tree structure', inject(function (apiRoot, feedService) {
+    it('should produce a tree structure', inject(function (apiRoot, feedService, $httpParamSerializer) {
         var tree = feedService.feedTree();
         expect(tree.apiurl).toEqual(apiRoot);
         expect(tree.title).toEqual('All');
         expect(tree.branches.length).toEqual(2);
         expect(tree.branches[0]).toEqual(jasmine.objectContaining({title: 'Feed', apiurl: 'http://apiurl', userTitle: 'FooFooFooFooFoo'}));
-        expect(tree.branches[1]).toEqual(jasmine.objectContaining({title: 'Feed2', apiurl: 'http://apiurl2'}));
+        expect(tree.branches[1]).toEqual(jasmine.objectContaining({title: 'Fun Stuff', apiurl: apiRoot + '?' + $httpParamSerializer({label: 'Fun Stuff'})}));
+        expect(tree.branches[1].branches.length).toEqual(1);
+        expect(tree.branches[1].branches[0]).toEqual(jasmine.objectContaining({title: 'Feed2', apiurl: 'http://apiurl2'}));
     }));
     it('should indentify correctly number unread at each node', inject(function (feedService) {
         var tree = feedService.feedTree();
         expect(tree.unread()).toEqual(5);
         expect(tree.branches[0].unread()).toEqual(2);
         expect(tree.branches[1].unread()).toEqual(3);
+        expect(tree.branches[1].branches[0].unread()).toEqual(3);
     }));
 
     describe('getMore()', function () {
@@ -85,11 +88,19 @@ describe('feeds_service', function () {
             $httpBackend.flush(1);
             this.tree = feedService.feedTree();
         }));
-        it('should set the userTitle and PUT the new title', inject(function ($httpBackend) {
+        it('should set the userTitle and PUT the new title for feed branches', inject(function ($httpBackend) {
             $httpBackend.expectPUT(this.tree.branches[0].apiurl, {userTitle: 'FooBar'})
             .respond(204);
             this.tree.branches[0].setUserTitle('FooBar');
             expect(this.tree.branches[0].userTitle).toEqual('FooBar');
+            $httpBackend.flush(1);
+        }));
+        it('should set the title and PUT folder name on feeds for folders', inject(function ($httpBackend) {
+            $httpBackend.expectPUT(this.tree.branches[1].branches[0].apiurl, {labels: ['Dull Blogs']})
+            .respond(204);
+            this.tree.branches[1].setUserTitle('Dull Blogs');
+            expect(this.tree.branches[1].title).toEqual('Dull Blogs');
+            expect(this.tree.branches[1].branches[0].folder).toEqual('Dull Blogs');
             $httpBackend.flush(1);
         }));
     });

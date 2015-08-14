@@ -1,12 +1,14 @@
 angular.module('reader.feeds.service')
-.factory('feedService', ['$http', '$q', 'currentUserService', 'apiRoot', 'getMoreNumber', function ($http, $q, userService, apiRoot, getMoreNumber) {
+.factory('feedService',
+['$http', '$q', 'currentUserService', 'apiRoot', 'getMoreNumber', '$httpParamSerializer',
+function ($http, $q, userService, apiRoot, getMoreNumber, $httpParamSerializer) {
     var last_modified,
         content = {},
-        feedTree = treeNode({apiurl: apiRoot, title: 'All'}),
+        feedTree = treeNode({apiurl: apiRoot, title: 'All'}, undefined, true),
         foo_meta = {},
         foo_items = {};
 
-    function treeNode (data, parent) {
+    function treeNode (data, parent, isFolder) {
         var unread = data.unread || 0,
             isMore = true,
             items = [],
@@ -17,6 +19,7 @@ angular.module('reader.feeds.service')
             userTitle: data.userTitle,
             apiurl: data.apiurl,
             branches: [],
+            folder: isFolder,
             items: function () {return items;},
             addItem: function (item) {
                 if (!node_item_map[item.apiurl]) {
@@ -28,6 +31,7 @@ angular.module('reader.feeds.service')
                 items = [];
                 node_item_map = {};
                 this.oldest = undefined;
+                isMore = true;
             },
             parent: parent,
             isMore: function () {
@@ -57,8 +61,34 @@ angular.module('reader.feeds.service')
                 });
             },
             setUserTitle: function (userTitle) {
-                this.userTitle = userTitle;
-                $http.put(this.apiurl, {userTitle: userTitle});
+                if (this.folder) {
+                    this.title = userTitle;
+                    this.branches.forEach(function (node) {
+                        node.setFolder(userTitle);
+                    });
+                }
+                else {
+                    this.userTitle = userTitle;
+                    $http.put(this.apiurl, {userTitle: userTitle});
+                }
+            },
+            setFolder: function (folderName) {
+                if (this.folder) {
+                    throw new Error('Only applicable to feeds');
+                }
+                this.folder = folderName;
+                $http.put(this.apiurl, {labels: [folderName]});
+            },
+            moveFolder: function (folderName) {
+              var self = this;
+              self.setFolder(folderName);
+              self.parent.branches = self.parent.branches.filter(function (node) {
+                  return node !== self;
+              });
+              self.parent.clearItems();
+              self.parent = folder(folderName);
+              self.parent.branches.push(self);
+              self.parent.clearItems();
             },
             markAllAsRead: function () {
                 $http.put(this.apiurl, {read: true});
@@ -75,7 +105,7 @@ angular.module('reader.feeds.service')
                 }
             },
             unread: function () {
-                if (this.branches.length) {
+                if (this.folder) {
                     return this.branches.reduce(function (prev, cur) {
                         return prev + cur.unread();
                     }, 0);
@@ -140,14 +170,17 @@ angular.module('reader.feeds.service')
 
     // Load some data initally
     $http.get(apiRoot, {params: {N: 0}}).then(function (res) {
-        var meta_data = res.data.meta,
-            items = res.data.items.map(function (item) {
-                return new Item(item);
-            });
+        var meta_data = res.data.meta;
         last_modified = res.headers('last-modified');
         meta_data.forEach(function (feedData) {
-            var newOb = treeNode(feedData, feedTree);
-            feedTree.branches.push(newOb);
+            var parent;
+            if (feedData.labels && feedData.labels[0]) {
+                parent = folder(feedData.labels[0]);
+            } else {
+                parent = feedTree;
+            }
+            var newOb = treeNode(feedData, parent, false);
+            parent.branches.push(newOb);
             foo_meta[feedData.apiurl] = newOb;
         });
     });
@@ -259,4 +292,16 @@ angular.module('reader.feeds.service')
         });
     }
 
+    function folder (folderName) {
+        var newFolder,
+            apiurl = apiRoot + '?' + $httpParamSerializer({label: folderName});
+        if (foo_meta[apiurl]) {
+            return foo_meta[apiurl];
+        } else {
+            newFolder = treeNode({apiurl: apiurl, title: folderName}, feedTree, true);
+            feedTree.branches.push(newFolder);
+            foo_meta[apiurl] = newFolder;
+            return newFolder;
+        }
+    }
 }]);
