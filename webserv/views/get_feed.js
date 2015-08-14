@@ -5,7 +5,7 @@ var db = require('../mongoConnect.js'),
 module.exports = function (req, res) {
     var query_meta = {user_id: req.user._id, _id: req.params.ObjectID},
         query_items = {user_id: req.user._id, meta_id: req.params.ObjectID},
-        num = 10, n_unread_promise, posts_promise;
+        num, n_unread_promise, posts_promise;
 
     n_unread_promise = db.posts.call('aggregateAsync', [
         {$match: {user_id: req.user._id, meta_id: req.params.ObjectID, read: {$ne: true}}},
@@ -26,12 +26,15 @@ module.exports = function (req, res) {
         }
         catch (e) {}
     }
-     if (num>0) {
-        posts_promise = db.posts.find(query_items).sort({pubdate: -1}).limit(num).toArrayAsync().reduce(util.reducer.bind(null, util.cleanItem), []);
-     } else {
+    if (num===0) {
         posts_promise = Promise.resolve([]);
-     }
-
+    } else {
+        posts_promise = db.posts.find(query_items).sort({pubdate: -1});
+        if (num) {
+            posts_promise = posts_promise.limit(num);
+        }
+        posts_promise = posts_promise.toArrayAsync().reduce(util.reducer.bind(null, util.cleanItem), []);
+    }
     Promise.join(
         db.feeds.findOneAsync(query_meta).then(util.cleanMeta),
         posts_promise,

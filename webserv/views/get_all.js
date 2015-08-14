@@ -39,7 +39,6 @@ module.exports = function (req, res) {
             return obj;
         });
 
-        num = 10;
         if (req.query.N) {
             try {
                 num = parseInt(req.query.N);
@@ -47,7 +46,9 @@ module.exports = function (req, res) {
             catch (e) {}
         }
 
-        if (num>0) {
+        if (num===0) {
+            items_promise = Promise.resolve([]);
+        } else {
             if (!q1.last_update) { q1.meta_id = {$in: metaIdList}; } // Urgh! rework this!
             if (req.query.older_than) {
                 try {
@@ -56,10 +57,12 @@ module.exports = function (req, res) {
                 }
                 catch (e) {}
             }
-            items_promise = db.posts.find(q1).sort({pubdate: -1}).limit(num).toArrayAsync()
+            items_promise = db.posts.find(q1).sort({pubdate: -1});
+            if (num) {
+                items_promise = items_promise.limit(num);
+            }
+            items_promise = items_promise.toArrayAsync()
                 .reduce(util.reducer.bind(last_update, util.cleanItem), []);
-        } else {
-            items_promise = Promise.resolve([]);
         }
         Promise.join(items_promise, n_unread_promise, function (items, n_unread) {
             meta.forEach(function (m) {
