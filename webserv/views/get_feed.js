@@ -40,7 +40,11 @@ module.exports = function (req, res) {
         posts_promise,
         n_unread_promise,
         function (meta, items, n_unread) {
-            if (n_unread[0]) meta.unread = n_unread[0].unread;
+            if (n_unread[0]) {
+                meta.unread = n_unread[0].unread;
+            } else {
+                meta.unread = 0;
+            }
             res.status(200)
             .json({meta: [meta], items: items});
         }

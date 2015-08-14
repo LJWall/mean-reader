@@ -31,7 +31,7 @@ describe('putAll method', function () {
             })
             .done(done);
         });
-        put_all({user: {_id: 'IMPOSTER'}, body: {read: true}}, spyRes);
+        put_all({user: {_id: 'IMPOSTER'}, body: {read: true}, query: {}}, spyRes);
     });
 
     it('should do nothing if {read=true} not in the body', function (done) {
@@ -46,6 +46,8 @@ describe('putAll method', function () {
             })
             .done(done);
         });
-        put_all({user: {_id: 'FOO_UID'}, body: {}, params: {ObjectID: test_data.meta[0]._id}}, spyRes);
+        put_all({user: {_id: 'FOO_UID'}, body: {}, params: {ObjectID: test_data.meta[0]._id}, query: {}}, spyRes);
     });
+
+    it('should repect a query paramter label=foo');
 });

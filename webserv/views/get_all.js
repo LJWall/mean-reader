@@ -66,7 +66,7 @@ module.exports = function (req, res) {
         }
         Promise.join(items_promise, n_unread_promise, function (items, n_unread) {
             meta.forEach(function (m) {
-                m.unread = n_unread[m.apiurl];
+                m.unread = (n_unread[m.apiurl] ? n_unread[m.apiurl] : 0);
             });
             res.status(200)
             .set('last-modified', last_update.dt)
