@@ -7,40 +7,29 @@
     </a>
   </li>
   <li ng-show="feedTree.showBranches">
-    <ul>
-      <li class="tree-item" ng-repeat="meta in feedTree.branches | filter:{folder: true} track by meta.apiurl" ng-class="{active: (meta.apiurl===highlightFeed)}">
-        <span class="feeds-text">
-          <i class="fa fa-fw fa-folder"></i>
-          <a href class="active-contrast" ng-click="viewFeed({feedObj: meta})">
-              {{meta.title}}
-              <span class="badge" ng-bind="(meta.unread() >0 ? meta.unread() : undefined)"></span>
-          </a>
-        </span>
-      </li>
-      <li class="tree-item" ng-repeat="meta in feedTree.branches | filter:{folder: false} track by meta.apiurl" ng-class="{active: (meta.apiurl===highlightFeed)}">
-        <span class="feeds-text">
-          <i class="fa fa-fw fa-list"></i>
-          <a href class="active-contrast" ng-click="viewFeed({feedObj: meta})">
-              {{meta.userTitle || meta.title}}
-              <span class="badge" ng-bind="(meta.unread() >0 ? meta.unread() : undefined)"></span>
-          </a>
-        </span>
-        <div class="feeds-cb-holder">
-          <span dropdown>
-            <a href dropdown-toggle class="active-contrast"><i class="fa fa-fw fa-cog"></i></a>
-            <ul class="dropdown-menu">
-              <li><a href ng-click="rename(meta)"><i class="fa fa-fw fa-i-cursor"></i>Rename</a></li>
-              <li class="divider"></li>
-              <li><a href ng-click="deleteFeed({'feedObj': meta})"><i class="fa fa-fw fa-trash"></i>Delete</a></li>
-              <li class="divider"></li>
-              <li class="dropdown-header">Move to folder</li>
-              <li ng-repeat="folder_meta in feedTree.branches | filter:{folder: true} track by folder_meta.apiurl">
-                <a href ng-click="meta.moveFolder(folder_meta.title)"><i class="fa fa-fw fa-folder"></i>{{folder_meta.title}}</a>
-              </li>
-              <li><a href ng-click="moveToNewFolder(meta)"><i class="fa fa-fw fa-plus-square"></i>New folder</a></li>
-            </ul>
+    <ul class="sub-tree">
+      <!-- folder -->
+      <div ng-repeat="folder_meta in feedTree.branches | filter:{folder: true}">
+        <li class="tree-item" ng-class="{active: (folder_meta.apiurl===highlightFeed)}">
+          <span class="feeds-text">
+            <i class="fa fa-fw pointy" ng-class="{'fa-caret-down': folder_meta.showBranches, 'fa-caret-right': !folder_meta.showBranches}" ng-click="folder_meta.showBranches=!folder_meta.showBranches"></i>
+            <a href class="active-contrast" ng-click="viewFeed({feedObj: folder_meta})">
+                {{folder_meta.title}}
+                <span class="badge" ng-bind="(folder_meta.unread() >0 ? folder_meta.unread() : undefined)"></span>
+            </a>
           </span>
-        </div>
+        </li>
+        <li ng-show="folder_meta.showBranches">
+          <ul class="sub-tree">
+            <li class="tree-item" ng-repeat="meta in folder_meta.branches | filter:{folder: false}" ng-class="{active: (meta.apiurl===highlightFeed)}">
+              <reader-view-feeds-entry></reader-view-feeds-entry>
+            </li>
+          </ul>
+        </li>
+      </div>
+      <!-- /folder -->
+      <li class="tree-item" ng-repeat="meta in feedTree.branches | filter:{folder: false} track by meta.apiurl" ng-class="{active: (meta.apiurl===highlightFeed)}">
+        <reader-view-feeds-entry></reader-view-feeds-entry>
       </li>
     </ul>
   </li>

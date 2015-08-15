@@ -76,7 +76,6 @@ function ($http, $q, userService, apiRoot, getMoreNumber, $httpParamSerializer) 
                 if (this.folder) {
                     throw new Error('Only applicable to feeds');
                 }
-                this.folder = folderName;
                 $http.put(this.apiurl, {labels: [folderName]});
             },
             moveFolder: function (folderName) {
