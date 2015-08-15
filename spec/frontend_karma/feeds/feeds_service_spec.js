@@ -100,7 +100,6 @@ describe('feeds_service', function () {
             .respond(204);
             this.tree.branches[1].setUserTitle('Dull Blogs');
             expect(this.tree.branches[1].title).toEqual('Dull Blogs');
-            expect(this.tree.branches[1].branches[0].folder).toEqual('Dull Blogs');
             $httpBackend.flush(1);
         }));
     });
