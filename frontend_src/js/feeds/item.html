@@ -2,7 +2,7 @@
       ng-class="{'reader-unread': !item.read, 'reader-chk-item': item.checked, 'feed-filter': itemFilter.meta_apiurl, 'item-show': show_content}">
     <div class="item-left-matter">
         <i class="fa fa-fw reader-chk" ng-class="{'fa-square-o': !item.checked, 'fa-check-square': item.checked}" ng-click="checkItem(item)"></i>
-        <span class="item-feed-name">[<span class="inline-clip" ng-bind="item.meta().title"></span>]</span>
+        <span class="item-feed-name">[<span class="inline-clip" ng-bind="item.meta().userTitle || item.meta().title"></span>]</span>
     </div>
     <div class="item-title">
       <a href class="item-title-main" ng-click="show()" ng-bind="item.title || '(view)'"></a>
