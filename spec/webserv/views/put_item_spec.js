@@ -89,6 +89,30 @@ describe('put_item', function () {
             function () { return {user: {_id: 'FOO_UID'}, body: {}, params: {ObjectID: 'aaaaaaaaaaaaaaaaaaaaaaaa'}}; },
             function () { expect(spyRes.status.calls.allArgs()).toEqual([[404]]); }
         ));
+        it('should set starred=true on the item when PUT data contains starred=true', post(
+            function () { return {user: {_id: 'FOO_UID'}, body: {starred: true}, params: {ObjectID: test_data.item[0]._id}}; },
+            function (done) {
+                expect(spyRes.json.calls.argsFor(0)[0].starred).toEqual(true);
+                mongoConn.connection.call('collection', 'posts')
+                .call('findOneAsync', {_id: test_data.item[0]._id})
+                .then(function (item) {
+                    expect(item.starred).toBe(true);
+                })
+                .done(done);
+            }
+        ));
+        it('should set starred=false on the item when PUT data contains starred=flase', post(
+            function () { return {user: {_id: 'FOO_UID'}, body: {starred: false}, params: {ObjectID: test_data.item[0]._id}}; },
+            function (done) {
+                expect(spyRes.json.calls.argsFor(0)[0].starred).toEqual(false);
+                mongoConn.connection.call('collection', 'posts')
+                .call('findOneAsync', {_id: test_data.item[0]._id})
+                .then(function (item) {
+                    expect(item.starred).toBe(false);
+                })
+                .done(done);
+            }
+        ));
     });
 
 

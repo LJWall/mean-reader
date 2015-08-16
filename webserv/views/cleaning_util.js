@@ -24,6 +24,7 @@ module.exports.cleanItem = function  (item_data) {
     if (item_data.content_id) {
         obj.content_apiurl = url_for.content(item_data.content_id);
     }
+    if (item_data.starred!==undefined) { obj.starred = item_data.starred; }
     return obj;
 };
 
