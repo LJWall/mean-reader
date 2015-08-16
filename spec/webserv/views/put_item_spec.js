@@ -86,11 +86,7 @@ describe('put_item', function () {
             }
         ));
         it('should return 404 error if item cannot be found', post(
-            function () { return {user: {_id: 'FOO_UID'}, body: {}, params: {item_id: 'aaaaaaaaaaaaaaaaaaaaaaaa'}}; },
-            function () { expect(spyRes.status.calls.allArgs()).toEqual([[404]]); }
-        ));
-        it('should return 404 error if item_id does not make a good ObjectID', post(
-            function () { return {user: {_id: 'FOO_UID'}, body: {}, params: {item_id: 'fooo*'}}; },
+            function () { return {user: {_id: 'FOO_UID'}, body: {}, params: {ObjectID: 'aaaaaaaaaaaaaaaaaaaaaaaa'}}; },
             function () { expect(spyRes.status.calls.allArgs()).toEqual([[404]]); }
         ));
     });

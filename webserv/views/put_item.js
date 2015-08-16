@@ -17,7 +17,6 @@ module.exports = function (req, res) {
         }
     })
     .then(function (item) {
-        console.log(item);
         if (item) {
             res.status(200).json(util.cleanItem(item));
         } else {
