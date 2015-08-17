@@ -147,6 +147,7 @@ function ($http, $q, userService, apiRoot, getMoreNumber, $httpParamSerializer) 
       this.pubdate = new Date(data.pubdate);
       this.content_apiurl = data.content_apiurl;
       this.link = data.link;
+      this.starred = data.starred;
     };
     Item.prototype.getContent = getContent;
     Item.prototype.markAsRead = function (read) {
@@ -166,7 +167,10 @@ function ($http, $q, userService, apiRoot, getMoreNumber, $httpParamSerializer) 
     Item.prototype.meta = function () {
         return foo_meta[this.meta_apiurl];
     };
-
+    Item.prototype.toggleStarred = function (starred) {
+        this.starred = !this.starred;
+        $http.put(this.apiurl, {starred: this.starred});
+    };
     // Load some data initally
     $http.get(apiRoot, {params: {N: 0}}).then(function (res) {
         var meta_data = res.data.meta;

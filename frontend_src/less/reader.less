@@ -7,6 +7,11 @@
     }
 }
 
+.starred {
+    color: @nice-green;
+    cursor: pointer;
+}
+
 .td-side-pad {
     padding: 0px @table-cell-padding 0px @table-cell-padding;
 }
@@ -69,7 +74,7 @@
     @media (min-width: @screen-sm-min) {
         .item-left-matter {
             .make-xs-column(2);
-            width: 15em;
+            width: 17em;
         }
 
         .item-title {
@@ -77,9 +82,9 @@
             padding-left: (@grid-gutter-width / 2);
             padding-right: (@grid-gutter-width / 2);
             float: left;
-            width: -moz-calc(~"100% - 23em");
-            width: -webkit-calc(~"100% - 23em");
-            width: calc(~"100% - 23em");
+            width: -moz-calc(~"100% - 25em");
+            width: -webkit-calc(~"100% - 25em");
+            width: calc(~"100% - 25em");
         }
 
         .item-date {

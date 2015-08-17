@@ -222,4 +222,24 @@ describe('feeds_service', function () {
             expect(this.tree.items()[1].read).toBe(false);
         }));
     });
+    describe('Item.starred()', function () {;
+      beforeEach(inject(function (feedService, $httpBackend, $httpParamSerializer, apiRoot, getMoreNumber) {
+          $httpBackend.expectGET(apiRoot + '?' + $httpParamSerializer({'N': getMoreNumber}))
+          .respond(200, this.initData, {'last-modified': '2015-01-01T17:00:00Z'});
+          feedService.feedTree().getMore();
+          $httpBackend.flush(1);
+          this.tree = feedService.feedTree();
+      }));
+      it('should set starred', inject(function ($httpBackend) {
+          $httpBackend.expectPUT(this.tree.items()[0].apiurl, {starred: true}).respond({});
+          this.tree.items()[0].toggleStarred();
+          $httpBackend.flush();
+          expect(this.tree.items()[0].starred).toBe(true);
+
+          $httpBackend.expectPUT(this.tree.items()[0].apiurl, {starred: false}).respond({});
+          this.tree.items()[0].toggleStarred();
+          $httpBackend.flush();
+          expect(this.tree.items()[0].starred).toBe(false);
+      }));
+    })
 });
