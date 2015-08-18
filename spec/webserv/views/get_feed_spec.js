@@ -3,11 +3,7 @@ var get_feed = require('../../../webserv/views/get_feed'),
     util = require('./setup_util'),
     url_for = require('../../../webserv/url_for');
 
-    var mockFeedModel, saveSpy,
-        meta, item, meta_res, item_res;
-
-
-describe('getFeed method', function () {
+describe('get_feed', function () {
     beforeAll(util.prepTestData);
     beforeAll(util.insertTestData);
     beforeAll(util.makeResSpy);
