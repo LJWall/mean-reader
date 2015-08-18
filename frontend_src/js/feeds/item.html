@@ -5,7 +5,7 @@
         <i class="fa fa-fw"
             ng-class="{'fa-star-o': !item.starred, 'fa-star': item.starred, 'reader-chk': !item.starred, 'starred': item.starred}"
             ng-click="item.toggleStarred()"></i>
-        <span class="item-feed-name">[<span class="inline-clip" ng-bind="item.meta().userTitle || item.meta().title"></span>]</span>
+        <span class="item-feed-name">[<span class="inline-clip" ng-bind="item.meta().userTitle || item.meta().title || 'no title'"></span>]</span>
     </div>
     <div class="item-title">
       <a href class="item-title-main" ng-click="show()" ng-bind="item.title || '(view)'"></a>
