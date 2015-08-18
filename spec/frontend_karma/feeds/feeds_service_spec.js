@@ -222,7 +222,7 @@ describe('feeds_service', function () {
             expect(this.tree.items()[1].read).toBe(false);
         }));
     });
-    describe('Item.starred()', function () {;
+    describe('Item.starred()', function () {
       beforeEach(inject(function (feedService, $httpBackend, $httpParamSerializer, apiRoot, getMoreNumber) {
           $httpBackend.expectGET(apiRoot + '?' + $httpParamSerializer({'N': getMoreNumber}))
           .respond(200, this.initData, {'last-modified': '2015-01-01T17:00:00Z'});
@@ -241,5 +241,5 @@ describe('feeds_service', function () {
           $httpBackend.flush();
           expect(this.tree.items()[0].starred).toBe(false);
       }));
-    })
+    });
 });
