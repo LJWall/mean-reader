@@ -19,7 +19,7 @@ function ($http, $q, userService, apiRoot, getMoreNumber, $httpParamSerializer) 
             userTitle: data.userTitle,
             apiurl: data.apiurl,
             branches: [],
-            folder: isFolder,
+            folder: Boolean(isFolder),
             items: function () {return items;},
             addItem: function (item) {
                 if (!node_item_map[item.apiurl]) {
@@ -191,7 +191,7 @@ function ($http, $q, userService, apiRoot, getMoreNumber, $httpParamSerializer) 
     userService.onSignOut(function () {
         foo_meta = {};
         foo_items = {};
-        feedTree = treeNode({apiurl: apiRoot, title: 'All'});
+        feedTree = treeNode({apiurl: apiRoot, title: 'All'}, undefined, true);
         content = {};
     });
 
@@ -200,7 +200,7 @@ function ($http, $q, userService, apiRoot, getMoreNumber, $httpParamSerializer) 
             var newNode;
             return $http.post(apiRoot + '/feeds', {feedurl: url})
             .then(function (res) {
-                newNode = treeNode({apiurl: res.headers('Location')}, feedTree);
+                newNode = treeNode({apiurl: res.headers('Location')}, feedTree, false);
                 foo_meta[newNode.apiurl] = newNode;
                 return newNode.getMore();
             })
@@ -218,7 +218,7 @@ function ($http, $q, userService, apiRoot, getMoreNumber, $httpParamSerializer) 
                     if (foo_meta[meta.apiurl]) {
                         foo_meta[meta.apiurl].update(meta);
                     } else {
-                        foo_meta[meta.apiurl] = treeNode(meta, feedTree);
+                        foo_meta[meta.apiurl] = treeNode(meta, feedTree, false);
                         feedTree.branches.push(foo_meta[meta.apiurl]);
                         feedTree.clearItems();
                     }

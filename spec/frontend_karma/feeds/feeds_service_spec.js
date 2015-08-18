@@ -142,6 +142,9 @@ describe('feeds_service', function () {
             expect(this.tree.items().length).toEqual(0);
             expect(this.tree.oldest).toBeUndefined();
         });
+        it('should set folder=false on the new item', function () {
+            expect(this.tree.branches[2].folder).toBe(false);
+        });
     });
     describe('refresh()', function () {
         beforeEach(inject(function (feedService, $httpBackend, $httpParamSerializer, apiRoot, getMoreNumber) {
