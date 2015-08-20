@@ -31,6 +31,12 @@
       <li class="tree-item" ng-repeat="meta in feedTree.branches | filter:{folder: false} track by meta.apiurl" ng-class="{active: (meta.apiurl===highlightFeed)}">
         <reader-view-feeds-entry></reader-view-feeds-entry>
       </li>
+      <li class="tree-item" ng-class="{active: (feedTree.starred.apiurl===highlightFeed)}">
+        <span class="feeds-text">
+          <i class="fa fa-fw fa-star"></i>
+          <a href class="active-contrast" ng-click="viewFeed({feedObj: feedTree.starred})">Starred</a>
+        </span>
+      </li>
     </ul>
   </li>
 </ul>

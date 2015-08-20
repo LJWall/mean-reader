@@ -171,6 +171,7 @@ function ($http, $q, userService, apiRoot, getMoreNumber, $httpParamSerializer) 
         this.starred = !this.starred;
         $http.put(this.apiurl, {starred: this.starred});
     };
+
     // Load some data initally
     $http.get(apiRoot, {params: {N: 0}}).then(function (res) {
         var meta_data = res.data.meta;
@@ -187,6 +188,8 @@ function ($http, $q, userService, apiRoot, getMoreNumber, $httpParamSerializer) 
             foo_meta[feedData.apiurl] = newOb;
         });
     });
+
+    feedTree.starred = treeNode({title: 'Starred', apiurl: apiRoot + '/posts?' + $httpParamSerializer({starred: true})},undefined, false);
 
     userService.onSignOut(function () {
         foo_meta = {};

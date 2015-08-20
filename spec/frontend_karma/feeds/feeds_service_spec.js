@@ -37,6 +37,14 @@ describe('feeds_service', function () {
         expect(tree.branches[1].branches.length).toEqual(1);
         expect(tree.branches[1].branches[0]).toEqual(jasmine.objectContaining({title: 'Feed2', apiurl: 'http://apiurl2'}));
     }));
+
+    it('should add a \'starred\' property to the root node', inject(function (apiRoot, feedService, $httpParamSerializer) {
+        var tree = feedService.feedTree();
+        expect(tree.starred).toBeDefined();
+        expect(tree.starred.title).toEqual('Starred');
+        expect(tree.starred.apiurl).toEqual(apiRoot + '/posts?' + $httpParamSerializer({starred: true}));
+    }));
+
     it('should indentify correctly number unread at each node', inject(function (feedService) {
         var tree = feedService.feedTree();
         expect(tree.unread()).toEqual(5);

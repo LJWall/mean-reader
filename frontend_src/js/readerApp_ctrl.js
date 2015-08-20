@@ -18,6 +18,9 @@ angular.module('readerApp')
     };
 
     this.viewFeed = function (feedObj) {
+        if (selected === fs.feedTree().starred && feedObj !== fs.feedTree().starred) {
+            fs.feedTree().starred.clearItems();
+        }
         selected = feedObj;
     };
 
