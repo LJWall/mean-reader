@@ -71,8 +71,16 @@ describe('get_items', function () {
         });
         get_items({user: {_id: 'IMPOSTER'}, query: {starred: 'false'}, params: {}}, this.spyRes);
     });
-});
 
-describe('getFeed method with older_than query paramter', function () {
-    it('should return the right data');
+    it('should respect older_than query parameter', function (done) {
+        var self = this;
+        this.spyRes.events.once('responseComplete', function () {
+            expect(self.spyRes.json.calls.count()).toEqual(1);
+            var data = self.spyRes.json.calls.argsFor(0)[0];
+            expect(data.items.length).toEqual(1);
+            expect(data.items[0]).toEqual(clean.cleanItem(test_data.item[2]));
+            done();
+        });
+        get_items({user: {_id: 'IMPOSTER'}, query: {older_than: '2015-01-02T11:35:00.000Z'}, params: {}}, this.spyRes);
+    });
 });
