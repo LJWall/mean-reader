@@ -6,12 +6,12 @@ var db = require('../mongoConnect.js'),
 module.exports = function (req, res) {
     var last_update = {dt: new Date('2000-01-01')},
         query = {user_id: req.user._id},
-        items_promise, num;
+        items_promise, num, starred;
 
-    if (typeof req.query.starred === 'boolean') {
-        if (req.query.starred) {
+    if (req.query.starred) {
+        if (req.query.starred.toLowerCase() === 'true') {
             query.starred = true;
-        } else {
+        } else if (req.query.starred.toLowerCase() === 'false') {
             query.starred = {$ne: true};
         }
     }
