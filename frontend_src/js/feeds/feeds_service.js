@@ -90,8 +90,8 @@ function ($http, $q, userService, apiRoot, getMoreNumber, $httpParamSerializer) 
               self.parent.clearItems();
             },
             markAllAsRead: function () {
-                $http.put(this.apiurl, {read: true});
                 recursiveMarkAsRead(this);
+                return $http.put(this.apiurl, {read: true});
                 function recursiveMarkAsRead (node) {
                     if (node.branches.length) {
                         node.branches.forEach(recursiveMarkAsRead);
@@ -190,6 +190,14 @@ function ($http, $q, userService, apiRoot, getMoreNumber, $httpParamSerializer) 
     });
 
     feedTree.starred = treeNode({title: 'Starred', apiurl: apiRoot + '/posts?' + $httpParamSerializer({starred: true})},undefined, false);
+    // Wrap the mark-as-read method to promt a refreah afterwrds..
+    var innerMAAS = feedTree.starred.markAllAsRead.bind(feedTree.starred);
+    feedTree.starred.markAllAsRead = function () {
+        innerMAAS()
+        .then(function () {
+            refresh();
+        });
+    };
 
     userService.onSignOut(function () {
         foo_meta = {};
@@ -214,39 +222,41 @@ function ($http, $q, userService, apiRoot, getMoreNumber, $httpParamSerializer) 
                 return newNode;
             });
         },
-        refresh: function () {
-            return updateData()
-            .then(function (res) {
-                res.data.meta.forEach(function (meta) {
-                    if (foo_meta[meta.apiurl]) {
-                        foo_meta[meta.apiurl].update(meta);
-                    } else {
-                        foo_meta[meta.apiurl] = treeNode(meta, feedTree, false);
-                        feedTree.branches.push(foo_meta[meta.apiurl]);
-                        feedTree.clearItems();
-                    }
-                });
-                res.data.items.forEach(function (item) {
-                    var newItem;
-                    if (foo_items[item.apiurl]) {
-                        foo_items[item.apiurl].update(item);
-                        newItem = foo_items[item.apiurl];
-                    } else {
-                        newItem = new Item(item);
-                        foo_items[item.apiurl] = newItem;
-                    }
-                    var node = foo_meta[newItem.meta_apiurl];
-                    while (node) {
-                        node.addItem(newItem);
-                        node = node.parent;
-                    }
-                });
-            });
-        },
+        refresh: refresh,
         feedTree: function () {
             return feedTree;
         }
     };
+
+    function refresh () {
+        return updateData()
+        .then(function (res) {
+            res.data.meta.forEach(function (meta) {
+                if (foo_meta[meta.apiurl]) {
+                    foo_meta[meta.apiurl].update(meta);
+                } else {
+                    foo_meta[meta.apiurl] = treeNode(meta, feedTree, false);
+                    feedTree.branches.push(foo_meta[meta.apiurl]);
+                    feedTree.clearItems();
+                }
+            });
+            res.data.items.forEach(function (item) {
+                var newItem;
+                if (foo_items[item.apiurl]) {
+                    foo_items[item.apiurl].update(item);
+                    newItem = foo_items[item.apiurl];
+                } else {
+                    newItem = new Item(item);
+                    foo_items[item.apiurl] = newItem;
+                }
+                var node = foo_meta[newItem.meta_apiurl];
+                while (node) {
+                    node.addItem(newItem);
+                    node = node.parent;
+                }
+            });
+        });
+    }
 
     function getMore(node) {
         var config = {params: {N: getMoreNumber}};
