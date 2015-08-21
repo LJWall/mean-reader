@@ -1,7 +1,7 @@
 angular.module('reader.feeds.service')
 .factory('feedService',
-['$http', '$q', 'currentUserService', 'apiRoot', 'getMoreNumber', '$httpParamSerializer',
-function ($http, $q, userService, apiRoot, getMoreNumber, $httpParamSerializer) {
+['$http', '$q', 'currentUserService', 'apiRoot', 'getMoreNumber', '$httpParamSerializer', '$window',
+function ($http, $q, userService, apiRoot, getMoreNumber, $httpParamSerializer, $window) {
     var last_modified,
         content = {},
         feedTree = treeNode({apiurl: apiRoot, title: 'All'}, undefined, true),
@@ -198,6 +198,13 @@ function ($http, $q, userService, apiRoot, getMoreNumber, $httpParamSerializer) 
             refresh();
         });
     };
+
+    // do a refresh ever 15 min
+    $window.setTimeout(repeatRefresh, 900000);
+    function repeatRefresh () {
+        $window.setTimeout(repeatRefresh, 900000);
+        refresh();
+    }
 
     userService.onSignOut(function () {
         foo_meta = {};
