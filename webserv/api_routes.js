@@ -21,6 +21,7 @@ app.put(url_for.feed(':ObjectID'),    require('./views/put_feed'));
 app.delete(url_for.feed(':ObjectID'), require('./views/delete_feed'));
 app.put(url_for.item(':ObjectID'),    require('./views/put_item'));
 app.get(url_for.item(),               require('./views/get_items'));
+app.put(url_for.item(),               require('./views/put_all'));
 app.get(url_for.content(':ObjectID'), require('./views/get_content'));
 
 module.exports = app;

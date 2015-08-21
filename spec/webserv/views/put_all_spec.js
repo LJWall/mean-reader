@@ -46,8 +46,23 @@ describe('putAll method', function () {
             })
             .done(done);
         });
-        put_all({user: {_id: 'FOO_UID'}, body: {}, params: {ObjectID: test_data.meta[0]._id}, query: {}}, spyRes);
+        put_all({user: {_id: 'IMPOSTER'}, body: {}, params: {ObjectID: test_data.meta[0]._id}, query: {}}, spyRes);
     });
 
     it('should repect a query paramter label=foo');
+
+    it('should repect a query paramter starred=true', function (done) {
+        spyRes.events.once('responseComplete', function () {
+            expect(spyRes.status.calls.allArgs()).toEqual([[204]]);
+            expect(spyRes.end).toHaveBeenCalled();
+            mongoConn.posts.find({user_id: 'IMPOSTER'}).sort({link: 1}).toArrayAsync()
+            .then(function (items) {
+                expect(items.length).toEqual(2);
+                expect(items[1].read).toBe(true);
+                expect(items[0].read).toBeUndefined();
+            })
+            .done(done);
+        });
+        put_all({user: {_id: 'IMPOSTER'}, body: {read: true}, params: {}, query: {starred: 'true'}}, spyRes);
+    });
 });

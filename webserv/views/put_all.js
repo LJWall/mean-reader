@@ -6,6 +6,15 @@ module.exports = function (req, res) {
         var q_items = {user_id: req.user._id, read: {$ne: true}},
             q_feeds = {user_id: req.user._id};
 
+        if (req.query.starred) {
+            if (req.query.starred.toLowerCase() === 'true') {
+                q_items.starred = true;
+            }
+            else if (req.query.starred.toLowerCase() === 'false') {
+                q_items.starred = {$ne: true};
+            }
+        }
+
         Promise.try(function () {
             if (req.query.label) {
                 q_feeds = {
