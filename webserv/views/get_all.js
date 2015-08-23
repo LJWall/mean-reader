@@ -9,13 +9,7 @@ module.exports = function (req, res) {
         q2 = Object.create(q1);
 
     if (req.query.updated_since) {
-        try {
-            var dt = new Date(req.query.updated_since);
-            q1.last_update = {$gt: dt};
-        }
-        catch (e) {
-            res.status(500).end();
-        }
+        q1.last_update = {$gt: req.query.updated_since};
     }
 
     if (req.query.label) {
@@ -25,7 +19,7 @@ module.exports = function (req, res) {
     .then(function (metaRaw) {
         var metaIdList = metaRaw.map(function (m) {return m._id; }),
             meta = metaRaw.reduce(util.reducer.bind(last_update, util.cleanMeta), []),
-            num, items_promise, n_unread_promise;
+            items_promise, n_unread_promise;
 
         n_unread_promise = db.posts.call('aggregateAsync', [
             {$match: {user_id: req.user._id, read: {$ne: true}, meta_id: {$in: metaIdList}}},
@@ -39,27 +33,16 @@ module.exports = function (req, res) {
             return obj;
         });
 
-        if (req.query.N) {
-            try {
-                num = parseInt(req.query.N);
-            }
-            catch (e) {}
-        }
-
-        if (num===0) {
+        if (req.query.N===0) {
             items_promise = Promise.resolve([]);
         } else {
             if (!q1.last_update) { q1.meta_id = {$in: metaIdList}; } // Urgh! rework this!
             if (req.query.older_than) {
-                try {
-                    var dtOlderThan = new Date(req.query.older_than);
-                    q1.pubdate = {$lt: dtOlderThan};
-                }
-                catch (e) {}
+                q1.pubdate = {$lt: req.query.older_than};
             }
             items_promise = db.posts.find(q1).sort({pubdate: -1});
-            if (num) {
-                items_promise = items_promise.limit(num);
+            if (req.query.N) {
+                items_promise = items_promise.limit(req.query.N);
             }
             items_promise = items_promise.toArrayAsync()
                 .reduce(util.reducer.bind(last_update, util.cleanItem), []);

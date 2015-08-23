@@ -6,11 +6,11 @@ module.exports = function (req, res) {
         var q_items = {user_id: req.user._id, read: {$ne: true}},
             q_feeds = {user_id: req.user._id};
 
-        if (req.query.starred) {
-            if (req.query.starred.toLowerCase() === 'true') {
+        if (typeof req.query.starred === 'boolean') {
+            if (req.query.starred) {
                 q_items.starred = true;
             }
-            else if (req.query.starred.toLowerCase() === 'false') {
+            else {
                 q_items.starred = {$ne: true};
             }
         }

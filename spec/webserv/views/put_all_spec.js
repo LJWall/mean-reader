@@ -63,6 +63,6 @@ describe('putAll method', function () {
             })
             .done(done);
         });
-        put_all({user: {_id: 'IMPOSTER'}, body: {read: true}, params: {}, query: {starred: 'true'}}, spyRes);
+        put_all({user: {_id: 'IMPOSTER'}, body: {read: true}, params: {}, query: {starred: true}}, spyRes);
     });
 });

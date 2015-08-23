@@ -57,7 +57,7 @@ describe('get_items', function () {
             expect(data.items[0]).toEqual(clean.cleanItem(test_data.item[2]));
             done();
         });
-        get_items({user: {_id: 'IMPOSTER'}, query: {starred: 'true'}, params: {}}, this.spyRes);
+        get_items({user: {_id: 'IMPOSTER'}, query: {starred: true}, params: {}}, this.spyRes);
     });
 
     it('should respect starred=false query parameter', function (done) {
@@ -69,7 +69,7 @@ describe('get_items', function () {
             expect(data.items[0]).toEqual(clean.cleanItem(test_data.item[1]));
             done();
         });
-        get_items({user: {_id: 'IMPOSTER'}, query: {starred: 'false'}, params: {}}, this.spyRes);
+        get_items({user: {_id: 'IMPOSTER'}, query: {starred: false}, params: {}}, this.spyRes);
     });
 
     it('should respect older_than query parameter', function (done) {
@@ -81,6 +81,6 @@ describe('get_items', function () {
             expect(data.items[0]).toEqual(clean.cleanItem(test_data.item[2]));
             done();
         });
-        get_items({user: {_id: 'IMPOSTER'}, query: {older_than: '2015-01-02T11:35:00.000Z'}, params: {}}, this.spyRes);
+        get_items({user: {_id: 'IMPOSTER'}, query: {older_than: new Date('2015-01-02T11:35:00.000Z')}, params: {}}, this.spyRes);
     });
 });

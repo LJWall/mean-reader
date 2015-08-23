@@ -13,6 +13,8 @@ app.param('ObjectID', function processObjectID (req, res, next, id) {
     next();
 });
 
+app.use(require('./request_prep'));
+
 app.get(url_for.apiroot(),            require('./views/get_all'));
 app.put(url_for.apiroot(),            require('./views/put_all'));
 app.post(url_for.feed(),              require('./views/post_feed'));
