@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="readerApp" ng-controller="ReaderCtrl as ctrl">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>reader</title>
+  <title ng-bind="ctrl.pageTitle('reader')">reader</title>
   <link rel="stylesheet" href="css/reader.css">
   <link rel="stylesheet" href="css/font-awesome.min.css">
   <link rel="shortcut icon" href="favicon.ico">
   <link href='//fonts.googleapis.com/css?family=Alfa+Slab+One' rel='stylesheet' type='text/css'>
   <base target="_blank">
 </head>
-<body ng-app="readerApp" ng-controller="ReaderCtrl as ctrl" >
+<body>
   <div class="reader-navbar">
     <span class="brand-text"><i class="fa fa-book hidden-xs"></i> reader</span>
     <span class="pull-right" reader-login></span>

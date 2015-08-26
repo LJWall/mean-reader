@@ -87,4 +87,12 @@ angular.module('readerApp')
             item.checked = false;
         });
     };
+
+    this.pageTitle = function (def) {
+        var num = fs.feedTree().unread();
+        if (num>0) {
+          return def + " (" + num +")";
+        }
+        return def;
+    };
 }]);
