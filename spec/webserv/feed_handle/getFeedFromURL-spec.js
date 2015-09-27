@@ -49,7 +49,7 @@ describe('getFeedFromURL', function () {
         Promise.settle([getFeedFromURL('http://127.0.0.1:9999/will_be_refused.xml')])
         .then(function (results) {
             expect(results[0].isRejected()).toBe(true);
-            expect(results[0].reason().message).toEqual('connect ECONNREFUSED');
+            expect(results[0].reason().message).toMatch('connect ECONNREFUSED');
         })
         .done(done);
     });

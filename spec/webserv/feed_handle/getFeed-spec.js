@@ -47,7 +47,7 @@ describe('getFeed', function () {
                 done.fail('This code should not run...');
             })
             .catch(function (err) {
-                expect(err.message).toEqual('connect ECONNREFUSED');
+                expect(err.message).toMatch('connect ECONNREFUSED');
             })
             .done(done);
         });
